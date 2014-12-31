@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Examples</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Examples</h1>
+        </div>
+        
+        <div id="66322735" class="content prepend-top">
+            <p>
+    This section of the document contains a couple of examples for the most common scenarios likely to be used with the security realms, please feel free to raise Jira issues requesting additional scenarios or if you have configured something not covered here please feel free to add your own examples - this document is editable after all     <img src="images/author/images/icons/emoticons/3649551.gif" alt="images/author/images/icons/emoticons/3649551.gif" />
+            </p>
+                <p>
+    At the moment these examples are making use of the '<tt class=" ">ManagementRealm</tt>' however the same can apply to the '<tt class=" ">ApplicationRealm</tt>' or any custom realm you create for yourselves.            </p>
+        <div class="section-2"  id="66322735_Examples-LDAPAuthentication"  >
+        <h2>LDAP Authentication</h2>
+    
+            <p>
+    The following example demonstrates an example configuration making use of Active Directory to verify the users username and password.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;management&gt;
+  &lt;security-realms&gt;
+    &lt;security-realm name=&quot;ManagementRealm&quot;&gt;
+      &lt;authentication&gt;
+        &lt;ldap connection=&quot;EC2&quot; base-dn=&quot;CN=Users,DC=darranl,DC=jboss,DC=org&quot;&gt;
+          &lt;username-filter attribute=&quot;sAMAccountName&quot; /&gt;
+        &lt;/ldap&gt;
+      &lt;/authentication&gt;
+    &lt;/security-realm&gt;
+
+  &lt;/security-realms&gt;
+
+  &lt;outbound-connections&gt;
+    &lt;ldap name=&quot;EC2&quot; url=&quot;ldap://127.0.0.1:9797&quot; search-dn=&quot;CN=wf8,CN=Users,DC=darranl,DC=jboss,DC=org&quot; search-credential=&quot;password&quot;/&gt;
+  &lt;/outbound-connections&gt;
+
+  ...
+
+&lt;/management&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    For simplicity the <tt class=" ">&lt;local/&gt;</tt> configuration has been removed from this example, however there it is fine to leave that in place for local authentication to remain possible.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322735_Examples-EnableSSL"  >
+        <h2>Enable SSL</h2>
+    
+            <p>
+    The first step is the creation of the key, by default this is going to be used for both the native management interface and the http management interface - to create the key we can use the <tt class=" ">keyTool</tt>, the following example will create a key valid for one year.            </p>
+                <p>
+    Open a terminal window in the folder {<tt class=" ">jboss.home}/standalone/configuration</tt> and enter the following command: -            </p>
+                <p>
+    <tt class=" ">keytool -genkey -alias server -keyalg RSA -keystore server.keystore -validity 365</tt>            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Enter keystore password:
+Re-enter new password:</code></pre>
+        </div>
+    </div>
+            <p>
+    In this example I choose '<tt class=" ">keystore_password</tt>'.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>What is your first and last name?
+  [Unknown]:  localhost</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    Of all of the questions asked this is the most important and should match the host name that will be entered into the web browser to connect to the admin console.            </p>
+        </div>
+    
+            <p>
+    Answer the remaining questions as you see fit and at the end for the purpose of this example I set the key password to '<tt class=" ">key_password</tt>'.            </p>
+                <p>
+    The following example shows how this newly created keystore will be referenced to enable SSL.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;security-realm name=&quot;ManagementRealm&quot;&gt;
+  &lt;server-identities&gt;
+    &lt;ssl&gt;
+      &lt;keystore path=&quot;server.keystore&quot; relative-to=&quot;jboss.server.config.dir&quot; keystore-password=&quot;keystore_password&quot; alias=&quot;server&quot; key-password=&quot;key_password&quot; /&gt;
+    &lt;/ssl&gt;
+  &lt;/server-identities&gt;
+  &lt;authentication&gt;
+    ...
+  &lt;/authentication&gt;
+&lt;/security-realm&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The contents of the <tt class=" ">&lt;authentication /&gt;</tt> have not been changed in this example so authentication still occurs using either the local mechanism or username/password authentication using Digest.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322735_Examples-AddClientCerttoSSL"  >
+        <h2>Add Client-Cert to SSL</h2>
+    
+            <p>
+    To enable Client-Cert style authentication we just now need to add a <tt class=" ">&lt;truststore /&gt;</tt> element to the <tt class=" ">&lt;authentication /&gt;</tt> element referencing a trust store that has had the certificates or trusted clients imported.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;security-realm name=&quot;ManagementRealm&quot;&gt;
+  &lt;server-identities&gt;
+    &lt;ssl&gt;
+      &lt;keystore path=&quot;server.keystore&quot; relative-to=&quot;jboss.server.config.dir&quot; keystore-password=&quot;keystore_password&quot; alias=&quot;server&quot; key-password=&quot;key_password&quot; /&gt;
+    &lt;/ssl&gt;
+  &lt;/server-identities&gt;
+  &lt;authentication&gt;
+    &lt;truststore path=&quot;server.truststore&quot; relative-to=&quot;jboss.server.config.dir&quot; keystore-password=&quot;truststore_password&quot; /&gt;
+    &lt;local default-user=&quot;$local&quot;/&gt;
+    &lt;properties path=&quot;mgmt-users.properties&quot; relative-to=&quot;jboss.server.config.dir&quot;/&gt;
+  &lt;/authentication&gt;
+&lt;/security-realm&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    In this scenario if Client-Cert authentication does not occur clients can fall back to use either the local mechanism or username/password authentication.  To make Client-Cert based authentication mandatory just remove the <tt class=" ">&lt;local /&gt;</tt> and <tt class=" ">&lt;properties /&gt;</tt> elements.            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

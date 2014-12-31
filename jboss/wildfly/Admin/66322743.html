@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>The HTTP management API</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>The HTTP management API</h1>
+        </div>
+        
+        <div id="66322743" class="content prepend-top">
+            <p>
+    Work in progress...            </p>
+                <p>
+    Make sure you have added the user using <a href="66322734.html">add-user.sh</a>.            </p>
+                <p>
+    This is simple operation that is equivalent of running :read-resource with CLI in root directory            </p>
+                <p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ curl --digest -L -D - http://localhost:9990/management --header &quot;Content-Type: application/json&quot; -d '{&quot;operation&quot;:&quot;read-attribute&quot;,&quot;name&quot;:&quot;server-state&quot;,&quot;json.pretty&quot;:1}' -u admin
+Enter host password for user 'admin':
+HTTP/1.1 401 Unauthorized
+Content-length: 0
+Www-authenticate: Digest realm=&quot;ManagementRealm&quot;,nonce=&quot;7ed7d483aa1aa620845ab45d56995344&quot;
+Date: Wed, 25 Jan 2012 16:03:40 GMT
+
+HTTP/1.1 200 OK
+Transfer-encoding: chunked
+Content-type: application/json
+Date: Wed, 25 Jan 2012 10:05:52 GMT
+
+{
+    &quot;outcome&quot; : &quot;success&quot;,
+    &quot;result&quot; : &quot;running&quot;
+}</code></pre>
+        </div>
+    </div>
+Here's an example of an operation on a resource with a nested address and passed paramters            </p>
+                <p>
+    this is same as if you would run <strong class=" ">/host=master/server=server-01:read-attribute(name=server-state)</strong>            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ curl --digest -L -D - http://localhost:9990/management --header &quot;Content-Type: application/json&quot; -d '{&quot;operation&quot;:&quot;read-attribute&quot;,&quot;address&quot;:[{&quot;host&quot;:&quot;master&quot;},{&quot;server&quot;:&quot;server-01&quot;}],&quot;name&quot;:&quot;server-state&quot;,&quot;json.pretty&quot;:1}'
+HTTP/1.1 200 OK
+Transfer-encoding: chunked
+Content-type: application/json
+Date: Tue, 17 Apr 2012 04:02:24 GMT
+
+{
+&nbsp;&nbsp;&nbsp; &quot;outcome&quot; : &quot;success&quot;,
+&nbsp;&nbsp;&nbsp; &quot;result&quot; : &quot;running&quot;
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Following example will get us information from http connection in web subsystem including run-time attributes            </p>
+                <p>
+    This is the same as running /subsystem=web/connector=http:read-resource(include-runtime=true) in CLI            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>curl --digest -D - http://localhost:9990/management --header &quot;Content-Type: application/json&quot; -d '{&quot;operation&quot;:&quot;read-resource&quot;, &quot;include-runtime&quot;:&quot;true&quot; , &quot;address&quot;:[&quot;subsystem&quot;,&quot;web&quot;,&quot;connector&quot;,&quot;http&quot;], &quot;json.pretty&quot;:1}' -u user:pass
+
+HTTP/1.1 200 OK
+Transfer-encoding: chunked
+Content-type: application/json
+Date: Tue, 17 Jul 2012 15:48:39 GMT
+
+{
+    &quot;outcome&quot; : &quot;success&quot;,
+    &quot;result&quot; : {
+        &quot;bytesReceived&quot; : &quot;14727204&quot;,
+        &quot;bytesSent&quot; : &quot;2544228&quot;,
+        &quot;enable-lookups&quot; : false,
+        &quot;enabled&quot; : true,
+        &quot;errorCount&quot; : &quot;8&quot;,
+        &quot;executor&quot; : null,
+        &quot;max-connections&quot; : null,
+        &quot;max-post-size&quot; : 2097152,
+        &quot;max-save-post-size&quot; : 4096,
+        &quot;maxTime&quot; : &quot;1865&quot;,
+        &quot;name&quot; : &quot;http&quot;,
+        &quot;processingTime&quot; : &quot;12920&quot;,
+        &quot;protocol&quot; : &quot;HTTP/1.1&quot;,
+        &quot;proxy-name&quot; : null,
+        &quot;proxy-port&quot; : null,
+        &quot;redirect-port&quot; : 8433,
+        &quot;requestCount&quot; : &quot;134&quot;,
+        &quot;scheme&quot; : &quot;http&quot;,
+        &quot;secure&quot; : false,
+        &quot;socket-binding&quot; : &quot;http&quot;,
+        &quot;ssl&quot; : null,
+        &quot;virtual-server&quot; : null
+    }
+}</code></pre>
+        </div>
+    </div>
+        </div>
+    </div>
+</body>
+</html>

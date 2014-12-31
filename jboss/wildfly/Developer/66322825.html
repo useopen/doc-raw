@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Application Client Reference</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Application Client Reference</h1>
+        </div>
+        
+        <div id="66322825" class="content prepend-top">
+            <p>
+    As a Java EE 7 compliant server, WildFly 8 contains an application client. An application client is essentially a cut down server instance, that allow you to use EE features such as injection in a client side program.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    This article is not a tutorial on application client development, rather it covers the specifics of the WildFly application client. There are tutorials available elsewhere that cover application client basics, such as <a href="http://blogs.steeplesoft.com/2011/02/java-ees-buried-treasure-the-application-client-container/">this one</a>.            </p>
+        </div>
+    
+    <div class="confbox admonition admonition-info">
+        
+            <p>
+    Note that the application client is different to the EJB client libraries, it is perfectly possible to write client application that do not use the application client, but instead use the jboss-ejb-client library directly.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322825_ApplicationClientReference-GettingStarted"  >
+        <h2>Getting Started</h2>
+    
+            <p>
+    To launch the application client use the <tt class=" ">appclient.sh</tt> or <tt class=" ">appclient.bat</tt> script in the bin directory. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./appclient.sh --host=10.0.0.1 myear.ear#appClient.jar arg1</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">--host</tt> argument tells the appclient the server to connect to. The next argument is the application client deployment to use, application clients can only run a single deployment, and this deployment must also be deployed on the full server instance that the client is connecting too.            </p>
+                <p>
+    Any arguments after the deployment to use are passed directly through to the application clients <tt class=" ">main</tt> function.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322825_ApplicationClientReference-Connectingtomorethanonehost"  >
+        <h2>Connecting to more than one host</h2>
+    
+            <p>
+    If you want to connect to more than one host or make use of the clustering functionality then you need to specify a jboss-ejb-client.properties file rather than a host:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./appclient.sh --ejb-client-properties=my-jboss-ejb-client.properties myear.ear#appClient.jar arg1</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322825_ApplicationClientReference-Example"  >
+        <h2>Example</h2>
+    
+            <p>
+    A simple example how to package an application client and use it with WildFly can be within the quickstart <a href="https://github.com/wildfly/quickstart/tree/master/app-client">appclient</a> which is located on Github .            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

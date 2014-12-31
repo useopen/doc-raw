@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>WS User Guide</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>WS User Guide</h1>
+        </div>
+        
+        <div id="66322810" class="content prepend-top">
+            <p>
+    The <a href="http://www.jcp.org/en/jsr/detail?id=224">Java API for XML-Based Web Services (JAX-WS / JSR-224)</a> defines the mapping between WSDL and Java as well as the classes to be used for accessing webservices and publishing them. JBossWS implements the latest JAX-WS specification, hence users can reference it for any vendor agnostic webservice usage need. Below is a brief overview of the most basic functionalities.            </p>
+        <div class="section-2"  id="66322810_JAX-WSUserGuide-WebServiceEndpoints"  >
+        <h2>Web Service Endpoints</h2>
+    
+            <p>
+    JAX-WS simplifies the development model for a web service endpoint a great deal. In short, an endpoint implementation bean is annotated with JAX-WS annotations and deployed to the server. The server automatically generates and publishes the abstract contract (i.e. wsdl+schema) for client consumption. All marshalling/unmarshalling is delegated to <a href="http://www.jcp.org/en/jsr/summary?id=jaxb">JAXB</a>.            </p>
+        <div class="section-3"  id="66322810_JAX-WSUserGuide-PlainoldJavaObject%28POJO%29"  >
+        <h3>Plain old Java Object (POJO)</h3>
+    
+            <p>
+    Let's take a look at simple POJO endpoint implementation. All endpoint associated metadata is provided via <a href="http://www.jcp.org/en/jsr/summary?id=181">JSR-181</a> annotations            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@WebService
+@SOAPBinding(style = SOAPBinding.Style.RPC)
+public class JSEBean01
+{
+&nbsp;&nbsp; @WebMethod
+&nbsp;&nbsp; public String echo(String input)
+&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...
+&nbsp;&nbsp; }
+}</code></pre>
+        </div>
+    </div>
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-Theendpointasawebapplication"  >
+        <h4>The endpoint as a web application</h4>
+    
+            <p>
+    A JAX-WS java service endpoint (JSE) is deployed as a web application. Here is a sample <i class=" ">web.xml</i> descriptor:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;web-app ...&gt;
+&nbsp; &lt;servlet&gt;
+&nbsp;&nbsp;&nbsp; &lt;servlet-name&gt;TestService&lt;/servlet-name&gt;
+&nbsp;&nbsp;&nbsp; &lt;servlet-class&gt;org.jboss.test.ws.jaxws.samples.jsr181pojo.JSEBean01&lt;/servlet-class&gt;
+&nbsp; &lt;/servlet&gt;
+&nbsp; &lt;servlet-mapping&gt;
+&nbsp;&nbsp;&nbsp; &lt;servlet-name&gt;TestService&lt;/servlet-name&gt;
+&nbsp;&nbsp;&nbsp; &lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+&nbsp; &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-Packagingtheendpoint"  >
+        <h4>Packaging the endpoint</h4>
+    
+            <p>
+    A JSR-181 java service endpoint (JSE) is packaged as a web application in a <i class=" ">war</i> file.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;war warfile=&quot;${build.dir}/libs/jbossws-samples-jsr181pojo.war&quot; webxml=&quot;${build.resources.dir}/samples/jsr181pojo/WEB-INF/web.xml&quot;&gt;
+&nbsp; &lt;classes dir=&quot;${build.dir}/classes&quot;&gt;
+&nbsp;&nbsp;&nbsp; &lt;include name=&quot;org/jboss/test/ws/samples/jsr181pojo/JSEBean01.class&quot;/&gt;
+&nbsp; &lt;/classes&gt;
+&lt;/war&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Note, only the endpoint implementation bean and web.xml are required.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-AccessingthegeneratedWSDL"  >
+        <h4>Accessing the generated WSDL</h4>
+    
+            <p>
+    A successfully deployed service endpoint will show up in the WildFly managent console. You can get the deployed endpoint wsdl address there too.            </p>
+        <div class="confbox admonition admonition-info">
+        
+            <p>
+    Note, it is also possible to generate the abstract contract off line  using JBossWS tools. For details of that please see Bottom-Up (Java to  WSDL).            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-EJB3StatelessSessionBean%28SLSB%29"  >
+        <h3>EJB3 Stateless Session Bean (SLSB)</h3>
+    
+            <p>
+    The JAX-WS programming model supports the same set of annotations on EJB3 stateless session beans as on POJO endpoints.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Stateless
+@Remote(EJB3RemoteInterface.class)
+@RemoteBinding(jndiBinding = &quot;/ejb3/EJB3EndpointInterface&quot;)
+
+@WebService
+@SOAPBinding(style = SOAPBinding.Style.RPC)
+public class EJB3Bean01 implements EJB3RemoteInterface
+{
+&nbsp;&nbsp; @WebMethod
+&nbsp;&nbsp; public String echo(String input)
+&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...
+ &nbsp; }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Above you see an EJB-3.0 stateless session bean that exposes one method both on the remote interface and as an endpoint operation.            </p>
+        <div class="section-4"  id="66322810_JAX-WSUserGuide-Packagingtheendpoint2"  >
+        <h4>Packaging the endpoint</h4>
+    
+            <p>
+    A JSR-181 EJB service endpoint is packaged as an ordinary ejb deployment.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jar jarfile=&quot;${build.dir}/libs/jbossws-samples-jsr181ejb.jar&quot;&gt;
+&nbsp; &lt;fileset dir=&quot;${build.dir}/classes&quot;&gt;
+&nbsp;&nbsp;&nbsp; &lt;include name=&quot;org/jboss/test/ws/samples/jsr181ejb/EJB3Bean01.class&quot;/&gt;
+&nbsp;&nbsp;&nbsp; &lt;include name=&quot;org/jboss/test/ws/samples/jsr181ejb/EJB3RemoteInterface.class&quot;/&gt;
+&nbsp; &lt;/fileset&gt;
+&lt;/jar&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-AccessingthegeneratedWSDL2"  >
+        <h4>Accessing the generated WSDL</h4>
+    
+            <p>
+    A successfully deployed service endpoint will show up in the WildFly managent console. You can get the deployed endpoint wsdl address there  too.            </p>
+        <div class="confbox admonition admonition-info">
+        
+            <p>
+    Note,  it is also possible to generate the abstract contract off line  using  JBossWS tools. For details of that please see Bottom-Up (Java to  WSDL).            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-EndpointProvider"  >
+        <h3>Endpoint Provider</h3>
+    
+            <p>
+    JAX-WS services typically implement a native Java service endpoint interface (SEI), perhaps mapped from a WSDL port type, either directly or via the use of annotations.            </p>
+                <p>
+    Java SEIs provide a high level Java-centric abstraction that hides the details of converting between Java objects and their XML representations for use in XML-based messages. However, in some cases it is desirable for services to be able to operate at the XML message level. The Provider interface offers an alternative to SEIs and may be implemented by services wishing to work at the XML message level.            </p>
+                <p>
+    A Provider based service instances invoke method is called for each message received for the service.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@WebServiceProvider(wsdlLocation = &quot;WEB-INF/wsdl/Provider.wsdl&quot;)
+@ServiceMode(value = Service.Mode.PAYLOAD)
+public class ProviderBeanPayload implements Provider&lt;Source&gt;
+{
+&nbsp;&nbsp; public Source invoke(Source req)
+&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; // Access the entire request PAYLOAD and return the response PAYLOAD
+&nbsp;&nbsp; }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Note, <tt class=" ">Service.Mode.PAYLOAD</tt> is the default and does not have to be declared explicitly. You can also use <tt class=" ">Service.Mode.MESSAGE</tt> to access the entire SOAP message (i.e. with <tt class=" ">MESSAGE</tt> the Provider can also see SOAP Headers)            </p>
+                <p>
+    The abstract contract for a provider endpoint cannot be derived/generated automatically. Therefore it is necessary to specify the <i class=" ">wsdlLocation</i> with the <tt class=" ">@</tt><tt class=" ">WebServiceProvider</tt> annotation.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322810_JAX-WSUserGuide-WebServiceClients"  >
+        <h2>Web Service Clients</h2>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-Service"  >
+        <h3>Service</h3>
+    
+            <p>
+    <tt class=" ">Service</tt> is an abstraction that represents a WSDL service. A WSDL service is a collection of related ports, each of which consists of a port type bound to a particular protocol and available at a particular endpoint address.            </p>
+                <p>
+    For most clients, you will start with a set of stubs generated from the WSDL. One of these will be the service, and you will create objects of that class in order to work with the service (see &quot;static case&quot; below).            </p>
+        <div class="section-4"  id="66322810_JAX-WSUserGuide-ServiceUsage"  >
+        <h4>Service Usage</h4>
+    
+    <div class="section-5"  id="66322810_JAX-WSUserGuide-Staticcase"  >
+        <h5>Static case</h5>
+    
+            <p>
+    Most clients will start with a WSDL file, and generate some stubs using JBossWS tools like <i class=" ">wsconsume</i>.&nbsp; This usually gives a mass of files, one of which is the top of the tree.&nbsp; This is the service implementation class.            </p>
+                <p>
+    The generated implementation class can be recognised as it will have two public constructors, one with no arguments and one with two arguments, representing the wsdl location (a <tt class=" ">java.net.URL</tt>) and the service name (a <tt class=" ">javax.xml.namespace.QName</tt>) respectively.            </p>
+                <p>
+    Usually you will use the no-argument constructor. In this case the WSDL location and service name are those found in the WSDL. These are set implicitly from the <tt class=" ">@WebServiceClient</tt> annotation that decorates the generated class.            </p>
+                <p>
+    The following code snippet shows the generated constructors from the generated class:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>// Generated Service Class
+
+@WebServiceClient(name=&quot;StockQuoteService&quot;, targetNamespace=&quot;http://example.com/stocks&quot;, wsdlLocation=&quot;http://example.com/stocks.wsdl&quot;)
+publicclass StockQuoteService extends javax.xml.ws.Service
+{
+&nbsp;&nbsp; public StockQuoteService()
+&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; super(new URL(&quot;http://example.com/stocks.wsdl&quot;), new QName(&quot;http://example.com/stocks&quot;, &quot;StockQuoteService&quot;));
+&nbsp;&nbsp; }
+
+&nbsp;&nbsp; public StockQuoteService(String wsdlLocation, QName serviceName)
+&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; super(wsdlLocation, serviceName);
+&nbsp;&nbsp; }
+
+&nbsp;&nbsp; ...
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Section Dynamic Proxy explains how to obtain a port from the service and how to invoke an operation on the port. If you need to work with the XML payload directly or with the XML representation of the entire SOAP message, have a look at <tt class=" ">Dispatch</tt>.            </p>
+        </div>
+    
+    <div class="section-5"  id="66322810_JAX-WSUserGuide-Dynamiccase"  >
+        <h5>Dynamic case</h5>
+    
+            <p>
+    In the dynamic case, when nothing is generated, a web service client uses <tt class=" ">Service.create</tt> to create Service instances, the following code illustrates this process.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>URL wsdlLocation = new URL(&quot;http://example.org/my.wsdl&quot;);
+QName serviceName = new QName(&quot;http://example.org/sample&quot;, &quot;MyService&quot;);
+Service service = Service.create(wsdlLocation, serviceName);</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-HandlerResolver"  >
+        <h4>Handler Resolver</h4>
+    
+            <p>
+    JAX-WS provides a flexible plug-in framework for message processing modules, known as handlers, that may be used to extend the capabilities of a JAX-WS runtime system. Handler Framework describes the handler framework in detail. A Service instance provides access to a <tt class=" ">HandlerResolver</tt> via a pair of <tt class=" ">getHandlerResolver</tt> / <tt class=" ">setHandlerResolver</tt> methods that may be used to configure a set of handlers on a per-service, per-port or per-protocol binding basis.            </p>
+                <p>
+    When a Service instance is used to create a proxy or a Dispatch instance then the handler resolver currently registered with the service is used to create the required handler chain. Subsequent changes to the handler resolver configured for a Service instance do not affect the handlers on previously created proxies, or Dispatch instances.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-Executor"  >
+        <h4>Executor</h4>
+    
+            <p>
+    Service instances can be configured with a <tt class=" ">java.util.concurrent.Executor</tt>. The executor will then be used to invoke any asynchronous callbacks requested by the application. The <tt class=" ">setExecutor</tt> and <tt class=" ">getExecutor</tt> methods of <tt class=" ">Service</tt> can be used to modify and retrieve the executor configured for a service.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-DynamicProxy"  >
+        <h3>Dynamic Proxy</h3>
+    
+            <p>
+    You can create an instance of a client proxy using one of <tt class=" ">getPort</tt> methods on the <tt class=" ">Service</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/**
+ * The getPort method returns a proxy. A service client
+ * uses this proxy to invoke operations on the target
+ * service endpoint. The &lt;code&gt;serviceEndpointInterface&lt;/code&gt;
+ * specifies the service endpoint interface that is supported by
+ * the created dynamic proxy instance.
+ **/
+public &lt;T&gt; T getPort(QName portName, Class&lt;T&gt; serviceEndpointInterface)
+{
+&nbsp;&nbsp; ...
+}
+
+/**
+ * The getPort method returns a proxy. The parameter
+ * &lt;code&gt;serviceEndpointInterface&lt;/code&gt; specifies the service
+ * endpoint interface that is supported by the returned proxy.
+ * In the implementation of this method, the JAX-WS
+ * runtime system takes the responsibility of selecting a protocol
+ * binding (and a port) and configuring the proxy accordingly.
+ * The returned proxy should not be reconfigured by the client.
+ *
+ **/
+public &lt;T&gt; T getPort(Class&lt;T&gt; serviceEndpointInterface)
+{
+&nbsp;&nbsp; ...
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The service endpoint interface (SEI) is usually generated using tools. For details see Top Down (WSDL to Java)            </p>
+                <p>
+    A generated static Service usually also offers typed methods to get ports. These methods also return dynamic proxies that implement the SEI.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@WebServiceClient(name = &quot;TestEndpointService&quot;, targetNamespace = &quot;http://org.jboss.ws/wsref&quot;,
+&nbsp;&nbsp; wsdlLocation = &quot;http://localhost.localdomain:8080/jaxws-samples-webserviceref?wsdl&quot;)
+
+publicclass TestEndpointService extends Service
+{
+&nbsp;&nbsp;&nbsp; ...
+
+&nbsp;&nbsp;&nbsp; public TestEndpointService(URL wsdlLocation, QName serviceName) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; super(wsdlLocation, serviceName);
+&nbsp;&nbsp;&nbsp; }
+
+&nbsp;&nbsp;&nbsp; @WebEndpoint(name = &quot;TestEndpointPort&quot;)
+&nbsp;&nbsp;&nbsp; public TestEndpoint getTestEndpointPort()
+&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return (TestEndpoint)super.getPort(TESTENDPOINTPORT, TestEndpoint.class);
+&nbsp;&nbsp;&nbsp; }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-WebServiceRef"  >
+        <h3>WebServiceRef</h3>
+    
+            <p>
+    The <tt class=" ">@WebServiceRef</tt> annotation is used to declare a reference to a Web service. It follows the resource pattern exemplified by the <tt class=" ">javax.annotation.Resource</tt> annotation in <a href="http://www.jcp.org/en/jsr/summary?id=250">JSR-250</a>.            </p>
+                <p>
+    There are two uses to the WebServiceRef annotation:            </p>
+    <ol class=" "><li class=" ">            <p>
+    To define a reference whose type is a generated service class. In this case, the type and value element will both refer to the generated service class type. Moreover, if the reference type can be inferred by the field/method declaration the annotation is applied to, the type and value elements MAY have the default value (Object.class, that is). If the type cannot be inferred, then at least the type element MUST be present with a non-default value.            </p>
+    </li><li class=" ">            <p>
+    To define a reference whose type is a SEI. In this case, the type element MAY be present with its default value if the type of the reference can be inferred from the annotated field/method declaration, but the value element MUST always be present and refer to a generated service class type (a subtype of javax.xml.ws.Service). The wsdlLocation element, if present, overrides theWSDL location information specified in the WebService annotation of the referenced generated service class.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>publicclass EJB3Client implements EJB3Remote
+{
+&nbsp;&nbsp; @WebServiceRef
+&nbsp;&nbsp; public TestEndpointService service4;
+
+&nbsp;&nbsp; @WebServiceRef
+&nbsp;&nbsp; public TestEndpoint port3;</code></pre>
+        </div>
+    </div>
+</li></ol>    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-Dispatch"  >
+        <h3>Dispatch</h3>
+    
+            <p>
+    XMLWeb Services use XML messages for communication between services and service clients. The higher level JAX-WS APIs are designed to hide the details of converting between Java method invocations and the corresponding XML messages, but in some cases operating at the XML message level is desirable. The Dispatch interface provides support for this mode of interaction.            </p>
+                <p>
+    <tt class=" ">Dispatch</tt> supports two usage modes, identified by the constants <tt class=" ">javax.xml.ws.Service.Mode.MESSAGE</tt> and <tt class=" ">javax.xml.ws.Service.Mode.PAYLOAD</tt> respectively:            </p>
+                <p>
+    <strong class=" "><i class=" ">Message</i></strong> In this mode, client applications work directly with protocol-specific message structures. E.g., when used with a SOAP protocol binding, a client application would work directly with a SOAP message.            </p>
+                <p>
+    <strong class=" "><i class=" ">Message Payload</i></strong> In this mode, client applications work with the payload of messages rather than the messages themselves. E.g., when used with a SOAP protocol binding, a client application would work with the contents of the SOAP Body rather than the SOAP message as a whole.            </p>
+                <p>
+    Dispatch is a low level API that requires clients to construct messages or message payloads as XML and requires an intimate knowledge of the desired message or payload structure. Dispatch is a generic class that supports input and output of messages or message payloads of any type.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Service service = Service.create(wsdlURL, serviceName);
+Dispatch dispatch = service.createDispatch(portName, StreamSource.class, Mode.PAYLOAD);
+
+String payload = &quot;&lt;ns1:ping xmlns:ns1='http://oneway.samples.jaxws.ws.test.jboss.org/'/&gt;&quot;;
+dispatch.invokeOneWay(new StreamSource(new StringReader(payload)));
+
+payload = &quot;&lt;ns1:feedback xmlns:ns1='http://oneway.samples.jaxws.ws.test.jboss.org/'/&gt;&quot;;
+Source retObj = (Source)dispatch.invoke(new StreamSource(new StringReader(payload)));</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-AsynchronousInvocations"  >
+        <h3>Asynchronous Invocations</h3>
+    
+            <p>
+    The <tt class=" ">BindingProvider</tt> interface represents a component that provides a protocol binding for use by clients, it is implemented by proxies and is extended by the <tt class=" ">Dispatch</tt> interface.            </p>
+                <p>
+    <tt class=" ">BindingProvider</tt> instances may provide asynchronous operation capabilities. When used, asynchronous operation invocations are decoupled from the <tt class=" ">BindingProvider</tt> instance at invocation time such that the response context is not updated when the operation completes. Instead a separate response context is made available using the <tt class=" ">Response</tt> interface.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public void testInvokeAsync() throws Exception
+{
+&nbsp;&nbsp; URL wsdlURL = new URL(&quot;http://&quot; + getServerHost() + &quot;:8080/jaxws-samples-asynchronous?wsdl&quot;);
+&nbsp;&nbsp; QName serviceName = new QName(targetNS, &quot;TestEndpointService&quot;);
+&nbsp;&nbsp; Service service = Service.create(wsdlURL, serviceName);
+&nbsp;&nbsp; TestEndpoint port = service.getPort(TestEndpoint.class);
+&nbsp;&nbsp; Response response = port.echoAsync(&quot;Async&quot;);
+&nbsp;&nbsp; // access future
+&nbsp;&nbsp; String retStr = (String) response.get();
+&nbsp;&nbsp; assertEquals(&quot;Async&quot;, retStr);
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-OnewayInvocations"  >
+        <h3>Oneway Invocations</h3>
+    
+            <p>
+    <tt class=" ">@Oneway</tt> indicates that the given web method has only an input message and no output. Typically, a oneway method returns the thread of control to the calling application prior to executing the actual business method.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@WebService (name=&quot;PingEndpoint&quot;)
+@SOAPBinding(style = SOAPBinding.Style.RPC)
+publicclass PingEndpointImpl
+{
+&nbsp;&nbsp; privatestatic String feedback;
+&nbsp;&nbsp;
+&nbsp;&nbsp; @WebMethod
+&nbsp;&nbsp; @Oneway
+&nbsp;&nbsp; publicvoid ping()
+&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; log.info(&quot;ping&quot;);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; feedback = &quot;ok&quot;;
+&nbsp;&nbsp; }
+&nbsp;&nbsp;
+&nbsp;&nbsp; @WebMethod
+&nbsp;&nbsp; public String feedback()
+&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; log.info(&quot;feedback&quot;);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return feedback;
+&nbsp;&nbsp; }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-TimeoutConfiguration"  >
+        <h3>Timeout Configuration</h3>
+    
+            <p>
+    There are two properties to configure the http connection timeout and client receive time out:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public void testConfigureTimeout() throws Exception
+{
+&nbsp;  //Set timeout until a connection is established
+&nbsp;&nbsp; ((BindingProvider)port).getRequestContext().put(&quot;javax.xml.ws.client.connectionTimeout&quot;, &quot;6000&quot;);
+
+&nbsp;  //Set timeout until the response is received
+&nbsp;&nbsp; ((BindingProvider) port).getRequestContext().put(&quot;javax.xml.ws.client.receiveTimeout&quot;, &quot;1000&quot;);
+
+&nbsp;&nbsp; port.echo(&quot;testTimeout&quot;);
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322810_JAX-WSUserGuide-CommonAPI"  >
+        <h2>Common API</h2>
+    
+            <p>
+    This sections describes concepts that apply equally to Web Service Endpoints and Web Service Clients.            </p>
+        <div class="section-3"  id="66322810_JAX-WSUserGuide-HandlerFramework"  >
+        <h3>Handler Framework</h3>
+    
+            <p>
+    The handler framework is implemented by a JAX-WS protocol binding in both client and server side runtimes. Proxies, and Dispatch instances, known collectively as binding providers, each use protocol bindings to bind their abstract functionality to specific protocols.            </p>
+                <p>
+    Client and server-side handlers are organized into an ordered list known as a handler chain. The handlers within a handler chain are invoked each time a message is sent or received. Inbound messages are processed by handlers prior to binding provider processing. Outbound messages are processed by handlers after any binding provider processing.            </p>
+                <p>
+    Handlers are invoked with a message context that provides methods to access and modify inbound and outbound messages and to manage a set of properties. Message context properties may be used to facilitate communication between individual handlers and between handlers and client and service implementations. Different types of handlers are invoked with different types of message context.            </p>
+        <div class="section-4"  id="66322810_JAX-WSUserGuide-LogicalHandler"  >
+        <h4>Logical Handler</h4>
+    
+            <p>
+    Handlers that only operate on message context properties and message payloads. Logical handlers are protocol agnostic and are unable to affect protocol specific parts of a message. Logical handlers are handlers that implement <tt class=" ">javax.xml.ws.handler.LogicalHandler</tt>.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-ProtocolHandler"  >
+        <h4>Protocol Handler</h4>
+    
+            <p>
+    Handlers that operate on message context properties and protocol specific messages. Protocol handlers are specific to a particular protocol and may access and change protocol specific aspects of a message. Protocol handlers are handlers that implement any interface derived from <tt class=" ">javax.xml.ws.handler.Handler</tt> except <tt class=" ">javax.xml.ws.handler.LogicalHandler</tt>.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-Serviceendpointhandlers"  >
+        <h4>Service endpoint handlers</h4>
+    
+            <p>
+    On the service endpoint, handlers are defined using the <tt class=" ">@HandlerChain</tt> annotation.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@WebService
+@HandlerChain(file = &quot;jaxws-server-source-handlers.xml&quot;)
+publicclass SOAPEndpointSourceImpl
+{
+&nbsp;&nbsp; ...
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The location of the handler chain file supports 2 formats            </p>
+                <p>
+    1. An absolute java.net.URL in externalForm. (ex: <a href="http://myhandlers.foo.com/handlerfile1.xml">http://myhandlers.foo.com/handlerfile1.xml</a>)            </p>
+                <p>
+    2. A relative path from the source file or class file. (ex: bar/handlerfile1.xml)            </p>
+        </div>
+    
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-Serviceclienthandlers"  >
+        <h4>Service client handlers</h4>
+    
+            <p>
+    On the client side, handler can be configured using the <tt class=" ">@HandlerChain</tt> annotation on the SEI or dynamically using the API.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Service service = Service.create(wsdlURL, serviceName);
+Endpoint port = (Endpoint)service.getPort(Endpoint.class);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+BindingProvider bindingProvider = (BindingProvider)port;
+List&lt;Handler&gt; handlerChain = new ArrayList&lt;Handler&gt;();
+handlerChain.add(new LogHandler());
+handlerChain.add(new AuthorizationHandler());
+handlerChain.add(new RoutingHandler());
+bindingProvider.getBinding().setHandlerChain(handlerChain); // important!</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-MessageContext"  >
+        <h3>Message Context</h3>
+    
+            <p>
+    <tt class=" ">MessageContext</tt> is the super interface for all JAX-WS message contexts. It extends <tt class=" ">Map&lt;String,Object&gt;</tt> with additional methods and constants to manage a set of properties that enable handlers in a handler chain to share processing related state. For example, a handler may use the put method to insert a property in the message context that one or more other handlers in the handler chain may subsequently obtain via the get method.            </p>
+                <p>
+    Properties are scoped as either APPLICATION or HANDLER. All properties are available to all handlers for an instance of an MEP on a particular endpoint. E.g., if a logical handler puts a property in the message context, that property will also be available to any protocol handlers in the chain during the execution of an MEP instance. APPLICATION scoped properties are also made available to client applications (see section 4.2.1) and service endpoint implementations. The defaultscope for a property is HANDLER.            </p>
+        <div class="section-4"  id="66322810_JAX-WSUserGuide-LogicalMessageContext"  >
+        <h4>Logical Message Context</h4>
+    
+            <p>
+    Logical Handlers are passed a message context of type <tt class=" ">LogicalMessageContext</tt> when invoked. <tt class=" ">LogicalMessageContext</tt> extends <tt class=" ">MessageContext</tt> with methods to obtain and modify the message payload, it does not provide access to the protocol specific aspects of amessage. A protocol binding defines what component of a message are available via a logical message context. The SOAP binding defines that a logical handler deployed in a SOAP binding can access the contents of the SOAP body but not the SOAP headers whereas the XML/HTTP binding defines that a logical handler can access the entire XML payload of a message.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322810_JAX-WSUserGuide-SOAPMessageContext"  >
+        <h4>SOAP Message Context</h4>
+    
+            <p>
+    SOAP handlers are passed a <tt class=" ">SOAPMessageContext</tt> when invoked. <tt class=" ">SOAPMessageContext</tt> extends <tt class=" ">MessageContext</tt> with methods to obtain and modify the SOAP message payload.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-FaultHandling"  >
+        <h3>Fault Handling</h3>
+    
+            <p>
+    An implementation may thow a <tt class=" ">SOAPFaultException</tt>            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public void throwSoapFaultException()
+{
+&nbsp;&nbsp; SOAPFactory factory = SOAPFactory.newInstance();
+&nbsp;&nbsp; SOAPFault fault = factory.createFault(&quot;this is a fault string!&quot;, new QName(&quot;http://foo&quot;, &quot;FooCode&quot;));
+&nbsp;&nbsp; fault.setFaultActor(&quot;mr.actor&quot;);
+&nbsp;&nbsp; fault.addDetail().addChildElement(&quot;test&quot;);
+&nbsp;&nbsp; thrownew SOAPFaultException(fault);
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    or an application specific user exception            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public void throwApplicationException() throws UserException
+{
+&nbsp;&nbsp; thrownew UserException(&quot;validation&quot;, 123, &quot;Some validation error&quot;);
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-info">
+        
+            <p>
+    In case of the latter, JBossWS generates the required fault wrapper beans at runtime if they are not part of the deployment            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322810_JAX-WSUserGuide-JAXWSAnnotations"  >
+        <h2>WS Annotations</h2>
+    
+            <p>
+    For details, see <a href="http://www.jcp.org/en/jsr/detail?id=224">JSR-224 - Java API for XML-Based Web Services (JAX-WS) 2.2</a>            </p>
+        <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.ServiceMode"  >
+        <h3>javax.xml.ws.ServiceMode</h3>
+    
+            <p>
+    The <tt class=" ">ServiceMode</tt> annotation is used to specify the mode for a provider class, i.e. whether a provider wants to have access to protocol message  payloads (e.g. a SOAP body) or the entire protocol messages (e.g. a SOAP  envelope).            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.WebFault"  >
+        <h3>javax.xml.ws.WebFault</h3>
+    
+            <p>
+    The <tt class=" ">WebFault</tt> annotation is used when mapping WSDL faults to Java  exceptions, see section 2.5. It is used to capture the name of the fault  element used when marshalling the JAXB type generated from the global  element referenced by the WSDL fault message. It can also be used to  customize the mapping of service specific exceptions to WSDL faults.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.RequestWrapper"  >
+        <h3>javax.xml.ws.RequestWrapper</h3>
+    
+            <p>
+    The <tt class=" ">RequestWrapper</tt> annotation is applied to the methods of an SEI. It is  used to capture the JAXB generated request wrapper bean and the element  name and namespace for marshalling / unmarshalling the bean. The default  value of localName element is the operationName as defined in <tt class=" ">WebMethod</tt> annotation and the default value for the targetNamespace element is the  target namespace of the SEI.When starting from Java, this annotation is  used to resolve overloading conflicts in document literal mode. Only  the className element is required in this case.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.ResponseWrapper"  >
+        <h3>javax.xml.ws.ResponseWrapper</h3>
+    
+            <p>
+    The <tt class=" ">ResponseWrapper</tt> annotation is applied to the methods of an SEI. It is  used to capture the JAXB generated response wrapper bean and the element  name and namespace for marshalling / unmarshalling the bean. The  default value of the localName element is the operationName as defined  in the <tt class=" ">WebMethod</tt> appended with &rdquo;Response&rdquo; and the default value of the  targetNamespace element is the target namespace of the SEI. When  starting from Java, this annotation is used to resolve overloading  conflicts in document literal mode. Only the className element is  required in this case.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.WebServiceClient"  >
+        <h3>javax.xml.ws.WebServiceClient</h3>
+    
+            <p>
+    The <tt class=" ">WebServiceClient</tt> annotation is specified on a generated service class  (see 2.7). It is used to associate a class with a specific Web service,  identify by a URL to a WSDL document and the qualified name of a  wsdl:service element.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.WebEndpoint"  >
+        <h3>javax.xml.ws.WebEndpoint</h3>
+    
+            <p>
+    The <tt class=" ">WebEndpoint</tt> annotation is specified on the getPortName() methods of a  generated service class (see 2.7). It is used to associate a get method  with a specific wsdl:port, identified by its local name (a NCName).            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.WebServiceProvider"  >
+        <h3>javax.xml.ws.WebServiceProvider</h3>
+    
+            <p>
+    The <tt class=" ">WebServiceProvider</tt> annotation is specified on classes that implement a  strongly typed <tt class=" ">javax.xml.ws.Provider</tt>. It is used to declare that a  class that satisfies the requirements for a provider (see 5.1) does  indeed define a Web service endpoint, much like the <tt class=" ">WebService</tt> annotation does for SEI-based endpoints.            </p>
+                <p>
+    The <tt class=" ">WebServiceProvider</tt> and <tt class=" ">WebService</tt> annotations are mutually exclusive.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.BindingType"  >
+        <h3>javax.xml.ws.BindingType</h3>
+    
+            <p>
+    The <tt class=" ">BindingType</tt> annotation is applied to an endpoint implementation class.  It specifies the binding to use when publishing an endpoint of this  type.            </p>
+                <p>
+    The default binding for an endpoint is the SOAP 1.1/HTTP one.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.WebServiceRef"  >
+        <h3>javax.xml.ws.WebServiceRef</h3>
+    
+            <p>
+    The <tt class=" ">WebServiceRef</tt> annotation is used to declare a reference to a Web  service. It follows the resource pattern exemplified by the <tt class=" ">javax.annotation.Resource</tt> annotation in JSR-250 [JBWS:32]. The <tt class=" ">WebServiceRef</tt> annotation is required to be honored when running on the Java EE 5  platform, where it is subject to the common resource injection rules  described by the platform specification [JBWS:33].            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.WebServiceRefs"  >
+        <h3>javax.xml.ws.WebServiceRefs</h3>
+    
+            <p>
+    The <tt class=" ">WebServiceRefs</tt> annotation is used to declare multiple references to Web  services on a single class. It is necessary to work around the limition  against specifying repeated annotations of the same type on any given  class, which prevents listing multiple <tt class=" ">javax.ws.WebServiceRef</tt> annotations one after the other. This annotation follows the resource  pattern exemplified by the <tt class=" ">javax.annotation.Resources</tt> annotation in  JSR-250.            </p>
+                <p>
+    Since no name and type can be inferred in this case, each <tt class=" ">WebServiceRef</tt> annotation inside a WebServiceRefs MUST contain name and  type elements with non-default values. The <tt class=" ">WebServiceRef</tt> annotation is  required to be honored when running on the Java EE 5 platform, where it  is subject to the common resource injection rules described by the  platform specification.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.Action"  >
+        <h3>javax.xml.ws.Action</h3>
+    
+            <p>
+    The <tt class=" ">Action</tt> annotation is applied to the methods of a SEI. It used to  generate the wsa:Action on wsdl:input and wsdl:output of each wsdl:operation mapped from the annotated methods.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.xml.ws.FaultAction"  >
+        <h3>javax.xml.ws.FaultAction</h3>
+    
+            <p>
+    The <tt class=" ">FaultAction</tt> annotation is used within the <tt class=" ">Action</tt> annotation to generate  the wsa:Action element on the wsdl:fault element of each wsdl:operation  mapped from the annotated methods.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322810_JAX-WSUserGuide-JSR181Annotations"  >
+        <h2>181 Annotations</h2>
+    
+            <p>
+    JSR-181 defines the syntax and semantics of Java Web Service (JWS) metadata and default values.            </p>
+                <p>
+    For details, see <a href="http://www.jcp.org/en/jsr/detail?id=181">JSR 181 - Web Services Metadata for the Java Platform</a>.            </p>
+        <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.jws.WebService"  >
+        <h3>javax.jws.WebService</h3>
+    
+            <p>
+    Marks a Java class as implementing a Web Service, or a Java interface as defining a Web Service interface.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.jws.WebMethod"  >
+        <h3>javax.jws.WebMethod</h3>
+    
+            <p>
+    Customizes a method that is exposed as a Web Service operation.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.jws.OneWay"  >
+        <h3>javax.jws.OneWay</h3>
+    
+            <p>
+    Indicates  that the given web method has only an input message and no output.  Typically, a oneway method returns the thread of control to the calling  application prior to executing the actual business method. A JSR-181  processor is REQUIRED to report an error if an operation marked <tt class=" ">@Oneway</tt> has a return value, declares any checked exceptions or has any INOUT or  OUT parameters.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.jws.WebParam"  >
+        <h3>javax.jws.WebParam</h3>
+    
+            <p>
+    Customizes the mapping of an individual parameter to a Web Service message part and XML element.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.jws.WebResult"  >
+        <h3>javax.jws.WebResult</h3>
+    
+            <p>
+    Customizes the mapping of the return value to a WSDL part and XML element.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.jws.SOAPBinding"  >
+        <h3>javax.jws.SOAPBinding</h3>
+    
+            <p>
+    Specifies the mapping of the Web Service onto the SOAP message protocol.            </p>
+                <p>
+    The <tt class=" ">SOAPBinding</tt> annotation has a target of <tt class=" ">TYPE</tt> and <tt class=" ">METHOD</tt>. The annotation  may be placed on a method if and only if the <tt class=" ">SOAPBinding.style</tt> is <tt class=" ">DOCUMENT</tt>. Implementations MUST report an error if the <tt class=" ">SOAPBinding</tt> annotation is placed on a method with a <tt class=" ">SOAPBinding.style</tt> of <tt class=" ">RPC</tt>.  Methods that do not have a <tt class=" ">SOAPBinding</tt> annotation accept the <tt class=" ">SOAPBinding</tt> behavior defined on the type.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322810_JAX-WSUserGuide-javax.jws.HandlerChain"  >
+        <h3>javax.jws.HandlerChain</h3>
+    
+            <p>
+    The <tt class=" ">@HandlerChain</tt> annotation associates the Web Service with an externally defined handler chain.            </p>
+                <p>
+    It is an error to combine this annotation with the <tt class=" ">@SOAPMessageHandlers</tt> annotation.            </p>
+                <p>
+    The <tt class=" ">@HandlerChain</tt> annotation MAY be present on the endpoint interface and  service implementation bean. The service implementation bean's <tt class=" ">@HandlerChain</tt> is used if <tt class=" ">@HandlerChain</tt> is present on both.            </p>
+                <p>
+    The <tt class=" ">@HandlerChain</tt> annotation MAY be specified on the type only. The annotation target includes <tt class=" ">METHOD</tt> and <tt class=" ">FIELD</tt> for use by JAX-WS-2.x.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Command line parameters</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Command line parameters</h1>
+        </div>
+        
+        <div id="66322695" class="content prepend-top">
+            <p>
+    To start up a WildFly 8 managed domain, execute the <tt class=" ">$JBOSS_HOME/bin/domain.sh</tt> script. To start up a standalone server, execute the&nbsp;<tt class=" ">$JBOSS_HOME/bin/standalone.sh</tt>. With no arguments, the default configuration is used. You can override the default configuration by providing arguments on the command line, or in your calling script.            </p>
+        <div class="section-2"  id="66322695_Commandlineparameters-Systemproperties"  >
+        <h2>System properties</h2>
+    
+            <p>
+    The standalone and the managed domain modes each use a default configuration which expects various files and writable directories to exist in standard locations. Each of these standard locations is associated with a system property, which has a default value. To override a system property, pass its new value using the standard jvm <tt class=" ">-Dkey=value</tt> options:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$JBOSS_HOME/bin/standalone.sh -Djboss.home.dir=some/location/WildFly/jboss-as \
+    -Djboss.server.config.dir=some/location/WildFly/jboss-as/custom-standalone</code></pre>
+        </div>
+    </div>
+            <p>
+    This command starts up a standalone server instance using a non-standard AS home directory and a custom configuration directory. For specific information about system properties, refer to the definitions below.            </p>
+                <p>
+    Instead of passing the parameters directly, you can put them into a properties file, and pass the properties file to the script, as in the two examples below.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$JBOSS_HOME/bin/domain.sh --properties=/some/location/jboss.properties
+$JBOSS_HOME/bin/domain.sh -P=/some/location/jboss.properties</code></pre>
+        </div>
+    </div>
+            <p>
+    The syntax for passing in parameters and properties files is the same regardless of whether you are running the <tt class=" ">domain.sh</tt>, <tt class=" ">standalone.sh</tt>, or the Microsoft Windows scripts<tt class=" ">domain.bat</tt> or <tt class=" ">standalone.bat</tt>.            </p>
+                <p>
+    The properties file is a standard Java property file containing <tt class=" ">key=value</tt> pairs:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>jboss.home.dir=/some/location/WildFly/jboss-as
+jboss.domain.config.dir=/some/location/WildFly/custom-domain</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322695_Commandlineparameters-standalonesystemproperties"><a name="66322695_Commandlineparameters-standalonesystemproperties"></a></span>
+            </p>
+        <div class="section-3"  id="66322695_Commandlineparameters-Standalone"  >
+        <h3>Standalone</h3>
+    
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Property name            </td>
+                <td rowspan="1" colspan="1">
+    Usage            </td>
+                <td rowspan="1" colspan="1">
+    Default value            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">java.ext.dirs</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The JDK extension directory paths            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">null</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.home.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The root directory of the WildFly 8 installation.            </td>
+                <td rowspan="1" colspan="1">
+    Set by <tt class=" ">standalone.sh</tt> to <tt class=" ">$JBOSS_HOME</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.base.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The base directory for server content.            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.home.dir</tt>/standalone            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.config.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The base configuration directory.            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.base.dir</tt>/configuration            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.data.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The directory used for persistent data file storage.            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.base.dir</tt>/data            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.log.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The directory containing the <tt class=" ">server.log</tt> file.            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.base.dir</tt>/log            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.temp.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The directory used for temporary file storage.            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.base.dir</tt>/tmp            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.deploy.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The directory used to store deployed content            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.data.dir</tt>/content            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+        <span id="66322695_Commandlineparameters-domainsystemproperties"><a name="66322695_Commandlineparameters-domainsystemproperties"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322695_Commandlineparameters-ManagedDomain"  >
+        <h3>Managed Domain</h3>
+    
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Property name            </td>
+                <td rowspan="1" colspan="1">
+    Usage            </td>
+                <td rowspan="1" colspan="1">
+    Default value            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.home.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The root directory of the WildFly installation.            </td>
+                <td rowspan="1" colspan="1">
+    Set by <tt class=" ">domain.sh</tt> to <tt class=" ">$JBOSS_HOME</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.base.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The base directory for domain content.            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.home.dir</tt>/domain            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.config.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The base configuration directory            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.base.dir</tt>/configuration            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.data.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The directory used for persistent data file storage.            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.base.dir</tt>/data            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.log.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The directory containing the <tt class=" ">host-controller.log</tt> and <tt class=" ">process-controller.log</tt> files            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.base.dir</tt>/log            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.temp.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The directory used for temporary file storage            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.base.dir</tt>/tmp            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.deployment.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The directory used to store deployed content            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.base.dir</tt>/content            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.servers.dir</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The directory containing the output for the managed server instances            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.base.dir</tt>/servers            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+        <span id="66322695_Commandlineparameters-parameters"><a name="66322695_Commandlineparameters-parameters"></a></span>
+            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322695_Commandlineparameters-Othercommandlineparameters"  >
+        <h2>Other command line parameters</h2>
+    
+            <p>
+    The first acceptable format for command line arguments to the WildFly launch scripts is            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>--name=value</code></pre>
+        </div>
+    </div>
+            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$JBOSS_HOME/bin/standalone.sh --server-config=standalone-ha.xml</code></pre>
+        </div>
+    </div>
+            <p>
+    If the parameter name is a single character, it is prefixed by a single '-' instead of two. Some parameters have both a long and short option.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>-x=value</code></pre>
+        </div>
+    </div>
+            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$JBOSS_HOME/bin/standalone.sh -P=/some/location/jboss.properties</code></pre>
+        </div>
+    </div>
+            <p>
+    For some command line arguments frequently used in previous major releases of WildFly, replacing the &quot;=&quot; in the above examples with a space is supported, for compatibility.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>-b 192.168.100.10</code></pre>
+        </div>
+    </div>
+            <p>
+    If possible, use the <tt class=" ">-x=value</tt> syntax. New parameters will always support this syntax.            </p>
+                <p>
+    The sections below describe the command line parameter names that are available in standalone and domain mode.            </p>
+        <div class="section-3"  id="66322695_Commandlineparameters-Standalone2"  >
+        <h3>Standalone</h3>
+    
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Default if absent            </td>
+                <td rowspan="1" colspan="1">
+    Value            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--server-config</tt><br/><tt class=" ">-c</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.server.config.dir</tt>/standalone.xml            </td>
+                <td rowspan="1" colspan="1">
+    A relative path which is interpreted to be relative to <tt class=" ">jboss.server.config.dir</tt>.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--read-only-server-config</tt>            </td>
+                <td rowspan="1" colspan="1">
+    -            </td>
+                <td rowspan="1" colspan="1">
+    A relative path which is interpreted to be relative to <tt class=" ">jboss.server.config.dir</tt>. This is similar to <tt class=" ">--server-config</tt> but it does not overwrite the file used when the management model is changed. However a full versioned history is maintained of the file.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-3"  id="66322695_Commandlineparameters-ManagedDomain2"  >
+        <h3>Managed Domain</h3>
+    
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Default if absent            </td>
+                <td rowspan="1" colspan="1">
+    Value            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--domain-config</tt><br/><tt class=" ">-c</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.config.dir</tt>/domain.xml            </td>
+                <td rowspan="1" colspan="1">
+    A relative path which is interpreted to be relative to <tt class=" ">jboss.domain.config.dir</tt>.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--read-only-domain-config</tt>            </td>
+                <td rowspan="1" colspan="1">
+    -            </td>
+                <td rowspan="1" colspan="1">
+    A relative path which is interpreted to be relative to <tt class=" ">jboss.domain.config.dir</tt>. This is similar to <tt class=" ">--domain-config</tt> but it does not overwrite the file used when the management model is changed. However a full versioned history is maintained of the file.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--host-config</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.domain.config.dir</tt>/host.xml            </td>
+                <td rowspan="1" colspan="1">
+    A relative path which is interpreted to be relative to <tt class=" ">jboss.domain.config.dir</tt>.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--read-only-host-config</tt>            </td>
+                <td rowspan="1" colspan="1">
+    -            </td>
+                <td rowspan="1" colspan="1">
+    A relative path which is interpreted to be relative to <tt class=" ">jboss.domain.config.dir</tt>. This is similar to <tt class=" ">--host-config</tt> but it does not overwrite the file used when the management model is changed. However a full versioned history is maintained of the file.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The following parameters take no value and are only usable on slave host controllers (i.e. hosts configured to connect to a <tt class=" ">remote</tt> domain controller.)            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name &nbsp; &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    Function            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--backup</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Causes the slave host controller to create and maintain a local copy of the domain configuration file            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--cached-dc</tt>            </td>
+                <td rowspan="1" colspan="1">
+    If the slave host controller is unable to contact the master domain controller to get its configuration at boot, boot from a local copy previously created using <tt class=" ">--backup</tt>. The slave host controller will not be able make any modifications to the domain configuration, but it will be able to launch servers.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+        <span id="66322695_Commandlineparameters-commonparameters"><a name="66322695_Commandlineparameters-commonparameters"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322695_Commandlineparameters-Commonparameters"  >
+        <h3>Common parameters</h3>
+    
+            <p>
+    These parameters apply in both standalone or managed domain mode:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Function            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">-b=&lt;value&gt;</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Sets system property <tt class=" ">jboss.bind.address</tt> to &lt;value&gt;. See <a href="66322695.html#66322695_Commandlineparameters-bindaddress">Controlling the Bind Address with -b</a> for further details.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">-b&lt;name&gt;=&lt;value&gt;</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Sets system property <tt class=" ">jboss.bind.address.&lt;name&gt;</tt> to &lt;value&gt; where <i class=" ">name</i> can vary. See <a href="66322695.html#66322695_Commandlineparameters-bindaddress">Controlling the Bind Address with -b</a> for further details.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">-u=&lt;value&gt;</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Sets system property <tt class=" ">jboss.default.multicast.address</tt> to &lt;value&gt;. See <a href="66322695.html#66322695_Commandlineparameters-defaultmulticastaddress">Controlling the Default Multicast Address with -u</a> for further details.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--version</tt><br/><tt class=" ">-v</tt><br/><tt class=" ">-V</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Prints the version of WildFly to standard output and exits the JVM.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">--help</tt><br/><tt class=" ">-h</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Prints a help message explaining the options and exits the JVM.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+        <span id="66322695_Commandlineparameters-bindaddress"><a name="66322695_Commandlineparameters-bindaddress"></a></span>
+            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322695_Commandlineparameters-ControllingtheBindAddresswith%5Cb"  >
+        <h2>Controlling the Bind Address with -b</h2>
+    
+            <p>
+    WildFly&nbsp;binds sockets to the IP addresses and interfaces contained in the <tt class=" ">&lt;interfaces&gt;</tt> elements in <tt class=" ">standalone.xml</tt>, <tt class=" ">domain.xml</tt> and <tt class=" ">host.xml</tt>. (See <a href="66322692.html#66322692_Generalconfigurationconcepts-interfaces">Interfaces</a> and <a href="66322692.html#66322692_Generalconfigurationconcepts-socketbindings">Socket Bindings</a> for further information on these elements.) The standard configurations that ship with WildFly includes two interface configurations:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interfaces&gt;
+    &lt;interface name=&quot;management&quot;&gt;
+        &lt;inet-address value=&quot;${jboss.bind.address.management:127.0.0.1}&quot;/&gt;
+    &lt;/interface&gt;
+    &lt;interface name=&quot;public&quot;&gt;
+       &lt;inet-address value=&quot;${jboss.bind.address:127.0.0.1}&quot;/&gt;
+    &lt;/interface&gt;
+&lt;/interfaces&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Those configurations use the values of system properties <tt class=" ">jboss.bind.address.management</tt> and <tt class=" ">jboss.bind.address</tt> if they are set. If they are not set, 127.0.0.1 is used for each value.            </p>
+                <p>
+    As noted in <a href="66322695.html#66322695_Commandlineparameters-commonparameters">Common Parameters</a>, the AS supports the <tt class=" ">-b</tt> and <tt class=" ">-b&lt;name&gt;</tt> command line switches. The only function of these switches is to set system properties <tt class=" ">jboss.bind.address</tt> and <tt class=" ">jboss.bind.address.&lt;name&gt;</tt> respectively. However, because of the way the standard WildFly configuration files are set up, using the <tt class=" ">-b</tt> switches can indirectly control how the AS binds sockets.            </p>
+                <p>
+    <i class=" ">If your interface configurations match those shown above</i>, using this as your launch command causes all sockets associated with interface named &quot;public&quot; &nbsp;to be bound to <tt class=" ">192.168.100.10</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$JBOSS_HOME/bin/standalone.sh -b=192.168.100.10</code></pre>
+        </div>
+    </div>
+            <p>
+    In the standard config files, public interfaces are those not associated with server management. Public interfaces handle normal end-user requests.            </p>
+        <div class="confbox admonition admonition-info">
+            <div class="title">Interface names</div>
+        
+            <p>
+    The interface named &quot;public&quot; is not inherently special. It is provided as a convenience. You can name your interfaces to suit your environment.            </p>
+        </div>
+    
+            <p>
+    To bind the public interfaces to all IPv4 addresses (the IPv4 wildcard address), use the following syntax:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$JBOSS_HOME/bin/standalone.sh -b=0.0.0.0</code></pre>
+        </div>
+    </div>
+            <p>
+    You can also bind the management interfaces, as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$JBOSS_HOME/bin/standalone.sh -bmanagement=192.168.100.10</code></pre>
+        </div>
+    </div>
+            <p>
+    In the standard config files, management interfaces are those sockets associated with server management, such as the socket used by the CLI, the HTTP socket used by the admin console, and the JMX connector socket.            </p>
+        <div class="confbox admonition admonition-note">
+            <div class="title">Be Careful</div>
+        
+            <p>
+    The <tt class=" ">-b</tt> switch only controls the interface bindings because the standard config files that ship with WildFly sets things up that way. If you change the <tt class=" ">&lt;interfaces&gt;</tt> section in your configuration to ignore the system properties controlled by <tt class=" ">-b</tt>, then setting <tt class=" ">-b</tt> in your launch command will have no effect.            </p>
+                <p>
+    For example, this perfectly valid setting for the &quot;public&quot; interface causes &nbsp;<tt class=" ">-b</tt> to have no effect on the &quot;public&quot; interface:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interface name=&quot;public&quot;&gt;
+   &lt;nic name=&quot;eth0&quot;/&gt;
+&lt;/interface&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The key point is <strong class=" ">the contents of the configuration files determine the configuration. Settings like</strong> <tt class=" ">-b</tt> <strong class=" ">are not overrides of the configuration files.</strong>&nbsp;They only provide a shorter syntax for setting a system properties that may or may not be referenced in the configuration files. They are provided as a convenience, and you can choose to modify your configuration to ignore them.            </p>
+        </div>
+    
+            <p>
+        <span id="66322695_Commandlineparameters-defaultmulticastaddress"><a name="66322695_Commandlineparameters-defaultmulticastaddress"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-2"  id="66322695_Commandlineparameters-ControllingtheDefaultMulticastAddresswith%5Cu"  >
+        <h2>Controlling the Default Multicast Address with -u</h2>
+    
+            <p>
+    WildFly 8 may use multicast communication for some services, particularly those involving high availability clustering. The multicast addresses and ports used are configured using the <tt class=" ">socket-binding</tt> elements in <tt class=" ">standalone.xml</tt> and <tt class=" ">domain.xml</tt>. (See <a href="66322692.html#66322692_Generalconfigurationconcepts-socketbindings">Socket Bindings</a> for further information on these elements.) The standard HA configurations that ship with WildFly include two socket binding configurations that use a default multicast address:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;socket-binding name=&quot;jgroups-mping&quot; port=&quot;0&quot; multicast-address=&quot;${jboss.default.multicast.address:230.0.0.4}&quot; multicast-port=&quot;45700&quot;/&gt;
+&lt;socket-binding name=&quot;jgroups-udp&quot; port=&quot;55200&quot; multicast-address=&quot;${jboss.default.multicast.address:230.0.0.4}&quot; multicast-port=&quot;45688&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Those configurations use the values of system property <tt class=" ">jboss.default.multicast.address</tt> if it is set. If it is not set, 230.0.0.4 is used for each value. (The configuration may include other socket bindings for multicast-based services that are not meant to use the default multicast address; e.g. a binding the mod-cluster services use to communicate on a separate address/port with Apache httpd servers.)            </p>
+                <p>
+    As noted in <a href="66322695.html#66322695_Commandlineparameters-commonparameters">Common Parameters</a>, the AS supports the <tt class=" ">-u</tt> command line switch. The only function of this switch is to set system property <tt class=" ">jboss.default.multicast.address</tt>. However, because of the way the standard AS configuration files are set up, using the <tt class=" ">-u</tt> switches can indirectly control how the AS uses multicast.            </p>
+                <p>
+    <i class=" ">If your socket binding configurations match those shown above</i>, using this as your launch command causes the service using those sockets configurations to be communicate over multicast address <tt class=" ">230.0.1.2</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$JBOSS_HOME/bin/standalone.sh -u=230.0.1.2</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+            <div class="title">Be Careful</div>
+        
+            <p>
+    As with the <tt class=" ">-b</tt> switch, the <tt class=" ">-u</tt> switch only controls the multicast address used because the standard config files that ship with WildFly 8&nbsp;sets things up that way. If you change the <tt class=" ">&lt;socket-binding&gt;</tt> sections in your configuration to ignore the system properties controlled by <tt class=" ">-u</tt>, then setting <tt class=" ">-u</tt> in your launch command will have no effect.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

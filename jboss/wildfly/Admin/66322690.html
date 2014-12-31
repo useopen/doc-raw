@@ -1,0 +1,719 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Core management concepts</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Core management concepts</h1>
+        </div>
+        
+        <div id="66322690" class="content prepend-top">
+    <div class="section-2"  id="66322690_Coremanagementconcepts-Operatingmodes"  >
+        <h2>Operating modes</h2>
+    
+            <p>
+    WildFly 8 can be booted in two different modes. A <i class=" ">managed domain</i> allows you to run and manage a multi-server topology. Alternatively, you can run a <i class=" ">standalone server</i> instance.            </p>
+        <div class="section-3"  id="66322690_Coremanagementconcepts-StandaloneServer"  >
+        <h3>Standalone Server</h3>
+    
+            <p>
+    For many use cases, the centralized management capability available via a managed domain is not necessary. For these use cases, a WildFly 8 instance can be run as a &quot;standalone server&quot;. A standalone server instance is an independent process, much like an JBoss Application Server 3, 4, 5, or 6 instance is. Standalone instances can be launched via the <tt class=" ">standalone.sh</tt> or <tt class=" ">standalone.bat</tt> launch scripts.            </p>
+                <p>
+    If more than one standalone instance is launched and multi-server management is desired, it is the user's responsibility to coordinate management across the servers. For example, to deploy an application across all of the standalone servers, the user would need to individually deploy the application on each server.            </p>
+                <p>
+    It is perfectly possible to launch multiple standalone server instances and have them form an HA cluster, just like it was possible with JBoss Application Server 3, 4, 5 and 6.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-ManagedDomain"  >
+        <h3>Managed Domain</h3>
+    
+            <p>
+    One of the primary new features of WildFly 8 is the ability to manage multiple WildFly instances from a single control point. A collection of such servers is referred to as the members of a &quot;domain&quot; with a single Domain Controller process acting as the central management control point. All of the WildFly 8 instances in the domain share a common management policy, with the Domain Controller acting to ensure that each server is configured according to that policy. Domains can span multiple physical (or virtual) machines, with all WildFly 8 instances on a given host under the control of a special Host Controller process. One Host Controller instance is configured to act as the central Domain Controller. The Host Controller on each host interacts with the Domain Controller to control the lifecycle of the application server instances running on its host and to assist the Domain Controller in managing them.            </p>
+                <p>
+    When you launch a WildFly 8 managed domain on a host (via the <tt class=" ">domain.sh</tt> or <tt class=" ">domain.bat</tt> launch scripts) your intent is to launch a Host Controller and usually at least one WildFly instance. On one of the hosts the Host Controller should be configured to act as the Domain Controller. See <span class=" error">[WLFY8:Domain Setup]</span> for details.            </p>
+                <p>
+    The following is an example managed domain topology:            </p>
+                <p>
+        <img src="images/author/download/attachments/66322691/-1224665945.png" alt="images/author/download/attachments/66322691/-1224665945.png" />
+                </p>
+        <div class="section-4"  id="66322690_Coremanagementconcepts-Host"  >
+        <h4>Host</h4>
+    
+            <p>
+    Each &quot;Host&quot; box in the above diagram represents a physical or virtual host. A physical host can contain zero, one or more server instances.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322690_Coremanagementconcepts-HostController"  >
+        <h4>Host Controller</h4>
+    
+            <p>
+    When the domain.sh or domain.bat script is run on a host, a process known as a Host Controller is launched. The Host Controller is solely concerned with server management; it does not itself handle application server workloads. The Host Controller is responsible for starting and stopping the individual application server processes that run on its host, and interacts with the Domain Controller to help manage them.            </p>
+                <p>
+    Each Host Controller by default reads its configuration from the <tt class=" ">domain/configuration/host.xml</tt> file located in the unzipped WildFly 8 installation on its host's filesystem. The <tt class=" ">host.xml</tt> file contains configuration information that is specific to the particular host. Primarily:            </p>
+    <ul class=" "><li class=" ">            <p>
+    the listing of the names of the actual WildFly 8 instances that are meant to run off of this installation.            </p>
+    </li><li class=" ">            <p>
+    configuration of how the Host Controller is to contact the Domain Controller to register itself and access the domain configuration. This may either be configuration of how to find and contact a remote Domain Controller, or a configuration telling the Host Controller to itself act as the Domain Controller.            </p>
+    </li><li class=" ">            <p>
+    configuration of items that are specific to the local physical installation. For example, named interface definitions declared in <tt class=" ">domain.xml</tt> (see below) can be mapped to an actual machine-specific IP address in <tt class=" ">host.xml</tt>. Abstract path names in <tt class=" ">domain.xml</tt> can be mapped to actual filesystem paths in <tt class=" ">host.xml</tt>.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="66322690_Coremanagementconcepts-DomainController"  >
+        <h4>Domain Controller</h4>
+    
+            <p>
+    One Host Controller instance is configured to act as the central management point for the entire domain, i.e. to be the Domain Controller. The primary responsibility of the Domain Controller is to maintain the domain's central management policy, to ensure all Host Controllers are aware of its current contents, and to assist the Host Controllers in ensuring any running application server instances are configured in accordance with this policy. This central management policy is stored by default in the <tt class=" ">domain/configuration/domain.xml</tt> file in the unzipped WildFly 8 installation on Domain Controller's host's filesystem.            </p>
+                <p>
+    A <tt class=" ">domain.xml</tt> file must be located in the <tt class=" ">domain/configuration</tt> directory of an installation that's meant to run the Domain Controller. It does not need to be present in installations that are not meant to run a Domain Controller; i.e. those whose Host Controller is configured to contact a remote Domain Controller. The presence of a <tt class=" ">domain.xml</tt> file on such a server does no harm.            </p>
+                <p>
+    The <tt class=" ">domain.xml</tt> file includes, among other things, the configuration of the various &quot;profiles&quot; that WildFly 8 instances in the domain can be configured to run. A profile configuration includes the detailed configuration of the various subsystems that comprise that profile (e.g. an embedded JBoss Web instance is a subsystem; a JBoss TS transaction manager is a subsystem, etc). The domain configuration also includes the definition of groups of sockets that those subsystems may open. The domain configuration also includes the definition of &quot;server groups&quot;:            </p>
+        </div>
+    
+    <div class="section-4"  id="66322690_Coremanagementconcepts-ServerGroup"  >
+        <h4>Server Group</h4>
+    
+            <p>
+    A server group is set of server instances that will be managed and configured as one. In a managed domain each application server instance is a member of a server group. (Even if the group only has a single server, the server is still a member of a group.) It is the responsibility of the Domain Controller and the Host Controllers to ensure that all servers in a server group have a consistent configuration. They should all be configured with the same profile and they should have the same deployment content deployed.            </p>
+                <p>
+    The domain can have multiple server groups. The above diagram shows two server groups, &quot;ServerGroupA&quot; and &quot;ServerGroupB&quot;. Different server groups can be configured with different profiles and deployments; for example in a domain with different tiers of servers &#65279;providing different services. Different server groups can also run the same profile and have the same deployments; for example to support rolling application upgrade scenarios where a complete service outage is avoided by first upgrading the application on one server group and then upgrading a second server group.            </p>
+                <p>
+    An example server group definition is as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;server-group name=&quot;main-server-group&quot; profile=&quot;default&quot;&gt;
+&nbsp;&nbsp;&nbsp; &lt;socket-binding-group ref=&quot;standard-sockets&quot;/&gt;
+&nbsp;&nbsp;&nbsp; &lt;deployments&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;deployment name=&quot;foo.war_v1&quot; runtime-name=&quot;foo.war&quot; /&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;deployment name=&quot;bar.ear&quot; runtime-name=&quot;bar.ear&quot; /&gt;
+&nbsp;&nbsp;&nbsp; &lt;/deployments&gt;
+&lt;/server-group&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    A server-group configuration includes the following required attributes:            </p>
+    <ul class=" "><li class=" ">            <p>
+    name -- the name of the server group            </p>
+    </li><li class=" ">            <p>
+    profile -- the name of the profile the servers in the group should run            </p>
+    </li></ul>            <p>
+    In addition, the following optional elements are available:            </p>
+    <ul class=" "><li class=" ">            <p>
+    socket-binding-group  -- specifies the name of the default socket binding group to use on  servers in the group. Can be overridden on a per-server basis in <tt class=" ">host.xml</tt>. If not provided in the <tt class=" ">server-group</tt> element, it must be  provided for each server in <tt class=" ">host.xml</tt>.            </p>
+    </li><li class=" ">            <p>
+    deployments -- the deployment content that should be deployed on the servers in the group.            </p>
+    </li><li class=" ">            <p>
+    system-properties -- system properties that should be set on all servers in the group            </p>
+    </li><li class=" ">            <p>
+    jvm  -- default jvm settings for all servers in the group. The Host  Controller will merge these settings with any provided in <tt class=" ">host.xml</tt> to  derive the settings to use to launch the server's JVM. See <a href="https://docs.jboss.org/author/display/AS7/JVM+settings">JVM settings</a> for further details.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="66322690_Coremanagementconcepts-Server"  >
+        <h4>Server</h4>
+    
+            <p>
+    Each &quot;Server&quot; in the above diagram represents an actual application server instance. The server runs in a separate JVM process from the Host Controller. The Host Controller is responsible for launching that process. (In a managed domain the end user cannot directly launch a server process from the command line.)            </p>
+                <p>
+        <span style="color: #333333;">
+The Host Controller synthesizes the server's configuration by combining elements from the domain wide configuration (from    </span>
+     <span style="color: #333333;">
+<tt class=" ">domain.xml</tt>    </span>
+    <span style="color: #333333;">
+) and the host-specific configuration (from    </span>
+     <span style="color: #333333;">
+<tt class=" ">host.xml</tt>    </span>
+    <span style="color: #333333;">
+).    </span>
+            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-"  >
+        <h3>Deciding between running standalone servers or a managed domain</h3>
+    
+            <p>
+    Which use cases are appropriate for managed domain and which are appropriate for standalone servers? A managed domain is all about coordinated multi-server management -- with it WildFly 8 provides a central point through which users can manage multiple servers, with rich capabilities to keep those servers' configurations consistent and the ability to roll out configuration changes (including deployments) to the servers in a coordinated fashion.            </p>
+                <p>
+    It's important to understand that the choice between a managed domain and standalone servers is all about how your servers are managed, not what capabilities they have to service end user requests. This distinction is particularly important when it comes to high availability clusters. It's important to understand that HA functionality is orthogonal to running standalone servers or a managed domain. That is, a group of standalone servers can be configured to form an HA cluster. The domain and standalone modes determine how the servers are managed, not what capabilities they provide.            </p>
+                <p>
+    So, given all that:            </p>
+    <ul class=" "><li class=" ">            <p>
+    A single server installation gains nothing from running in a managed domain, so running a standalone server is a better choice.            </p>
+    </li><li class=" ">            <p>
+    For multi-server production environments, the choice of running a managed domain versus standalone servers comes down to whether the user wants to use the centralized management capabilities a managed domain provides. Some enterprises have developed their own sophisticated multi-server management capabilities and are comfortable coordinating changes across a number of independent WildFly 8 instances. For these enterprises, a multi-server architecture comprised of individual standalone servers is a good option.            </p>
+    </li><li class=" ">            <p>
+    Running a standalone server is better suited for most development scenarios. Any individual server configuration that can be achieved in a managed domain can also be achieved in a standalone server, so even if the application being developed will eventually run in production on a managed domain installation, much (probably most) development can be done using a standalone server.            </p>
+    </li><li class=" ">            <p>
+    Running a managed domain mode can be helpful in some advanced development scenarios; i.e. those involving interaction between multiple WildFly 8 instances. Developers may find that setting up various servers as members of a domain is an efficient way to launch a multi-server cluster.            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322690_Coremanagementconcepts-Generalconfigurationconcepts"  >
+        <h2>General configuration concepts</h2>
+    
+            <p>
+    For both a managed domain or a standalone server, a number of common configuration concepts apply:            </p>
+                <p>
+        <span id="66322690_Coremanagementconcepts-extensions"><a name="66322690_Coremanagementconcepts-extensions"></a></span>
+            </p>
+        <div class="section-3"  id="66322690_Coremanagementconcepts-Extensions"  >
+        <h3>Extensions</h3>
+    
+            <p>
+    An  extension is a module that extends the core capabilities of the server.  The WildFly 8 core is very simple and lightweight; most of the capabilities  people associate with an application server are provided via extensions.  An extension is packaged as a module in the <tt class=" ">modules</tt> folder. The user indicates that they want a particular extension to be available by including an <tt class=" ">&lt;extension/&gt;</tt> element naming its module in the <tt class=" ">domain.xml</tt> or <tt class=" ">standalone.xml</tt> file.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;extensions&gt;
+&nbsp;&nbsp;&nbsp; [...]
+&nbsp;&nbsp;&nbsp; &lt;extension module=&quot;org.jboss.as.transactions&quot;/&gt;
+&nbsp;&nbsp;&nbsp; &lt;extension module=&quot;org.jboss.as.webservices&quot; /&gt;
+&nbsp;&nbsp;&nbsp; &lt;extension module=&quot;org.jboss.as.weld&quot; /&gt;
+&lt;/extensions&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322690_Coremanagementconcepts-profiles"><a name="66322690_Coremanagementconcepts-profiles"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-ProfilesandSubsystems"  >
+        <h3>Profiles and Subsystems</h3>
+    
+            <p>
+    The most significant part of the configuration in <tt class=" ">domain.xml</tt> and <tt class=" ">standalone.xml</tt> is the configuration of one (in <tt class=" ">standalone.xml</tt>) or more (in <tt class=" ">domain.xml</tt>)   &quot;profiles&quot;. A profile is a named set of subsystem configurations. A   subsystem is an added set of capabilities added to the core server by an   extension (see &quot;Extensions&quot; above). A subsystem provides servlet   handling capabilities; a subsystem provides an EJB container; a   subsystem provides JTA, etc. A profile is a named list of subsystems,   along with the details of each subsystem's configuration. A profile with   a large number of subsystems results in a server with a large set of   capabilities. A profile with a small, focused set of subsystems will   have fewer capabilities but a smaller footprint.            </p>
+                <p>
+    The content of an individual profile configuration looks largely the same in <tt class=" ">domain.xml</tt> and <tt class=" ">standalone.xml</tt>.  The only difference is <tt class=" ">standalone.xml</tt> is only allowed to have a single  profile element (the profile the server will run), while <tt class=" ">domain.xml</tt> can have many profiles, each of which can be mapped to one or more groups of servers.            </p>
+                <p>
+    The contents of individual subsystem configurations look exactly the same between <tt class=" ">domain.xml</tt> and <tt class=" ">standalone.xml</tt>.            </p>
+                <p>
+        <span id="66322690_Coremanagementconcepts-paths"><a name="66322690_Coremanagementconcepts-paths"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-Paths"  >
+        <h3>Paths</h3>
+    
+            <p>
+    A logical name for a filesystem path. The <tt class=" ">domain.xml</tt>, <tt class=" ">host.xml</tt> and <tt class=" ">standalone.xml</tt> configurations all include a section where paths can be declared. Other  sections of the configuration can then reference those paths by their  logical name, rather than having to include the full details of the path  (which may vary on different machines). For example, the logging  subsystem configuration includes a reference to the  &quot;<tt class=" ">jboss.server.log.dir</tt>&quot; path that points to the server's &quot;<tt class=" ">log</tt>&quot; directory.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;file relative-to=&quot;jboss.server.log.dir&quot; path=&quot;server.log&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    WildFly 8 automatically provides a number of standard paths without any need  for the user to configure them in a configuration file:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">jboss.home</tt> - the root directory of the WildFly distribution            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">user.home</tt> - user's home directory            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">user.dir</tt> - user's current working directory            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">java.home</tt> - java installation directory            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.server.base.dir</tt> - root directory for an individual server instance            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.server.data.dir</tt> - directory the server will use for persistent data file storage            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.server.log.dir</tt> - directory the server will use for log file storage            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.server.tmp.dir</tt> - directory the server will use for temporary file storage            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.domain.servers.dir</tt> - directory under which a host controller will create the working area  for individual server instances (managed domain mode only)            </p>
+    </li></ul>            <p>
+    Users can add their own paths or override all except the first 5 of the above by adding a <tt class=" ">&lt;path/&gt;</tt> element to their configuration file.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;path name=&quot;example&quot; path=&quot;example&quot; relative-to=&quot;jboss.server.data.dir&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    &nbsp;The attributes are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> -- the name of the path.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">path</tt> -- the actual filesystem path. Treated as an absolute path, unless the 'relative-to' attribute is specified, in which case the value is treated as relative to that path.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">relative-to</tt> -- (optional) the name of another previously named path, or of one of the standard paths provided by the system.            </p>
+    </li></ul>            <p>
+    A <tt class=" ">&lt;path/&gt;</tt> element in a <tt class=" ">domain.xml</tt> need not include anything more than the <tt class=" ">name</tt> attribute; i.e. it need not include any information indicating what the actual filesystem path is:&nbsp;            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;path name=&quot;x&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Such  a configuration simply says, &quot;There is a path named 'x' that other  parts of the <tt class=" ">domain.xml</tt> configuration can reference. The actual  filesystem location pointed to by 'x' is host-specific and will be  specified in each machine's <tt class=" ">host.xml</tt> file.&quot; If this approach is used,  there must be a path element in each machine's <tt class=" ">host.xml</tt> that specifies  what the actual filesystem path is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;path name=&quot;x&quot; path=&quot;/var/x&quot; /&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    A <tt class=" ">&lt;path/&gt;</tt> element in a <tt class=" ">standalone.xml</tt> must include the specification of the actual filesystem path.            </p>
+                <p>
+        <span id="66322690_Coremanagementconcepts-interfaces"><a name="66322690_Coremanagementconcepts-interfaces"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-Interfaces"  >
+        <h3>Interfaces</h3>
+    
+            <p>
+    A logical name for a network interface/IP address/host name to which sockets can be bound. The <tt class=" ">domain.xml</tt>, <tt class=" ">host.xml</tt> and <tt class=" ">standalone.xml</tt> configurations all include a section where interfaces can be declared.  Other sections of the configuration can then reference those interfaces  by their logical name, rather than having to include the full details of  the interface (which may vary on different machines). An  interface configuration includes the logical name of the  interface as  well as information specifying the criteria to use for  resolving the  actual physical address to use. See&nbsp;<a href="https://docs.jboss.org/author/display/AS7/Interfaces+and+ports">Interfaces and ports</a> for further details.            </p>
+                <p>
+    An <tt class=" ">&lt;interface/&gt;</tt> element in a <tt class=" ">domain.xml</tt> need not include anything more than the <tt class=" ">name</tt> attribute; i.e. it need not include any information indicating what the actual IP address associated with the name is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interface name=&quot;internal&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Such  a configuration simply says, &quot;There is an interface named 'internal'  that other parts of the domain.xml configuration can reference. The  actual IP address pointed to by 'internal' is host-specific and will be  specified in each machine's host.xml file.&quot; If this approach is used,  there must be an interface element in each machine's <tt class=" ">host.xml</tt> that  specifies the criteria for determining the IP address:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interface name=&quot;internal&quot;&gt;
+&nbsp;&nbsp; &lt;nic name=&quot;eth1&quot;/&gt;
+&lt;/interface&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    An <tt class=" ">&lt;interface/&gt;</tt> element in a <tt class=" ">standalone.xml</tt> must include the criteria for determining the IP address.            </p>
+                <p>
+        <span id="66322690_Coremanagementconcepts-socketbindings"><a name="66322690_Coremanagementconcepts-socketbindings"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-SocketBindingsandSocketBindingGroups"  >
+        <h3>Socket Bindings and Socket Binding Groups</h3>
+    
+            <p>
+    A socket binding is a named configuration for a socket.            </p>
+                <p>
+    The <tt class=" ">domain.xml</tt> and <tt class=" ">standalone.xml</tt> configurations both include a section where named socket configurations  can be declared. Other sections of the configuration can then reference  those sockets by their logical name, rather than having to include the  full details of the socket configuration (which may vary on different  machines). See <a href="66322697.html">Interfaces and ports</a> for full details.            </p>
+                <p>
+        <span id="66322690_Coremanagementconcepts-systemproperties"><a name="66322690_Coremanagementconcepts-systemproperties"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-SystemProperties"  >
+        <h3>System Properties</h3>
+    
+            <p>
+    System property values can be set in a number of places in <tt class=" ">domain.xml</tt>, <tt class=" ">host.xml</tt> and <tt class=" ">standalone.xml</tt>.  The values in <tt class=" ">standalone.xml</tt> are set as part of the server boot  process. Values in <tt class=" ">domain.xml</tt> and <tt class=" ">host.xml</tt> are applied to servers when  they are launched.            </p>
+                <p>
+    When a system property is configured in <tt class=" ">domain.xml</tt> or <tt class=" ">host.xml</tt>, the servers it ends up being applied to depends on where it is set. Setting a system property in a child element directly under the <tt class=" ">domain.xml</tt> root results in the property being set on all servers. Setting it in a <tt class=" ">&lt;system-property/&gt;</tt> element inside a <tt class=" ">&lt;server-group/&gt;</tt> element in domain.xml results in the property being set on all servers in the group. Setting it in a child element directly under the <tt class=" ">host.xml</tt> root results in the property being set on all servers controlled by that host's Host Controller. Finally, setting it in a <tt class=" ">&lt;system-property/&gt;</tt> element inside a <tt class=" ">&lt;server/&gt;</tt> element in <tt class=" ">host.xml</tt> result in the property being set on that server. The same property can be configured in multiple locations, with a value in a <tt class=" ">&lt;server/&gt;</tt> element taking precedence over a value specified directly under the <tt class=" ">host.xml</tt> root element, the value in a <tt class=" ">host.xml</tt> taking precedence over anything from <tt class=" ">domain.xml</tt>, and a value in a <tt class=" ">&lt;server-group/&gt;</tt> element taking precedence over a value specified directly under the <tt class=" ">domain.xml</tt> root element.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322690_Coremanagementconcepts-Managementresources"  >
+        <h2>Management resources</h2>
+    
+            <p>
+    When WildFly parses your configuration files at boot, or when you use one of the AS's <a href="66322687.html">Management Clients</a> you are adding, removing or modifying <i class=" ">management resources</i> in the AS's internal management model. A WildFly management resource has the following characteristics:            </p>
+        <div class="section-3"  id="66322690_Coremanagementconcepts-Address"  >
+        <h3>Address</h3>
+    
+            <p>
+    All WildFly management resources are organized in a tree. The path to the node in the tree for a particular resource is its <i class=" ">address</i>. Each segment in a resource's address is a key/value pair:            </p>
+    <ul class=" "><li class=" ">            <p>
+    The key is the resource's <i class=" ">type</i>, in the context of its parent. So, for example, the root resource for a standalone server has children of type <tt class=" ">subsystem</tt>, <tt class=" ">interface</tt>, <tt class=" ">socket-binding</tt>, etc. The resource for the subsystem that provides the AS's webserver capability has children of type <tt class=" ">connector</tt> and <tt class=" ">virtual-server</tt>. The resource for the subsystem that provides the AS's messaging server capability has, among others, children of type <tt class=" ">jms-queue</tt> and <tt class=" ">jms-topic</tt>.            </p>
+    </li><li class=" ">            <p>
+    The value is the name of a particular resource of the given type, e.g <tt class=" ">web</tt> or <tt class=" ">messaging</tt> for subsystems or <tt class=" ">http</tt> or <tt class=" ">https</tt> for web subsystem connectors.            </p>
+    </li></ul>            <p>
+    The full address for a resource is the ordered list of key/value pairs that lead from the root of the tree to the resource. Typical notation is to separate the elements in the address with a '/' and to separate the key and the value with an '=':            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">/subsystem=web/connector=http</tt>            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">/subsystem=messaging/jms-queue=testQueue</tt>            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">/interface=public</tt>            </p>
+    </li></ul>            <p>
+    When using the HTTP API, a '/' is used to separate the key and the value instead of an '=':            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">http://localhost:9990/management/subsystem/web/connector/http</tt>            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">http://localhost:9990/management/subsystem/messaging/jms-queue/testQueue</tt>            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">http://localhost:9990/management/interface/public</tt>            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-Operations"  >
+        <h3>Operations</h3>
+    
+            <p>
+    Querying or modifying the state of a resource is done via an operation. An operation has the following characteristics:            </p>
+    <ul class=" "><li class=" ">            <p>
+    A string name            </p>
+    </li><li class=" ">            <p>
+    Zero or more named parameters. Each parameter has a string name, and a value of type <tt class=" ">org.jboss.dmr.ModelNode</tt> (or, when invoked via the CLI, the text representation of a <tt class=" ">ModelNode</tt>; when invoked via the HTTP API, the JSON representation of a <tt class=" ">ModelNode</tt>.) Parameters may be optional.            </p>
+    </li><li class=" ">            <p>
+    A return value, which will be of type <tt class=" ">org.jboss.dmr.ModelNode</tt> (or, when invoked via the CLI, the text representation of a <tt class=" ">ModelNode</tt>; when invoked via the HTTP API, the JSON representation of a <tt class=" ">ModelNode</tt>.)            </p>
+    </li></ul>            <p>
+    Every resource except the root resource will have an <tt class=" ">add</tt> operation and should have a <tt class=" ">remove</tt> operation (&quot;should&quot; because in WildFly 8 many do not). The parameters for the <tt class=" ">add</tt> operation vary depending on the resource. The <tt class=" ">remove</tt> operation has no parameters.            </p>
+                <p>
+    There are also a number of &quot;global&quot; operations that apply to all resources. See <a href="66322742.html">Global operations</a> for full details.            </p>
+                <p>
+    The operations a resource supports can themselves be determined by invoking an operation: the <tt class=" ">read-operation-names</tt> operation. Once the name of an operation is known, details about its parameters and return value can be determined by invoking the <tt class=" ">read-operation-description</tt> operation. For example, to learn the names of the operations exposed by the root resource for a standalone server, and then learn the full details of one of them, via the CLI one would:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] :read-operation-names
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        &quot;add-namespace&quot;,
+        &quot;add-schema-location&quot;,
+        &quot;delete-snapshot&quot;,
+        &quot;full-replace-deployment&quot;,
+        &quot;list-snapshots&quot;,
+        &quot;read-attribute&quot;,
+        &quot;read-children-names&quot;,
+        &quot;read-children-resources&quot;,
+        &quot;read-children-types&quot;,
+        &quot;read-config-as-xml&quot;,
+        &quot;read-operation-description&quot;,
+        &quot;read-operation-names&quot;,
+        &quot;read-resource&quot;,
+        &quot;read-resource-description&quot;,
+        &quot;reload&quot;,
+        &quot;remove-namespace&quot;,
+        &quot;remove-schema-location&quot;,
+        &quot;replace-deployment&quot;,
+        &quot;shutdown&quot;,
+        &quot;take-snapshot&quot;,
+        &quot;upload-deployment-bytes&quot;,
+        &quot;upload-deployment-stream&quot;,
+        &quot;upload-deployment-url&quot;,
+        &quot;validate-address&quot;,
+        &quot;write-attribute&quot;
+    ]
+}
+[standalone@localhost:9999 /] :read-operation-description(name=upload-deployment-url)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;operation-name&quot; =&gt; &quot;upload-deployment-url&quot;,
+        &quot;description&quot; =&gt; &quot;Indicates that the deployment content available at the included URL should be added to the deployment content repository. Note that this operation does not indicate the content should be deployed into the runtime.&quot;,
+        &quot;request-properties&quot; =&gt; {&quot;url&quot; =&gt; {
+            &quot;type&quot; =&gt; STRING,
+            &quot;description&quot; =&gt; &quot;The URL at which the deployment content is available for upload to the domain's or standalone server's deployment content repository.. Note that the URL must be accessible from the target of the operation (i.e. the Domain Controller or standalone server).&quot;,
+            &quot;required&quot; =&gt; true,
+            &quot;min-length&quot; =&gt; 1,
+            &quot;nillable&quot; =&gt; false
+        }},
+        &quot;reply-properties&quot; =&gt; {
+            &quot;type&quot; =&gt; BYTES,
+            &quot;description&quot; =&gt; &quot;The hash of managed deployment content that has been uploaded to the domain's or standalone server's deployment content repository.&quot;,
+            &quot;min-length&quot; =&gt; 20,
+            &quot;max-length&quot; =&gt; 20,
+            &quot;nillable&quot; =&gt; false
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    See <a href="66322690.html#66322690_Coremanagementconcepts-Descriptions">Descriptions</a> below for more on how to learn about the operations a resource exposes.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-Attributes"  >
+        <h3>Attributes</h3>
+    
+            <p>
+    Management resources expose information about their state as attributes. Attributes have string name, and a value of type <tt class=" ">org.jboss.dmr.ModelNode</tt> (or: for the CLI, the text representation of a <tt class=" ">ModelNode</tt>; for HTTP API, the JSON representation of a <tt class=" ">ModelNode</tt>.)            </p>
+                <p>
+    Attributes can either be read-only or read-write. Reading and writing attribute values is done via the global <tt class=" ">read-attribute</tt> and <tt class=" ">write-attribute</tt> operations.            </p>
+                <p>
+    The <tt class=" ">read-attribute</tt> operation takes a single parameter &quot;name&quot; whose value is a the name of the attribute. For example, to read the &quot;port&quot; attribute of a socket-binding resource via the CLI:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /socket-binding-group=standard-sockets/socket-binding=https:read-attribute(name=port)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; 8443
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    If an attribute is writable, the <tt class=" ">write-attribute</tt> operation is used to mutate its state. The operation takes two parameters:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> &ndash; the name of the attribute            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">value</tt> &ndash; the value of the attribute            </p>
+    </li></ul>            <p>
+    For example, to read the &quot;port&quot; attribute of a socket-binding resource via the CLI:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /socket-binding-group=standard-sockets/socket-binding=https:write-attribute(name=port,value=8444)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+            <p>
+    Attributes can have one of two possible <i class=" ">storage types</i>:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <strong class=" ">CONFIGURATION</strong> &ndash; means the value of the attribute is stored in the persistent configuration; i.e. in the <tt class=" ">domain.xml</tt>, <tt class=" ">host.xml</tt> or <tt class=" ">standalone.xml</tt> file from which the resource's configuration was read.            </p>
+    </li><li class=" ">            <p>
+    <strong class=" ">RUNTIME</strong> &ndash; the attribute value is only available from a running server; the value is not stored in the persistent configuration. A metric (e.g. number of requests serviced) is a typical example of a RUNTIME attribute.            </p>
+    </li></ul>            <p>
+    The values of all of the attributes a resource exposes can be obtained via the <tt class=" ">read-resource</tt> operation, with the &quot;include-runtime&quot; parameter set to &quot;true&quot;. For example, from the CLI:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=web/connector=http:read-resource(include-runtime=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;bytesReceived&quot; =&gt; &quot;0&quot;,
+        &quot;bytesSent&quot; =&gt; &quot;0&quot;,
+        &quot;errorCount&quot; =&gt; &quot;0&quot;,
+        &quot;maxTime&quot; =&gt; &quot;0&quot;,
+        &quot;processingTime&quot; =&gt; &quot;0&quot;,
+        &quot;protocol&quot; =&gt; &quot;HTTP/1.1&quot;,
+        &quot;requestCount&quot; =&gt; &quot;0&quot;,
+        &quot;scheme&quot; =&gt; &quot;http&quot;,
+        &quot;socket-binding&quot; =&gt; &quot;http&quot;,
+        &quot;ssl&quot; =&gt; undefined,
+        &quot;virtual-server&quot; =&gt; undefined
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Omit the &quot;include-runtime&quot; parameter (or set it to &quot;false&quot;) to limit output to those attributes whose values are stored in the persistent configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=web/connector=http:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;protocol&quot; =&gt; &quot;HTTP/1.1&quot;,
+        &quot;scheme&quot; =&gt; &quot;http&quot;,
+        &quot;socket-binding&quot; =&gt; &quot;http&quot;,
+        &quot;ssl&quot; =&gt; undefined,
+        &quot;virtual-server&quot; =&gt; undefined
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    See <a href="66322690.html#66322690_Coremanagementconcepts-Descriptions">Descriptions</a> below for how to learn more about the attributes a particular resource exposes.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-Children"  >
+        <h3>Children</h3>
+    
+            <p>
+    Management resources may support child resources. The <a href="66322690.html#66322690_Coremanagementconcepts-Address"><i class=" ">types</i> of children</a> a resource supports (e.g. <tt class=" ">connector</tt> for the web subsystem resource) can be obtained by querying the resource's description (see <a href="66322690.html#66322690_Coremanagementconcepts-Descriptions">Descriptions</a> below) or by invoking the <tt class=" ">read-children-types</tt> operation. Once you know the legal child types, you can query the names of all children of a given type by using the global <tt class=" ">read-children-types</tt> operation. The operation takes a single parameter &quot;child-type&quot; whose value is the type. For example, a resource representing a socket binding group has children. To find the type of those children and the names of resources of that type via the CLI one could:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /socket-binding-group=standard-sockets:read-children-types
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [&quot;socket-binding&quot;]
+}
+[standalone@localhost:9999 /] /socket-binding-group=standard-sockets:read-children-names(child-type=socket-binding)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        &quot;http&quot;,
+        &quot;https&quot;,
+        &quot;jmx-connector-registry&quot;,
+        &quot;jmx-connector-server&quot;,
+        &quot;jndi&quot;,
+        &quot;osgi-http&quot;,
+        &quot;remoting&quot;,
+        &quot;txn-recovery-environment&quot;,
+        &quot;txn-status-manager&quot;
+    ]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-Descriptions"  >
+        <h3>Descriptions</h3>
+    
+            <p>
+    All resources expose metadata that describes their attributes, operations and child types. This metadata is itself obtained by invoking one or more of the <a href="66322742.html">global operations</a> each resource supports. We showed examples of the <tt class=" ">read-operation-names</tt>, <tt class=" ">read-operation-description</tt>, <tt class=" ">read-children-types</tt> and <tt class=" ">read-children-names</tt> operations above.            </p>
+                <p>
+    The <tt class=" ">read-resource-description</tt> operation can be used to find the details of the attributes and child types associated with a resource. For example, using the CLI:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /socket-binding-group=standard-sockets:read-resource-description
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;description&quot; =&gt; &quot;Contains a list of socket configurations.&quot;,
+        &quot;head-comment-allowed&quot; =&gt; true,
+        &quot;tail-comment-allowed&quot; =&gt; false,
+        &quot;attributes&quot; =&gt; {
+            &quot;name&quot; =&gt; {
+                &quot;type&quot; =&gt; STRING,
+                &quot;description&quot; =&gt; &quot;The name of the socket binding group.&quot;,
+                &quot;required&quot; =&gt; true,
+                &quot;head-comment-allowed&quot; =&gt; false,
+                &quot;tail-comment-allowed&quot; =&gt; false,
+                &quot;access-type&quot; =&gt; &quot;read-only&quot;,
+                &quot;storage&quot; =&gt; &quot;configuration&quot;
+            },
+            &quot;default-interface&quot; =&gt; {
+                &quot;type&quot; =&gt; STRING,
+                &quot;description&quot; =&gt; &quot;Name of an interface that should be used as the interface for any sockets that do not explicitly declare one.&quot;,
+                &quot;required&quot; =&gt; true,
+                &quot;head-comment-allowed&quot; =&gt; false,
+                &quot;tail-comment-allowed&quot; =&gt; false,
+                &quot;access-type&quot; =&gt; &quot;read-write&quot;,
+                &quot;storage&quot; =&gt; &quot;configuration&quot;
+            },
+            &quot;port-offset&quot; =&gt; {
+                &quot;type&quot; =&gt; INT,
+                &quot;description&quot; =&gt; &quot;Increment to apply to the base port values defined in the socket bindings to derive the runtime values to use on this server.&quot;,
+                &quot;required&quot; =&gt; false,
+                &quot;head-comment-allowed&quot; =&gt; true,
+                &quot;tail-comment-allowed&quot; =&gt; false,
+                &quot;access-type&quot; =&gt; &quot;read-write&quot;,
+                &quot;storage&quot; =&gt; &quot;configuration&quot;
+            }
+        },
+        &quot;operations&quot; =&gt; {},
+        &quot;children&quot; =&gt; {&quot;socket-binding&quot; =&gt; {
+            &quot;description&quot; =&gt; &quot;The individual socket configurtions.&quot;,
+            &quot;min-occurs&quot; =&gt; 0,
+            &quot;model-description&quot; =&gt; undefined
+        }}
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Note the <tt class=" ">&quot;operations&quot; =&gt; }} in the output above. If the command had included the {{operations</tt> parameter (i.e. <tt class=" ">/socket-binding-group=standard-sockets:read-resource-description(operations=true)</tt>) the output would have included the description of each operation supported by the resource.            </p>
+                <p>
+    See the <a href="66322742.html">Global operations</a> section for details on other parameters supported by the <tt class=" ">read-resource-description</tt> operation and all the other globally available operations.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-ComparisontoJMXMBeans"  >
+        <h3>Comparison to JMX MBeans</h3>
+    
+            <p>
+    WildFly management resources are conceptually quite similar to Open MBeans. They have the following primary differences:            </p>
+    <ul class=" "><li class=" ">            <p>
+    WildFly management resources are organized in a tree structure. The order of the key value pairs in a resource's address is significant, as it defines the resource's position in the tree. The order of the key properties in a JMX <tt class=" ">ObjectName</tt> is not significant.            </p>
+    </li><li class=" ">            <p>
+    In an Open MBean attribute values, operation parameter values and operation return values must either be one of the simple JDK types (String, Boolean, Integer, etc) or implement either the <tt class=" ">javax.management.openmbean.CompositeData</tt> interface or the <tt class=" ">javax.management.openmbean.TabularData</tt> interface. WildFly&nbsp;management resource attribute values, operation parameter values and operation return values are all of type <tt class=" ">org.jboss.dmr.ModelNode</tt>.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322690_Coremanagementconcepts-Basicstructureofthemanagementresourcetrees"  >
+        <h3>Basic structure of the management resource trees</h3>
+    
+            <p>
+    As noted above, management resources are organized in a tree structure. The structure of the tree depends on whether you are running a standalone server or a managed domain.            </p>
+        <div class="section-4"  id="66322690_Coremanagementconcepts-Standaloneserver"  >
+        <h4>Standalone server</h4>
+    
+            <p>
+    The structure of the managed resource tree is quite close to the structure of the <tt class=" ">standalone.xml</tt> configuration file.            </p>
+    <ul class=" "><li class=" ">            <p>
+    The root resource            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">extension</tt> &ndash; extensions installed in the server            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">path</tt> &ndash; paths available on the server            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">system-property</tt> &ndash; system properties set as part of the configuration (i.e. not on the command line)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">core-service=management</tt> &ndash; the server's core management services            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">core-service=service-container</tt> &ndash; resource for the JBoss MSC <tt class=" ">ServiceContainer</tt> that's at the heart of the AS            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">subsystem</tt> &ndash; the subsystems installed on the server. The bulk of the management model will be children of type <tt class=" ">subsystem</tt>            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">interface</tt> &ndash; interface configurations            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">socket-binding-group</tt> &ndash; the central resource for the server's socket bindings            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">socket-binding</tt> &ndash; individual socket binding configurations            </p>
+    </li></ul></li><li class=" ">            <p>
+    <tt class=" ">deployment</tt> &ndash; available deployments on the server            </p>
+    </li></ul></li></ul>    </div>
+    
+    <div class="section-4"  id="66322690_Coremanagementconcepts-Manageddomain"  >
+        <h4>Managed domain</h4>
+    
+            <p>
+    In a managed domain, the structure of the managed resource tree spans the entire domain, covering both the domain wide configuration (e.g. what's in <tt class=" ">domain.xml</tt>, the host specific configuration for each host (e.g. what's in <tt class=" ">host.xml</tt>, and the resources exposed by each running application server. The Host Controller processes in a managed domain provide access to all or part of the overall resource tree. How much is available depends on whether the management client is interacting with the Host Controller that is acting as the master Domain Controller. If the Host Controller is the master Domain Controller, then the section of the tree for each host is available. If the Host Controller is a slave to a remote Domain Controller, then only the portion of the tree associated with that host is available.            </p>
+    <ul class=" "><li class=" ">            <p>
+    The root resource for the entire domain. The persistent configuration associated with this resource and its children, except for those of type <tt class=" ">host</tt>, is persisted in the <tt class=" ">domain.xml</tt> file on the Domain Controller.            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">extension</tt> &ndash; extensions available in the domain            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">path</tt> &ndash; paths available on across the domain            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">system-property</tt> &ndash; system properties set as part of the configuration (i.e. not on the command line) and available across the domain            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">profile</tt> &ndash; sets of subsystem configurations that can be assigned to server groups            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">subsystem</tt> &ndash; configuration of subsystems that are part of the profile            </p>
+    </li></ul></li><li class=" ">            <p>
+    <tt class=" ">interface</tt> &ndash; interface configurations            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">socket-binding-group</tt> &ndash; sets of socket bindings configurations that can be applied to server groups            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">socket-binding</tt> &ndash; individual socket binding configurations            </p>
+    </li></ul></li><li class=" ">            <p>
+    <tt class=" ">deployment</tt> &ndash; deployments available for assignment to server groups            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">server-group</tt> &ndash; server group configurations            </p>
+    </li><li class=" ">            <p>
+    host &ndash; the individual Host Controllers. Each child of this type represents the root resource for a particular host. The persistent configuration associated with one of these resources or its children is persisted in the host's <tt class=" ">host.xml</tt> file.            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">path</tt> &ndash; paths available on each server on the host            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">system-property</tt> &ndash; system properties to set on each server on the host            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">core-service=management</tt> &ndash; the Host Controller's core management services            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">interface</tt> &ndash; interface configurations that apply to the Host Controller or servers on the host            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jvm</tt> &ndash; JVM configurations that can be applied when launching servers            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">server-config</tt> &ndash; configuration describing how the Host Controller should launch a server; what server group configuration to use, and any server-specific overrides of items specified in other resources            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">server</tt> &ndash; the root resource for a running server. Resources from here and below are not directly persisted; the domain-wide and host level resources contain the persistent configuration that drives a server            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">extension</tt> &ndash; extensions installed in the server            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">path</tt> &ndash; paths available on the server            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">system-property</tt> &ndash; system properties set as part of the configuration (i.e. not on the command line)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">core-service=management</tt> &ndash; the server's core management services            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">core-service=service-container</tt> &ndash; resource for the JBoss MSC <tt class=" ">ServiceContainer</tt> that's at the heart of the AS            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">subsystem</tt> &ndash; the subsystems installed on the server. The bulk of the management model will be children of type <tt class=" ">subsystem</tt>            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">interface</tt> &ndash; interface configurations            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">socket-binding-group</tt> &ndash; the central resource for the server's socket bindings            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">socket-binding</tt> &ndash; individual socket binding configurations            </p>
+    </li></ul></li><li class=" ">            <p>
+    <tt class=" ">deployment</tt> &ndash; available deployments on the server            </p>
+    </li></ul></li></ul></li></ul></li></ul>    </div>
+    
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

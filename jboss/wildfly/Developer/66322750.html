@@ -1,0 +1,2219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>How do I migrate my application from AS5 or AS6 to WildFly</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>How do I migrate my application from AS5 or AS6 to WildFly</h1>
+        </div>
+        
+        <div id="66322750" class="content prepend-top">
+            <p>
+    The purpose of this guide is to document only those changes that are needed to  successfully run and deploy AS 5 applications on WildFly 8.It provides information on  to resolve deployment and runtime problems and how to prevent changes  in application behaviour. This is the first step in moving to the new  platform. Once the application is successfully deployed and running on the new  platform, plans can be made to upgrade individual components to use the new  functions and features of WildFly.            </p>
+        <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-MigrationOverview"  >
+        <h2>Migration Overview</h2>
+    
+            <p>
+    WildFly 8&nbsp;is structured differently from previous versions of JBoss AS, so you may want do a little research before you attempt to migrate your application. <a href="https://docs.jboss.org/author/display/WFLY8/Getting+Started+Guide#GettingStartedGuide-GettingStartedwithJBossApplicationServer7">Getting Started with WildFly</a> in the <a href="https://docs.jboss.org/author/display/WFLY8/Getting+Started+Guide">Getting Started Guide</a> has a lot of useful information, including a table that lists the Java Enterprise Edition 6 Web Profile features that are supported in WildFly. If your application uses features that go beyond the  Web Profile specification, you must use release&nbsp;WildFly 8 or later as it supports the <a href="http://www.oracle.com/technetwork/java/javaee/overview/compatibility-jsp-136984.html">EE6 Full Profile</a>. You should also read <a href="https://docs.jboss.org/author/display/WFLY8/Getting+started+with+JBoss+AS">Getting started with WildFly</a>&nbsp;for helpful information about how to install and run the application server.            </p>
+                <p>
+    The rest of this document describes some of the changes you might need to make to your application to successfully deploy and run it on WildFly.            </p>
+        <div class="confbox admonition admonition-note">
+            <div class="title">Reminder</div>
+        
+            <p>
+    Before making any modifications to your application, make sure to create a backup copy.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UpdateApplicationDependenciesDuetoClassLoadingChanges"  >
+        <h2>Update Application Dependencies Due to Class Loading Changes</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Modularclassloadingoverview"  >
+        <h3>Modular class loading overview</h3>
+    
+            <p>
+    Class loading in WildFly&nbsp;is considerably different than in previous versions of JBoss AS. Class loading is now based on the <a href="https://docs.jboss.org/author/display/MODULES/Home">JBoss Modules</a> project. Instead of the more familiar hierarchical class loading  environment, WildFly's class loading is based on modules that have to define  explicit dependencies on other modules. Deployments in WildFly&nbsp;are also  modules, and do not have access to classes that are defined in jars in  the application server unless an explicit dependency on those classes is  defined.            </p>
+                <p>
+    While&nbsp;WildFly&nbsp;modules are isolated by default, as part of the deployment process some dependencies on modules defined by the application server are set up for you automatically. For instance, if you are deploying a Java EE application, a dependency on the Java EE API's will be added to your module automatically. Similarly if your module contains a <tt class=" ">beans.xml</tt> file, a dependency on <a href="http://seamframework.org/Weld">Weld</a> will be added automatically, along with any supporting modules that weld needs to operate. For a complete list of the automatic dependencies that are added see&nbsp;<a href="https://docs.jboss.org/author/display/WFLY8/Implicit+module+dependencies+for+deployments">Implicit module dependencies for deployments</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Understandmoduledependencies"  >
+        <h3>Understand module dependencies</h3>
+    
+            <p>
+    The deployers within the server &quot;implicitly&quot; add some commonly used module dependencies, like the javax.api and sun.jdk, to the deployment so that the classes are visible to the deployment at runtime. This way the application developer doesn't have to worry about adding them explicitly. How and when these implicit dependencies are added is explained in <a href="https://docs.jboss.org/author/display/WFLY8/Implicit+module+dependencies+for+deployments">Implicit module dependencies for deployments</a>.            </p>
+                <p>
+    For some classes, the modules must be specified explicitly in the <tt class=" ">MANIFEST.MF</tt> as Dependencies: or &quot;Class-Path:&quot; entries or in the <tt class=" ">jboss-deployment-structure.xml</tt>. Otherwise you may see ClassNotFoundExceptions, NoClassDefFoundErrors, or ClassCastExceptions. Tattletale is an excellent tool that can help you identify module dependencies in your application. Tattletale is described later in this document here: <a href="https://docs.jboss.org/author/display/WFLY8/Developer+Guide#DeveloperGuide-UseTattletaletofindapplicationdependencies">Use Tattletale to find application dependencies</a>.            </p>
+                <p>
+    You may also see runtime errors and page redirects to the JBoss Seam Debug Page. Manifest entries are explained in more detail here: <a href="https://docs.jboss.org/author/display/WFLY8/Class+Loading+in+AS7">Class Loading in WildFly</a>.            </p>
+        <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-HowtoPackageEARsandWARs"  >
+        <h4>How to Package EARs and WARs</h4>
+    
+            <p>
+    When you migrate your application, you may have to change the packaging structure of your EAR or WAR due to the class loading changes.            </p>
+                <p>
+    A WAR is a single module and all classes in the WAR are loaded with the same class loader. This means classes packaged in the WEB-INF/lib are treated the same as classes in WEB-INF/classes.            </p>
+                <p>
+    An EAR is different in that it consists of multiple modules. The <tt class=" ">EAR/lib</tt> directory is a single module, and every WAR or EJB jar deployment is also a separate module. Classes will not necessarily have access to other classes in the EAR unless explicit dependencies have been defined.            </p>
+                <p>
+    For more information on EAR and WAR packaging, see &quot;WAR Class Loading&quot; and &quot;EAR Class Loading&quot; in <a href="https://docs.jboss.org/author/display/WFLY8/Class+Loading+in+AS7">Class Loading in WildFly.</a>            </p>
+        <div class="confbox admonition admonition-note">
+            <div class="title">Reminder</div>
+        
+            <p>
+    If you are using maven configure defaultLibBundleDir property to lib directory:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;build&gt;
+      &lt;plugins&gt;
+         &lt;plugin&gt;
+            &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+            &lt;artifactId&gt;maven-ear-plugin&lt;/artifactId&gt;
+            &lt;configuration&gt;
+               &lt;!-- Tell maven to package in ear/lib for WildFly --&gt;
+               &lt;defaultLibBundleDir&gt;lib&lt;/defaultLibBundleDir&gt;
+...</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Createormodifyfilesthatcontrolclassloadingin%26nbsp%3BWildFly"  >
+        <h3>Create or modify files that control class loading in&#160;WildFly</h3>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-jbossweb.xml"  >
+        <h4>jboss-web.xml</h4>
+    
+            <p>
+    If you have defined a <tt class=" ">class-loading</tt> element, you need to remove it.  The behaviour that this provokes in EAP 5 is now the default  class-loading behaviour in WildFly, so it is no longer necessary. If you do  not remove this element, you will see a ParseError and  XMLStreamException in your server log:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>javax.xml.stream.XMLStreamException: ParseError at [row,col]:[5,5]
+    Message: Unexpected element 'class-loading' encountered
+    at org.jboss.metadata.parser.util.MetaDataElementParser.unexpectedElement(MetaDataElementParser.java:109)
+    at org.jboss.metadata.parser.jbossweb.JBossWebMetaDataParser.parse(JBossWebMetaDataParser.java:182)
+    at org.jboss.as.web.deployment.JBossWebParsingDeploymentProcessor.deploy(JBossWebParsingDeploymentProcessor.java:64)
+    ... 5 more</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-MANIFEST.MFfile"  >
+        <h4>MANIFEST.MF file</h4>
+    
+    <div class="section-5"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ManuallyeditedMANIFESTfiles"  >
+        <h5>Manually edited MANIFEST files</h5>
+    
+            <p>
+    Depending on which components your application uses, you may need to  add one or more dependencies to this file. There is more information  about these dependencies in the following paragraphs.<br/>The following is an example of <tt class=" ">MANIFEST.MF</tt> file that has been modified to contain dependencies and classpath entries:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Manifest-Version: 1.0
+Dependencies: org.jboss.logmanager
+Class-Path: OrderManagerEJB.jar</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    If you modify the <tt class=" ">MANIFEST.MF</tt> file, make sure to include a newline character at the end of the file.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-5"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Howtodefine%7B%7BMANIFEST.MF%7D%7DfiledependenciesifyouuseMaven"  >
+        <h5>How to define  MANIFEST.MF  file dependencies if you use Maven</h5>
+    
+            <p>
+    If you use Maven, you may need to modify your <tt class=" ">pom.xml</tt> file to generate the dependencies for the <tt class=" ">MANIFEST.MF</tt> file.            </p>
+                <p>
+    If your application uses EJB 3.0, you may have a section in the <tt class=" ">pom.xml</tt> file that looks like the following:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;plugin&gt;
+    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+    &lt;artifactId&gt;maven-ejb-plugin&lt;/artifactId&gt;
+    &lt;configuration&gt;
+        &lt;ejbVersion&gt;3.0&lt;/ejbVersion&gt;
+    &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    If the EJB 3.0 code uses org.apache.commons.log, you will need to add that dependency to the <tt class=" ">MANIFEST.MF</tt> file. To do that, you will need to modify the <tt class=" ">plugin</tt> element in the <tt class=" ">pom.xml</tt> file as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;plugin&gt;
+    &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+    &lt;artifactId&gt;maven-ejb-plugin&lt;/artifactId&gt;
+    &lt;configuration&gt;
+        &lt;ejbVersion&gt;3.0&lt;/ejbVersion&gt;
+        &lt;archive&gt;
+            &lt;manifestFile&gt;src/main/resources/META-INF/MANIFEST.MF&lt;/manifestFile&gt;
+        &lt;/archive&gt;
+    &lt;/configuration&gt;
+&lt;/plugin&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    In the above example, the <tt class=" ">src/main/resources/MANIFEST.MF</tt> file only needs to contain the dependency entry:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Dependencies: org.apache.commons.logging</code></pre>
+        </div>
+    </div>
+            <p>
+    Maven will generate the complete <tt class=" ">MANIFEST.MF</tt> file:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Manifest-Version: 1.0
+Dependencies: org.apache.commons.logging</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-jbossdeploymentstructure.xml"  >
+        <h4>jboss-deployment-structure.xml</h4>
+    
+            <p>
+    This file is a JBoss specific deployment descriptor that can be  used to control class loading in a fine grained manner. Like the <tt class=" ">MANIFEST.MF</tt>,  this file can be used to add dependencies. If can also prevent  automatic dependencies from being added, define additional modules,  change an EAR deployment's isolated class loading behaviour, and add  additional resource roots to a module.            </p>
+                <p>
+    For additional information, see <a href="https://docs.jboss.org/author/display/WFLY8/Developer+Guide#DeveloperGuide-%26nbsp%3Bjbossdeploymentstructure.xml">jboss-deployment-structure.xml</a><a href="https://docs.jboss.org/author/display/WFLY8/Class+Loading+in+AS7">.</a>            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-application.xml"  >
+        <h4>application.xml</h4>
+    
+            <p>
+    In previous versions of JBoss AS, you controlled the order of deployments within an EAR through the use of the <tt class=" ">jboss-app.xml</tt> file. This is no longer the case. The Java EE6 spec provides the &lt;initialize-in-order&gt; element in the <tt class=" ">application.xml</tt> which allows control of the order in which the Java EE modules within an EAR are deployed.            </p>
+                <p>
+    In most cases you do not need to specify deployment order. If your application uses dependency injections and resource-refs to refer to components in external modules, in most cases the &lt;initialize-in-order&gt; element is not required because the application server is able to implicitly determine the correct and optimal way of ordering the components.            </p>
+                <p>
+    Assume you have an application that contains a <tt class=" ">myBeans.jar</tt> and a <tt class=" ">myApp.war</tt> within a <tt class=" ">myApp.ear</tt>. A servlet in the <tt class=" ">myApp.war</tt> @EJB injects a bean from <tt class=" ">myBeans.jar</tt>. In this case, the application server has the appropriate knowledge to make sure that the EJB component is available before the servlet is started and you do not have to use the &lt;initialize-in-order&gt; element.            </p>
+                <p>
+    However, if that servlet uses legacy JNDI lookup style remote references like the following to access the bean, you may need to specify module order.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>init() {
+  Context ctx = new InitialContext();
+  ctx.lookup(&quot;TheBeanInMyBeansModule&quot;);
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    In this case, the server is not able to determine that that EJB component is in the <tt class=" ">myBeans.jar</tt> and you need to enforce that the components in the <tt class=" ">myBeans.jar</tt> are initialized and started before the components in <tt class=" ">myApp.war</tt>. To do this, you set the &lt;initialize-in-order&gt; element to <tt class=" ">true</tt> and specify the order of the <tt class=" ">myBeans.jar</tt> and <tt class=" ">myApp.war</tt> modules in the <tt class=" ">application.xml</tt> file.            </p>
+                <p>
+    The following is an example that uses the &lt;initialize-in-order&gt; element to control deployment order. The myBeans.jar is deployed before the myApp.war.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;application xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+             version=&quot;6&quot;
+             xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_6.xsd&quot;&gt;
+    &lt;application-name&gt;jboss-as-ejb-in-ear&lt;/application-name&gt;
+    &lt;initialize-in-order&gt;true&lt;/initialize-in-order&gt;
+    &lt;module&gt;
+        &lt;ejb&gt;myBeans.jar&lt;/ejb&gt;
+    &lt;/module&gt;
+    &lt;module&gt;
+        &lt;web&gt;
+            &lt;web-uri&gt;myApp.war&lt;/web-uri&gt;
+            &lt;context-root&gt;myApp&lt;/context-root&gt;
+        &lt;/web&gt;
+    &lt;/module&gt;
+&lt;/application&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The schema for the <tt class=" ">application.xml</tt> file can be found here at <a href="http://java.sun.com/xml/ns/javaee/application_6.xsd">http://java.sun.com/xml/ns/javaee/application_6.xsd</a>.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    You should be aware that setting &lt;initialize-in-order&gt; to <tt class=" ">true</tt> slows down deployment. It is preferable to define proper dependencies using dependency injections or resource-refs since it allows the container more flexibility in optimizing deployments.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ChangeResourceBundlelocation"  >
+        <h3>Change ResourceBundle location</h3>
+    
+            <p>
+    In previous versions of AS, the <tt class=" ">JBOSS_HOME/server/&lt;servername&gt;/conf/</tt> was available in the  classpath. Hence the properties files in that  location were available in  the classpath of the application.            </p>
+                <p>
+    In WildFly 8, to get those properties available in the classpath, package  them  within your application. For example, if you are deploying a .war  then  package those properties in WAR <tt class=" ">WEB-INF/classes/</tt> folder.  If you want  those properties accessible to all components in a .ear,  then package  them at the root of some .jar and place that jar in EAR <tt class=" ">lib/</tt> folder.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-WheretoFindAdditionalInformation"  >
+        <h3>Where to Find Additional Information</h3>
+    
+            <p>
+    For more information about the class loading changes in WildFly 8, see <a href="https://docs.jboss.org/author/display/WFLY8/Class+Loading+in+AS7">Class Loading in WildFly 8</a>.<br/>For more information about modular class loading, see the <a href="http://community.jboss.org/wiki/ModuleCompatibleClassloadingGuide">Module Compatible Classloading Guide.</a><br/>For information about deployment module dependencies, see <a href="http://community.jboss.org/wiki/DeploymentModuleDependencies">Deployment Module Dependencies</a>.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UpdatetheDataSourceConfiguration"  >
+        <h2>Update the DataSource Configuration</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Overview"  >
+        <h3>Overview</h3>
+    
+            <p>
+    In previous versions of the application server, the JCA data source configuration was defined in a file with a suffix of <tt class=" ">*-ds.xml</tt>. This file was then deployed in the server's deploy directory. The JDBC driver was copied to the server <tt class=" ">lib/</tt> directory or packaged in the application's <tt class=" ">WEB-INF/lib/</tt> directory.            </p>
+                <p>
+    In AS7, this has all changed. You will no longer package the JDBC driver with the application or in the <tt class=" ">server/lib</tt> directory. The <tt class=" ">*-ds.xml</tt> file is now obsolete and the datasource configuration information is now defined in the <tt class=" ">standalone/configuration/standalone.xml</tt> or in the <tt class=" ">domain/configuration/domain.xml</tt> file. The IronJacamar distribution features a migration tool that can help you convert your previous datasource configuration file into the new format. You can find more information about the tool here: <a href="https://docs.jboss.org/author/display/WFLY8/Developer+Guide#DeveloperGuide-IronJacamarDatasourceandResourceAdapterMigrationTool">IronJacamar Datasource and Resource Adapter Migration Tool </a>.            </p>
+                <p>
+    A JDBC 4-compliant driver can be installed as a deployment or as a core module. A driver that is JDBC 4-compliant contains a <tt class=" ">META-INF/services/java.sql.Driver</tt> file that specifies the driver class name. A driver that is not JDBC 4-compliant requires additional steps, as noted below.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Definethedatasource"  >
+        <h3>Define the datasource</h3>
+    
+            <p>
+    In WildFly 8, a datasource is configured in the server configuration file. If you are running in domain mode, the configuration file is the <tt class=" ">domain/configuration/domain.xml</tt> file. If you are running in standalone mode, you will configure the datasource in the <tt class=" ">standalone/configuration/standalone.xml</tt> file. Schema reference information, which is the same for both modes, can be found here: <a href="http://docs.jboss.org/ironjacamar/userguide/1.0/en-US/html/deployment.html#deployingds_descriptor">Datasource Descriptors</a>.            </p>
+                <p>
+    First, you will need to create a <tt class=" ">datasource</tt> element and a <tt class=" ">driver</tt> element for your JDBC driver and datasource information in the <tt class=" ">standalone.xml</tt> or <tt class=" ">domain.xml</tt> file. You will use some of the same information that was previously defined in the <tt class=" ">*-ds.xml</tt> file.            </p>
+                <p>
+    The following is an example of a MySQL <tt class=" ">datasource</tt> element:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;datasource jndi-name=&quot;java:/YourDatasourceName&quot; pool-name=&quot;YourDatasourceName&quot;&gt;
+  &lt;connection-url&gt;jdbc:mysql://localhost:3306/YourApplicationURL&lt;/connection-url&gt;
+  &lt;driver&gt; mysql-connector-java-5.1.15.jar &lt;/driver&gt;
+  &lt;transaction-isolation&gt; TRANSACTION_READ_COMMITTED &lt;/transaction-isolation&gt;
+  &lt;pool&gt;
+    &lt;min-pool-size&gt;100&lt;/min-pool-size&gt;
+    &lt;max-pool-size&gt;200&lt;/max-pool-size&gt;
+  &lt;/pool&gt;
+  &lt;security&gt;
+    &lt;user-name&gt; USERID &lt;/user-name&gt;
+    &lt;password&gt; PASSWORD&lt;/password&gt;
+  &lt;/security&gt;
+  &lt;statement&gt;
+    &lt;prepared-statement-cache-size&gt;100&lt;/prepared-statement-cache-size&gt;
+    &lt;share-prepared-statements/&gt;
+  &lt;/statement&gt;
+&lt;/datasource&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    A JAR that is JDBC 4-compliant contains a META-INF/services/java.sql.Driver file that specifies the driver class name. This is used by the server to find name of the class(es) of the Drivers which exist in that JAR.            </p>
+                <p>
+    This is an example of the <tt class=" ">driver</tt> element for a JDBC 4-compliant MySQL driver.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&nbsp;&nbsp;&nbsp; &lt;driver name=&quot;mysql-connector-java-5.1.15.jar&quot; module=&quot;com.mysql&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    This is an example of the driver element for driver that is not JDBC 4-compliant. The driver-class must be specified since it there is no <tt class=" ">META-INF/services/java.sql.Driver</tt> file that specifies the driver class name.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;driver name=&quot;mysql-connector-java-5.1.15.jar&quot; module=&quot;com.mysql&quot;&gt;
+        &lt;driver-class&gt;com.mysql.jdbc.Driver&lt;/driver-class&gt;
+    &lt;/driver&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    For more information on how to add a MySQL driver, see <a href="https://zorq.net/b/2011/07/12/adding-a-mysql-datasource-to-jboss-as-7/">Adding a MySQL datasource to JBoss AS 7</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-InstalltheJDBCdriver"  >
+        <h3>Install the JDBC driver</h3>
+    
+            <p>
+    The JDBC driver can be installed into the container in one of two ways:  either as a deployment or as a core module. There are pros and cons to  each approach, which will be outlined below. For a detailed explanation how to deploy JDBC 4-compliant driver jar, please refer to the <a href="https://docs.jboss.org/author/display/WFLY8/Admin+Guide#AdminGuide-Datasources">DataSources</a> chapter of the Admin Guide.            </p>
+        <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-InstalltheJDBCdriverasadeployment"  >
+        <h4>Install the JDBC driver as a deployment</h4>
+    
+            <p>
+    When you install the JDBC driver as a deployment, it is deployed as a regular JAR. This is the recommended way to install the driver. When you run your application server in domain mode, deployments are automatically propagated to all servers to which the deployment applies; thus distribution of the driver JAR is one less thing for administrators to worry about.            </p>
+                <p>
+    Any JDBC 4-compliant driver will automatically be recognized and installed into the system by name and version. A JDBC 4-compliant JAR is identified using the Java service provider mechanism. It contains a text a file named &quot;META-INF/services/java.sql.Driver&quot;, which contains the name of the class(es) of the Drivers which exist in that JAR. If your JDBC driver JAR is not JDBC 4-compliant, it can be made deployable by adding the java.sql.Driver file to the JAR or by deploying the JAR with an overlay. More information on that topic can be found here: <a href="http://community.jboss.org/wiki/DataSourceConfigurationinAS7#Installing_a_JDBC_driver_as_a_deployment">Installing a JDBC Driver as a Deployment</a>.            </p>
+                <p>
+    In WildFly 8&nbsp;standalone mode, you simply copy the JDBC 4-compliant JAR into the <tt class=" ">AS7_HOME/standalone/deployments directory</tt>. Here is an example of a MySQL JDBC driver installed as a deployment:            </p>
+                <p>
+    &nbsp;&nbsp;&nbsp; <tt class=" ">JBOSS_HOME/standalone/deployments/mysql-connector-java-5.1.15.jar</tt>            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    If the JDBC driver consists of more than one JAR, for example a JAR with the driver and a dependent license JAR, you can not install the driver as a deployment. You must install the JDBC driver as a core module.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-InstalltheJDBCdriverasacoremodule"  >
+        <h4>Install the JDBC driver as a core module</h4>
+    
+            <p>
+    To install the driver as a module, you will need to create a directory structure under the modules folder. This structure will contain the driver and a <tt class=" ">module.xml</tt> file to define the module.            </p>
+                <p>
+    For example, using the MySQL JDBC driver above, you would create a directory structure as follows:            </p>
+                <p>
+    &nbsp;&nbsp;&nbsp; <tt class=" ">JBOSS_HOME/modules/com/mysql/main</tt>            </p>
+                <p>
+    In the main directory, you then create the following <tt class=" ">module.xml</tt> file:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+    &lt;!--
+      ~ JBoss, Home of Professional Open Source.
+      ~ Copyright 2010, Red Hat, Inc., and individual contributors as indicated by the @author tags. See the copyright.txt file in the
+      ~ distribution for a full listing of individual contributors.
+      ~
+      ~ This is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as
+      ~ published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
+      ~
+      ~ This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+      ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+      ~
+      ~ You should have received a copy of the GNU Lesser General Public License along with this software; if not, write to the Free
+      ~ Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+      --&gt;
+
+
+    &lt;module xmlns=&quot;urn:jboss:module:1.0&quot; name=&quot;com.mysql&quot;&gt;
+        &lt;resources&gt;
+            &lt;resource-root path=&quot;mysql-connector-java-5.1.15.jar&quot;/&gt;
+        &lt;/resources&gt;
+        &lt;dependencies&gt;
+            &lt;module name=&quot;javax.api&quot;/&gt;
+        &lt;/dependencies&gt;
+    &lt;/module&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The module name, &quot;com.mysql&quot;, matches the directory structure for this module. Under dependencies, you specify the module's dependencies on other modules. In this case, as the case with all JDBC data sources, it is dependent on the Java JDBC APIs which are defined in another module named javax.api that is located under modules/javax/api/main.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Make sure you do NOT have a space at the beginning of <tt class=" ">module.xml</tt> file or you will get a &quot;New missing/unsatisfied dependencies&quot; error for this driver.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ConfigurethedatasourceforHibernateorJPA"  >
+        <h3>Configure the datasource for Hibernate or JPA</h3>
+    
+            <p>
+    If your application uses JPA and currently bundles the Hibernate JARs, you may want to use the Hibernate that is included with WildFly 8. You should remove the Hibernate jars from your application. You should also remove the &quot;hibernate.transaction.manager_lookup_class&quot; property from your persistence.xml as this is not needed.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-WheretoFindAdditionalInformation2"  >
+        <h3>Where to Find Additional Information</h3>
+    
+            <p>
+    <a href="http://community.jboss.org/wiki/DataSourceConfigurationinAS7">DataSource Configuration in WildFly 8</a><br/><a href="http://docs.jboss.org/ironjacamar/userguide/1.0/en-US/html/deployment.html#deployingds_descriptor">DataSource Descriptors</a><br/><a href="https://docs.jboss.org/author/display/WFLY8/DataSource+configuration">Admin Guide - DataSource Configuration</a><br/><a href="http://www.javalinux.it/wordpress/2011/07/14/how-to-create-an-manage-datasources-in-as7/">How to create and manage datasources in WildFly 8</a><br/><a href="https://zorq.net/b/2011/07/12/adding-a-mysql-datasource-to-jboss-as-7/">Adding a MySQL datasource to WildFly 8</a>.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UpdatetheResourceAdapterConfiguration"  >
+        <h2>Update the Resource Adapter Configuration</h2>
+    
+            <p>
+    TODO: The following section on Resource adapters needs to be reviewed            </p>
+        <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Overview2"  >
+        <h3>Overview</h3>
+    
+            <p>
+    In previous versions of the application server, the resource adapter configuration was defined in a file with a suffix of <tt class=" ">*-ds.xml</tt>.            </p>
+                <p>
+    In WildFly 8, a resource adapter is configured in the server configuration file.  If you are running in domain mode, the configuration file is the <tt class=" ">domain/configuration/domain.xml</tt> file. If you are running in standalone mode, you will configure the resource adapter in the <tt class=" ">standalone/configuration/standalone.xml</tt> file. Schema reference information, which is the same for both modes, can be found here: <a href="http://docs.jboss.org/ironjacamar/userguide/1.0/en-US/html/deployment.html#deployingra_descriptor">Resource adapter descriptors</a>. The IronJacamar distribution features a migration tool that can help you convert your previous datasource configuration file into the new format. You can find more information about the tool here: <a href="https://docs.jboss.org/author/display/WFLY8/Developer+Guide#DeveloperGuide-IronJacamarDatasourceandResourceAdapterMigrationTool">IronJacamar Datasource and Resource Adapter Migration Tool </a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Definetheresourceadapter"  >
+        <h3>Define the resource adapter</h3>
+    
+            <p>
+    The resource adapter descriptor information is defined under the <tt class=" ">&lt;subsystem xmlns=&quot;urn:jboss:domain:resource-adapters:1.0&quot;/&gt;</tt> element in the server configuration file. You will use some of the same information that was previously defined in the <tt class=" ">*-ds.xml</tt> file.            </p>
+                <p>
+    The following is an example of a resource adapter element in the server configuration file:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;resource-adapters&gt;
+  &lt;resource-adapter&gt;
+    &lt;archive&gt;multiple-full.rar&lt;/archive&gt;
+    &lt;config-property name=&quot;Name&quot;&gt;ResourceAdapterValue&lt;/config-property&gt;
+    &lt;transaction-support&gt;NoTransaction&lt;/transaction-support&gt;
+    &lt;connection-definitions&gt;
+      &lt;connection-definition
+      class-name=&quot;org.jboss.jca.test.deployers.spec.rars.multiple.MultipleManagedConnectionFactory1&quot;
+      enabled=&quot;true&quot; jndi-name=&quot;java:/eis/MultipleConnectionFactory1&quot;
+      pool-name=&quot;MultipleConnectionFactory1&quot;&gt;
+	&lt;config-property name=&quot;Name&quot;&gt;MultipleConnectionFactory1Value&lt;/config-property&gt;
+      &lt;/connection-definition&gt;
+      &lt;connection-definition
+      class-name=&quot;org.jboss.jca.test.deployers.spec.rars.multiple.MultipleManagedConnectionFactory2&quot;
+      enabled=&quot;true&quot; jndi-name=&quot;java:/eis/MultipleConnectionFactory2&quot;
+      pool-name=&quot;MultipleConnectionFactory2&quot;&gt;
+	&lt;config-property name=&quot;Name&quot;&gt;MultipleConnectionFactory2Value&lt;/config-property&gt;
+      &lt;/connection-definition&gt;
+    &lt;/connection-definitions&gt;
+    &lt;admin-objects&gt;
+      &lt;admin-object
+      class-name=&quot;org.jboss.jca.test.deployers.spec.rars.multiple.MultipleAdminObject1Impl&quot;
+      jndi-name=&quot;java:/eis/MultipleAdminObject1&quot;&gt;
+	&lt;config-property name=&quot;Name&quot;&gt;MultipleAdminObject1Value&lt;/config-property&gt;
+      &lt;/admin-object&gt;
+      &lt;admin-object class-name=&quot;org.jboss.jca.test.deployers.spec.rars.multiple.MultipleAdminObject2Impl&quot;
+      jndi-name=&quot;java:/eis/MultipleAdminObject2&quot;&gt;
+	&lt;config-property name=&quot;Name&quot;&gt;MultipleAdminObject2Value&lt;/config-property&gt;
+      &lt;/admin-object&gt;
+      &lt;/admin-objects&gt;
+  &lt;/resource-adapter&gt;
+&lt;/resource-adapters&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    TODO: The above section on Resource adapters needs to be reviewed            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UpdateapplicationJNDInamespacenames"  >
+        <h2>Update application JNDI namespace names</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Overview3"  >
+        <h3>Overview</h3>
+    
+            <p>
+    EJB 3.1 introduced a standardized global JNDI namespace and a series of related namespaces that map to the various scopes of a Java EE application. The three JNDI namespaces used for portable JNDI lookups are java:global, java:module, and java:app. If you use JNDI lookups in your application, you will need to change them to follow the new standardized JNDI namespace convention.            </p>
+                <p>
+    To conform to the new portable JNDI namespace rules, you will need to review the JNDI namespace rules and modify the application code to follow these rules.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ReviewtheJNDINamespaceRules"  >
+        <h3>Review the JNDI Namespace Rules</h3>
+    
+            <p>
+    WildFly 8&nbsp;has tightened up on JNDI namespace names to provide predictable   and consistent rules for every name bound in the application server and   to prevent future compatibility issues. This means you might run into   issues with the current namespaces in your application if they don't   follow the new rules.            </p>
+                <p>
+    Namespaces should follow these rules:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Unqualified relative names like &quot;ExampleDS&quot; or &quot;jdbc/ExampleDS&quot;<br/>should be qualified relative to &quot;java:comp/env&quot;, &quot;java:module/env&quot;, or<br/>&quot;java:jboss/env&quot;, depending on the context.            </p>
+    </li><li class=" ">            <p>
+    Unqualified &quot;absolute&quot; names like &quot;/jdbc/ExampleDS&quot; should be<br/>qualified relative to a &quot;java:jboss/root&quot; name.            </p>
+    </li><li class=" ">            <p>
+    Qualified &quot;absolute&quot; names like &quot;java:/jdbc/ExampleDS&quot; should be<br/>qualified the same way as #2.            </p>
+    </li><li class=" ">            <p>
+    The special &quot;java:jboss&quot; namespace is shared across the entire AS<br/>server instance.            </p>
+    </li><li class=" ">            <p>
+    Any &quot;relative&quot; name with a &quot;java:&quot; lead-in must be in one of the five<br/>namespaces: &quot;comp&quot;, &quot;module&quot;, &quot;app&quot;, &quot;global&quot;, or our proprietary<br/>&quot;jboss&quot;. Any name starting with &quot;java:xxx&quot; where &quot;xxx&quot; is a name which<br/>is not equal to one of the above five would result in an invalid name error.            </p>
+    </li></ol>    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ModifyyourapplicationcodetofollowthenewJNDInamespacerules"  >
+        <h3>Modify your application code to follow the new JNDI namespace rules</h3>
+    
+            <p>
+    Here's an example of a JNDI lookup in EAP 5.1. This code is usually found in an initialization method. Note the lookup name is: &quot;OrderManagerApp/ProductManagerBean/local&quot;.            </p>
+        <div class="confbox programlisting">
+                    <div class="title">Old - EAP 5.1</div>
+                <div class="content">
+        <pre><code>private ProductManager productManager;
+try {
+    context = new InitialContext();
+    productManager = (ProductManager) context.lookup(&quot;OrderManagerApp/ProductManagerBean/local&quot;);
+}
+
+catch(Exception lookupError) {
+    throw new ServletException(&quot;Unable to find the ProductManager bean&quot;, lookupError);
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Here is an example of how the same lookup would be coded in WildFly 8. This code is defined as member variables. The lookup name now uses the new portable java:app JNDI namespace: &quot;java:app/OrderManagerEJB/ProductManagerBean!services.ejb.ProductManager&quot;            </p>
+        <div class="confbox programlisting">
+                    <div class="title">New - AS 7</div>
+                <div class="content">
+        <pre><code>@EJB(lookup=&quot;java:app/OrderManagerEJB/ProductManagerBean!services.ejb.ProductManager&quot;)
+private ProductManager productManager;
+&nbsp;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ExamplesofJNDImappingsinpreviousreleasesandhowtheymightlooknow"  >
+        <h3>Examples of JNDI mappings in previous releases and how they might look now</h3>
+    
+            <p>
+    (This needs input!)            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Previous Namespace            </td>
+                <td rowspan="1" colspan="1">
+    New Namespaces            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    OrderManagerApp/ProductManagerBean/local            </td>
+                <td rowspan="1" colspan="1">
+    java:module/ProductManagerBean!services.ejb.ProductManager (EE6 standard binding, only accessible within the same module)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    OrderManagerApp/ProductManagerBean/local            </td>
+                <td rowspan="1" colspan="1">
+    java:app/OrderManagerEJB/ProductManagerBean!services.ejb.ProductManager (EE6 standard binding, only accessible within the same application)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    OrderManagerApp/ProductManagerBean/local            </td>
+                <td rowspan="1" colspan="1">
+    java:global/OrderManagerApp/OrderManagerEJB/ProductManagerBean!services.ejb.ProductManager (EE6 standard binding, globally accessible)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    java:comp/UserTransaction            </td>
+                <td rowspan="1" colspan="1">
+    java:comp/UserTransaction (This will not be accessible for non EE threads, e.g. Threads your application directly creates)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    java:comp/UserTransaction            </td>
+                <td rowspan="1" colspan="1">
+    java:jboss/UserTransaction (Globally accessible, use this if java:comp/UserTransaction is not available)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    java:/TransactionManager            </td>
+                <td rowspan="1" colspan="1">
+    java:jboss/TransactionManager            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    java:/TransactionSynchronizationRegistry            </td>
+                <td rowspan="1" colspan="1">
+    java:jboss/TransactionSynchronizationRegistry            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-WheretoFindAdditionalInformation%5C%5C"  >
+        <h3>Where to Find Additional Information</h3>
+    
+            <p>
+    <a href="http://download.oracle.com/javaee/6/tutorial/doc/gipjf.html#girgn">Java EE6 Tutorial - Portable JNDI Syntax</a><br/><a href="http://blogs.oracle.com/kensaks/entry/application_specified_portable_jndi_names">Application-specified Portable JNDI Names</a>            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-MigrateremoteEJBclientstotheWildFly8%26nbsp%3BclientAPI"  >
+        <h2>Migrate remote EJB clients to the WildFly 8&#160;client API</h2>
+    
+            <p>
+    TODO: complete this section            </p>
+        </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-MigrateEAP5DeployedApplicationsThatMakeRemoteInvocationsto%26nbsp%3BWildFly8"  >
+        <h2>Migrate EAP 5 Deployed Applications That Make Remote Invocations to&#160;WildFly 8</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Overview4"  >
+        <h3>Overview</h3>
+    
+            <p>
+    In WildFly 8, there are two ways to make remote invocations to the server:            </p>
+    <ol class=" "><li class=" ">            <p>
+    You can use the new JBoss specific EJB client API to do the invocation.            </p>
+    </li><li class=" ">            <p>
+    You can use JNDI to lookup a proxy for your bean and invoke on that returned proxy.            </p>
+    </li></ol>            <p>
+    This section covers option 2: coding changes required for clients that use JNDI.            </p>
+                <p>
+    In EAP 5, the EJB remote interface was bound in JNDI, by default, under the name &quot;ejbName/local&quot; for local interfaces, and &quot;ejbName/remote&quot; for the remote interfaces. The client application then looked up the stateful bean using &quot;ejbName/remote&quot;.            </p>
+                <p>
+    In AS 7, you use the ejb: namespace for remote access to EJBs with the following syntax:<br/>For stateless beans:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ejb:&lt;app-name&gt;/&lt;module-name&gt;/&lt;distinct-name&gt;/&lt;bean-name&gt;!&lt;fully-qualified-classname-of-the-remote-interface&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    For stateful beans:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ejb:&lt;app-name&gt;/&lt;module-name&gt;/&lt;distinct-name&gt;/&lt;bean-name&gt;!&lt;fully-qualified-classname-of-the-remote-interface&gt;?stateful</code></pre>
+        </div>
+    </div>
+            <p>
+    The values to be substituted in the above syntax are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    &lt;app-name&gt; - the application name of the deployed EJBs. This is typically the ear name without the .ear suffix, however, the name can be overridden in the application.xml file. If the application is not deployed as a .ear, this value is an empty string. Assume this example was not deployed as an EAR.            </p>
+    </li><li class=" ">            <p>
+    &lt;module-name&gt; - the module name of the deployed EJBs on the server. This is typically the jar name of the EJB deployment, without the .jar suffix, but can be overridden via the ejb-jar.xml. In this example, assume the EJBs were deployed in a jboss-as-ejb-remote-app.jar, so the module name is jboss-as-ejb-remote-app.            </p>
+    </li><li class=" ">            <p>
+    &lt;distinct-name&gt; - an optional distinct name for the EJB. This example doesn't use a distinct name, so it uses an empty string.            </p>
+    </li><li class=" ">            <p>
+    &lt;bean-name&gt; - by default, is the simple class name of the bean implementation class.            </p>
+    </li><li class=" ">            <p>
+    &lt;fully-qualified-classname-of-the-remote-interface&gt; - the remote view fully qualified class name.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UpdatetheClientCode"  >
+        <h3>Update the Client Code</h3>
+    
+            <p>
+    Assume you have deployed the following stateless EJB to an AS 7 server. Note that it exposes a remote view for the bean.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Stateless
+@Remote(RemoteCalculator.class)
+public class CalculatorBean implements RemoteCalculator {
+
+    @Override
+    public int add(int a, int b) {
+        return a + b;
+    }
+
+    @Override
+    public int subtract(int a, int b) {
+        return a - b;
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    In EAP 5, the client EJB lookup and invocation was coded something like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>InitialContext ctx = new InitialContext();
+RemoteCalculator calculator = (RemoteCalculator)
+				 ctx.lookup(&quot;CalculatorBean/remote&quot;);
+int a = 204;
+int b = 340;
+int sum = calculator.add(a, b));</code></pre>
+        </div>
+    </div>
+            <p>
+    In AS 7, using the information described above, the client lookup and invocation is coded like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>final Hashtable jndiProperties = new Hashtable();
+jndiProperties.put(Context.URL_PKG_PREFIXES, &quot;org.jboss.ejb.client.naming&quot;);
+final Context context = new InitialContext(jndiProperties);
+final String appName = &quot;&quot;;
+final String moduleName = &quot;jboss-as-ejb-remote-app&quot;;
+final String distinctName = &quot;&quot;;
+final String beanName = CalculatorBean.class.getSimpleName();
+final String viewClassName = RemoteCalculator.class.getName();
+final RemoteCalculator statelessRemoteCalculator =  RemoteCalculator) context.lookup(&quot;ejb:&quot; + appName + &quot;/&quot; + moduleName + &quot;/&quot; + distinctName + &quot;/&quot; + beanName + &quot;!&quot; + viewClassName);
+
+int a = 204;
+int b = 340;
+int sum = statelessRemoteCalculator.add(a, b);</code></pre>
+        </div>
+    </div>
+            <p>
+    If your client is accessing a stateful EJB, you must append &ldquo;?stateful&rdquo; to the end of the context lookup like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>final RemoteCalculator statelessRemoteCalculator =  RemoteCalculator) context.lookup(&quot;ejb:&quot; + appName + &quot;/&quot; + moduleName + &quot;/&quot; + distinctName + &quot;/&quot; + beanName + &quot;!&quot; + viewClassName + &quot;?stateful&quot;);</code></pre>
+        </div>
+    </div>
+            <p>
+    A complete working example, including both server and client code, can be found at the github repo here <a href="https://github.com/jbossas/quickstart/tree/master/ejb-remote">https://github.com/jbossas/quickstart/tree/master/ejb-remote</a>.            </p>
+                <p>
+    For more information on remote invocations using JNDI, see <a href="https://docs.jboss.org/author/display/WFLY8/EJB+invocations+from+a+remote+client+using+JNDI">EJB invocations from a remote client using JNDI</a>.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Modifyloggingdependencies"  >
+        <h2>Modify logging dependencies</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Overview5"  >
+        <h3>Overview</h3>
+    
+            <p>
+    JBoss LogManager supports front ends for all logging frameworks, so you can keep your current logging code or move to the new JBoss logging infrastructure. Regardless of your decision, because of the modular class loading changes, you will probably need to modify your application to add the required dependencies.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Updateyourapplicationcodeforthirdpartyloggingframeworks"  >
+        <h3>Update your application code for third-party logging frameworks</h3>
+    
+            <p>
+    As of WildFly 8,&nbsp;logging dependencies are added by default. There is one caveat to this. If you're using log4j and you don't want to use the logging subsystem to configure your handlers (appenders), then you need to exclude the server copy of log4j. See the <a href="https://docs.jboss.org/author/display/AS71/How+To#HowTo-HowdoIuselog4j.propertiesorlog4j.xmlinsteadofusingtheloggingsubsystemconfiguration%3F">logging documentation</a>            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ModifycodetousetheNewJBossLoggingFramework"  >
+        <h3>Modify code to use the New JBoss Logging Framework</h3>
+    
+            <p>
+    To use the new framework, you will need the change your imports and code as follows to achieve the same results as above:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import org.jboss.logging.Level;
+import org.jboss.logging.Logger;
+
+private static final Logger logger = Logger.getLogger(MyClass.class.toString());
+
+if(logger.isTraceEnabled()) {
+    logger.tracef(&quot;Starting...&quot;, subsystem);
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The JAR containing the JBoss Logging classes is located in the module named &quot;org.jboss.logging&quot;. Your MANIFEST-MF file will look like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&nbsp;&nbsp;&nbsp; Dependencies: org.jboss.logging</code></pre>
+        </div>
+    </div>
+            <p>
+    For more information on how to find the module dependency, please see &ldquo;How to Resolve ClassNotFoundExceptions&rdquo; under the &ldquo;Modular Class Loading&rdquo; above.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-WheretoFindAdditionalInformation3"  >
+        <h3>Where to Find Additional Information</h3>
+    
+            <p>
+    <a href="http://community.jboss.org/wiki/JBossAS7Logging">WildFly 8 Logging</a><br/><a href="http://community.jboss.org/wiki/JBossLoggingTooling">JBoss Logging Tooling</a>            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ConfigurechangesforapplicationsthatuseHibernateandJPA"  >
+        <h2>Configure changes for applications that use Hibernate and JPA</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Overview6"  >
+        <h3>Overview</h3>
+    
+            <p>
+    If your application contains a <tt class=" ">persistence.xml</tt> file or the code uses @PersistenceContext or @PersistenceUnit, WildFly 8&nbsp;will detect this during deployment and assume the application uses JPA. It will implicitly add Hibernate 4 and a few other dependencies to your application classpath.            </p>
+                <p>
+    If your application currently uses Hibernate 3 libraries, in most cases, this will not be a problem. You will be able to deploy and run successfully using Hibernate 4. However, if&nbsp; you see a ClassNotFoundExceptions when deploying your application you can try one of two following approaches:            </p>
+    <ol class=" "><li class=" ">            <p>
+    You may be able to resolve the issue by copying the specific Hibernate 3 JARs containing those classes into the application &quot;/lib&quot; directory or by adding them to the classpath using some other method. In some cases this may result in ClassCastExceptions or other class loading issues due to the mixed use of the Hibernate versions, so you will need to use the second approach.            </p>
+    </li><li class=" ">            <p>
+    You need to tell the server to use only the Hibernate 3 libraries and you will need to add exclusions for the Hibernate 4 libraries. Details on how to do this are described here: <a href="https://docs.jboss.org/author/display/WFLY8/JPA+Reference+Guide">JPA Reference Guide</a>.            </p>
+    </li></ol>            <p>
+    For more information on Hibernate and JPA, see <a href="https://docs.jboss.org/author/display/WFLY8/JPA+Reference+Guide">JPA Reference Guide</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UpdateyourHibernate3applicationtouseHibernate4"  >
+        <h3>Update your Hibernate 3 application to use Hibernate 4</h3>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ChangesforHibernate3.3applications"  >
+        <h4>Changes for Hibernate 3.3 applications</h4>
+    
+<ol class=" "><li class=" ">            <p>
+    Hibernate &quot;text&quot; type now maps to JDBC LONGVARCHAR<br/>In pre-3.5 versions of Hibernate, text type were mapped to JDBC CLOB. A new Hibernate type, &quot;materialized_clob&quot;, was added to map Java String properties to JDBC CLOB. If an application has properties configured as type=&quot;text&quot; that are intended to be mapped to JDBC CLOB, they should be changed to type=&quot;materialized_clob&quot; in hbm mapping files, or, if using annotations, @Type(type = &quot;text&quot;) should be replaced by @Lob.            </p>
+    </li><li class=" ">            <p>
+    Numeric aggregate Criteria projections now return the same value type as their HQL counterparts. As a result, the return type from the following projections in org.hibernate.criterion have changed:            </p>
+    <ol class=" "><li class=" ">            <p>
+    &quot;count&quot; and &quot;count distinct&quot; projections now return a Long value (due to changes in CountProjection, Projections.rowCount(), Projections.count( propertyName ), and Projections.countDistinct( propertyName )).            </p>
+    </li><li class=" ">            <p>
+    &quot;sum&quot; projections return a value type that depends on the property type due to changes in Projections.sum( propertyName ). Failure to modify your application code may result in a java.lang.ClassCastException.            </p>
+    <ol class=" "><li class=" ">            <p>
+    for properties mapped as Long, Short, Integer, or primitive integer types, a Long value is returned;            </p>
+    </li><li class=" ">            <p>
+    for properties mapped as Float, Double, or primitive floating point types, a Double value is returned.            </p>
+    </li></ol></li></ol></li></ol>    </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ChangesforHibernate3.5applications"  >
+        <h4>Changes for Hibernate 3.5 applications</h4>
+    
+<ol class=" "><li class=" ">            <p>
+    AnnotationConfigration must be merged into Configuration<br/>Aside from the fact that AnnotationConfiguration is now deprecated, this usually is not of concern. However, if you are still using an <tt class=" ">hbm.xml</tt> file, you should be aware that WildFly 8&nbsp;now uses the org.hibernate.cfg.EJB3NamingStrategy in AnnotationConfigration instead of the older org.hibernate.cfg.DefaultNamingStrategy that was previously used in Configuration. This can result in naming mismatches. If you rely on the naming strategy to default the name of a association (many-to-many and collections of elements) table, you may see this issue.  To resolve it, you can tell Hibernate to use the the legacy org.hibernate.cfg.DefaultNamingStrategy by calling Configuration#setNamingStrategy and passing it org.hibernate.cfg.DefaultNamingStrategy#INSTANCE            </p>
+    </li><li class=" ">            <p>
+    The namespaces for the Hibernate DTD files have changed.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Previous DTD Namespace            </td>
+                <td rowspan="1" colspan="1">
+    New DTD Namespaces            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <a href="http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd</a>            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <a href="http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd</a>            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd</a>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+</li><li class=" ">            <p>
+    If you are using Oracle, the global environment variable &quot;hibernate.jdbc.use_streams_for_binary&quot; must be set to true if you are using &quot;materialized_clob&quot; or &quot;materialized_blob&quot; properties.            </p>
+    </li><li class=" ">            <p>
+    If you are using PostgreSQL, the global environment variable &quot;hibernate.jdbc.use_streams_for_binary&quot; must be set to false if you are using CLOB or BLOB properties.            </p>
+    </li></ol>    </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-GeneralChangeswhenmigratingtoHibernate4"  >
+        <h4>General Changes when migrating to Hibernate 4</h4>
+    
+            <p>
+    In Hibernate 4.0 there is a new IdentifierGenerator implementations.            </p>
+                <p>
+    Hibernate 4.0 supplies a property that is called&nbsp;<strong class=" ">hibernate.id.new_generator_mappings</strong>&nbsp;and hibernate documentation states that it defaults to <strong class=" ">false</strong> for backward&nbsp;compatibility&nbsp;reasons - however in AS 7.1 this value defaults to <strong class=" ">true</strong>.            </p>
+                <p>
+    consider setting the value to false in&nbsp;<strong class=" ">persistence.xml</strong> in case you don't see the&nbsp;behaviour&nbsp;you had in your app in&nbsp;previous&nbsp;versions.            </p>
+                <p>
+    for more information - read about&nbsp;<strong class=" ">5.1.2 Identifiers</strong> in general and about&nbsp;<strong class=" ">5.1.2.2.&nbsp;Identifier generator</strong> more&nbsp;specifically*&nbsp;*<strong class=" "><a href="http://docs.jboss.org/hibernate/core/4.0/manual/en-US/html_single/#mapping-declaration-id"><strong class=" ">here</strong></a></strong>            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ChangesinJPAcontainermanagedbehaviour"  >
+        <h3>Changes in JPA container managed behaviour</h3>
+    
+            <p>
+    To comply with the JPA 2.0 specification section 7.6.3.1 requirements for persistence context propagation, jira <a href="https://issues.jboss.org/browse/AS7-1663">AS7-1663 (An extended persistence context should not be propagated if there is no JTA transaction)</a> was fixed in WildFly 8.&nbsp; If a SFSB with an extended persistence context, invokes another bean (not in an active JTA transaction) and the other bean uses a transactional entity manager.&nbsp; The extended persistence context will not be propagated to the transactional entity manager (propagation will occur if invoked with an active JTA transaction).&nbsp; If your application expects the extended persistence context to be propagated to the bean with the transactional entity manager, you need to change your app to do the invocation with an active JTA transaction.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-InfinispanasSecondLevelCache"  >
+        <h3>Infinispan as Second Level Cache</h3>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Overview7"  >
+        <h4>Overview</h4>
+    
+            <p>
+    JBoss Cache has been replaced by Infinispan for 2nd level cache (even for non-clustered use). This requires a change to the persistence.xml file. The syntax is slightly different, depending on if you're using JPA or Hibernate APIs. These examples assume you are using JPA.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Infinispansecondlevelcachesettings"  >
+        <h4>Infinispan second-level cache settings</h4>
+    
+            <p>
+    Here's an example of the persistence.xml file in EAP 5.1:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;property name=&quot;hibernate.cache.region.factory_class&quot; 		value=&quot;org.hibernate.cache.jbc2.JndiMultiplexedJBossCacheRegionFactory&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.region.jbc2.cachefactory&quot; 	value=&quot;java:CacheManager&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.use_second_level_cache&quot; 	value=&quot;true&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.use_minimal_puts&quot; 		value=&quot;true&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.region.jbc2.cfg.entity&quot; 	value=&quot;mvcc-entity&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.region_prefix&quot; 			value=&quot;services&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Here is what is needed to configure the same thing for a JPA application using Infinispan with WildFly 8:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;property name=&quot;hibernate.cache.use_second_level_cache&quot; value=&quot;true&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.use_minimal_puts&quot; value=&quot;true&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Here is what is needed to configure the same thing for a native Hibernate application using Infinispan with WildFly 8:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;property name=&quot;hibernate.cache.region.factory_class&quot; 		value=&quot;org.hibernate.cache.infinispan.JndiInfinispanRegionFactory&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.infinispan.cachemanager&quot;	value=&quot;java:jboss/infinispan/hibernate&quot;/&gt;
+&lt;property name=&quot;hibernate.transaction.manager_lookup_class&quot;	value=&quot;org.hibernate.transaction.JBossTransactionManagerLookup&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.use_second_level_cache&quot; 	value=&quot;true&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.use_minimal_puts&quot; 		value=&quot;true&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Since JPA applications use Infinispan by default, fewer properties are needed to be specified.&nbsp; For native Hibernate applications you need to:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Select the correct Hibernate transaction factory using the hibernate.transaction.factory_class property.            </p>
+    </li><li class=" ">            <p>
+    Select the correct Hibernate transaction manager lookup class using the hibernate.transaction.manager_lookup_class property.            </p>
+    </li><li class=" ">            <p>
+    Configure the Infinispan cache region factory using one of the two options below:            </p>
+    <ul class=" "><li class=" ">            <p>
+    If the Infinispan CacheManager is bound to JNDI, select JndiInfinispanRegionFactory as the cache region factory and add the cache manager&rsquo;s JNDI name            </p>
+    </li><li class=" ">            <p>
+    If running JPA/Hibernate and Infinispan standalone or within third party application server, select InfinispanRegionFactory as the cache region factory            </p>
+    </li></ul></li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-MigratetoHibernate4Validator"  >
+        <h3>Migrate to Hibernate 4 Validator</h3>
+    
+            <p>
+    Migrating from Hibernate Validator 3.x to 4.x means switching to a  completely new code base and new API - the JSR 303 (Bean Validation).  The good news is that this migration should be straight forward. Let's  have a look at the different parts which needs updating.            </p>
+        <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-AccessingthedefaultValidatorFactory"  >
+        <h4>Accessing the default ValidatorFactory</h4>
+    
+            <p>
+    WildFly 8&nbsp;binds a default ValidatorFactory to the JNDI context under the name <i class=" ">java:comp/ValidatorFactory</i>.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Lifecycletriggeredvalidation"  >
+        <h4>Life cycle triggered validation</h4>
+    
+            <p>
+    When used in combination with Hibernate 4 life-cycle based validation  will be automatically enabled by Hibernate Core. Validation will occur  on entity INSERT, UPDATE and DELETE operations. You can configure the  groups to be validated per event type using the properties <i class=" ">javax.persistence.validation.group.pre-persist</i>, <i class=" ">javax.persistence.validation.group.pre-update</i>, and <i class=" ">javax.persistence.validation.group.pre-remove</i>.  The values of these properties are the comma-separated, fully specified  class names of the groups to validate. The validation groups feature is  part of the Bean Validation specification and it is recommended you get  familiar with this new functionality. For a pure migration however, you  can ignore groups as Hibernate Validator 3 did not have such a feature.            </p>
+                <p>
+    You can also disable life-cycle based validation by setting the <i class=" ">javax.persistence.validation.mode</i> to <i class=" ">none</i>. Other values are <i class=" ">auto</i>, <i class=" ">callback</i> and <i class=" ">ddl</i>, where auto is the default.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Manualvalidation"  >
+        <h4>Manual validation</h4>
+    
+            <p>
+    In case you want to manually validate, you need to create a <i class=" ">Validator</i> instance from the <i class=" ">ValidatorFactory</i> via <i class=" ">ValidatorFactory.getValidator</i>. or get <i class=" ">Validator</i> injected in your EJB, CDI bean or any other Java EE injectable resource. You can customize your <i class=" ">Validator</i> instance by using a fluent API starting with <i class=" ">ValidatorFactory.usingContext</i>. Using this API you can configure a custom <i class=" ">MessageInterpolator</i>, <i class=" ">TraverableResolver</i> and <i class=" ">ConstraintValidatorFactory</i>. All these interfaces are new to Hibernate Validator and are specified in the Bean Validation specification.            </p>
+                <p>
+    Once you have your <i class=" ">Validator</i> instance, use the&nbsp;<i class=" ">validate</i> methods to either validate your whole entity or just a single property. A call to any <i class=" ">validate</i> method will return a set of <i class=" ">ConstraintViolation</i> instances (in contrast to an array of <i class=" ">InvalidValue</i> instances in Validator 3). An empty set indicates a successful validation without any constraint violations.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UsingthenewBeanValidationconstraints"  >
+        <h4>Using the new Bean Validation constraints</h4>
+    
+            <p>
+    This is the most visible change fro Hibernate Validator 3 constraints  in your code base. To upgrade to Hibernate Validator 4 you have to use  the constraints in the <i class=" ">javax.validation.constraints</i> and <i class=" ">org.hibernate.validator.constraints</i> packages. The former contains the standardized Bean Validation  constraints whereas the latter contains some Hibernate Validator  specific constraints. All constraints which existed in Validator 3 are  available in Validator 4. You just need to import the right class and in  some cases change the name and/or type of a constraint parameter.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Customconstraints"  >
+        <h4>Custom constraints</h4>
+    
+            <p>
+    In Validator 3 a custom constraint needed to implement <i class=" ">org.hibernate.validator.Validator</i>. In Validator 4 the interface to implement is <i class=" ">javax.validation.ConstraintValidator</i> which contains the same methods as the old interface, namely <i class=" ">initialize</i> and <i class=" ">isValid</i>.  Only the method signature is slightly different. Note that support for  DDL alteration is no longer part of Hibernate Validator 4 but very few  users made use of this feature.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-WheretoFindAdditionalInformation4"  >
+        <h4>Where to Find Additional Information</h4>
+    
+            <p>
+    <a href="http://community.jboss.org/wiki/Infinispan">Infinispan</a><br/><a href="http://docs.jboss.org/author/display/ISPN/Using+Infinispan+as+JPA-Hibernate+Second+Level+Cache+Provider">Using Infinspan as JPA/Hibernate Second Level Cache Provider</a><br/><a href="http://www.jboss.org/jbossclustering/docs/hibernate-jbosscache-guide-3.pdf">HIBERNATE - RelationalPersistence for Idiomatic Java</a>            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ChangesyouneedtomakeforSecurity"  >
+        <h2>Changes you need to make for Security</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ConfigureSecurityforBasicAuthentication"  >
+        <h3>Configure Security for Basic Authentication</h3>
+    
+            <p>
+    The UsersRolesLoginModule has always looked for the properties files in the classpath. In previous versions of AS, files in the <tt class=" ">JBOSS_HOME/server/SERVER_NAME/conf</tt> directory were on classpath so you could  put your properties files there. In WildFly 8&nbsp;the directory structure has changed, so you need to package the properties within the application to make them available in the classpath.            </p>
+                <p>
+        <span style="color: #000000;">
+To configure security for basic authentication, add a new security domain under security-domains to    </span>
+     <span style="color: #000000;">
+your standalone.xml configuration file    </span>
+     <span style="color: #000000;">
+:    </span>
+            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    &lt;security-domain name=&quot;example&quot;&gt;<br/>&nbsp;&nbsp;&nbsp; &lt;authentication&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;login-module code=&quot;UsersRoles&quot; flag=&quot;required&quot;&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;module-option name=&quot;usersProperties&quot; value=&quot;${jboss.server.config.dir}/example-users.properties&quot;/&gt;<br/>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&lt;module-option name=&quot;rolesProperties&quot; value=&quot;${jboss.server.config.dir}/example-roles.properties&quot;/&gt;<br/>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &lt;/login-module&gt;<br/>&nbsp;&nbsp;&nbsp; &lt;/authentication&gt;<br/>&lt;/security-domain&gt;            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    If you are running in standalone mode, ${jboss.server.config.dir} refers to <tt class=" ">JBOSS_HOME/standalone/configuration/</tt>            </p>
+                <p>
+    A list of available login modules can be found in the <a href="https://docs.jboss.org/author/display/WFLY8/Authentication+Modules">admin guide</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Modifysecuritydomainnames"  >
+        <h3>Modify security domain names</h3>
+    
+            <p>
+    In WildFly 8&nbsp;security domains no longer use the prefix java:/jaas/ in their names. Remove this prefix from the security domain configurations in <strong class=" ">jboss-web.xml</strong> for web applications and <strong class=" ">jboss.xml</strong> for enterprise applications.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ConfigureJAXRS%2FResteasychanges"  >
+        <h2>Configure JAX-RS / Resteasy changes</h2>
+    
+            <p>
+    WildFly 8&nbsp;sets up Resteasy for you, so there is no need to set it up yourself.            </p>
+                <p>
+    You should remove all of the resteasy configuration from your <tt class=" ">web.xml</tt> and replace it with one of the following three options:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Subclass javax.ws.rs.core.Application and use @ApplicationPath<br/>This is the easiest way and does not require any xml configuration. Simply include a subclass of javax.ws.rs.core.Application in your application, and annotate it with the path that you want your JAX-RS classes to be available. For example:            </p>
+    </li></ul>    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@ApplicationPath(&quot;/mypath&quot;)
+public class MyApplication extends Application {
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    This will make your JAX-RS resources available under <tt class=" ">/mywebappcontext/mypath</tt>.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Note that that the path is <tt class=" ">/mypath</tt> not <tt class=" ">/mypath/*</tt>            </p>
+        </div>
+    
+<ul class=" "><li class=" ">            <p>
+    Subclass javax.ws.rs.core.Application and use <tt class=" ">web.xml</tt><br/>If you do not wish to use @ApplicationPath but still need to subclass Application you can set up the JAX-RS mapping in <tt class=" ">web.xml</tt>:            </p>
+    </li></ul>    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class MyApplication extends Application {
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;servlet-mapping&gt;
+   &lt;servlet-name&gt;com.acme.MyApplication&lt;/servlet-name&gt;
+   &lt;url-pattern&gt;/hello/*&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    This will make your JAX-RS resources available under <tt class=" ">/mywebappcontext/hello</tt>.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    You can also use this approach to override an application path set with the @ApplicationPath annotation.            </p>
+        </div>
+    
+<ul class=" "><li class=" ">            <p>
+    Modify <tt class=" ">web.xml</tt><br/>If you don't want to subclass Application you can set the JAX-RS mapping in <tt class=" ">web.xml</tt> as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;servlet-mapping&gt;
+   &lt;servlet-name&gt;javax.ws.rs.core.Application&lt;/servlet-name&gt;
+   &lt;url-pattern&gt;/hello/*&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    This will make your JAX-RS resources available under /mywebappcontext/hello.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Note that you only have to add the mapping, not the corresponding servlet. The server is responsible for adding the corresponding servlet automatically.            </p>
+        </div>
+    
+</li></ul>            <p>
+    For more information, see the <a href="https://docs.jboss.org/author/display/WFLY8/JAX-RS+Reference+Guide">JAX-RS Reference Guide.</a>            </p>
+        </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ConfigureLDAPsecurityrealmchanges"  >
+        <h2>Configure LDAP security realm changes</h2>
+    
+            <p>
+    In previous releases of JBoss AS, the LDAP realm was configured as an application-policy in the <tt class=" ">login-config.xml file</tt>. The following is an example of configuration in a previous release:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;application-policy name=&quot;mcp_ldap_domain&quot;&gt;
+  &lt;authentication&gt;
+    &lt;login-module code=&quot;org.jboss.security.auth.spi.LdapExtLoginModule&quot; flag=&quot;required&quot;&gt;
+      &lt;module-option name=&quot;java.naming.factory.initial&quot;&gt;com.sun.jndi.ldap.LdapCtxFactory&lt;/module-option&gt;
+      &lt;module-option name=&quot;java.naming.security.authentication&quot;&gt;simple&lt;/module-option&gt;
+      ....
+    &lt;/login-module&gt;
+  &lt;/authentication&gt;
+&lt;/application-policy&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    In WildFly 8, the LDAP realm is configured as a security-domain in the <tt class=" ">standalone/configuration/standalone.xml</tt> file if you are running a standalone server or in the <tt class=" ">domain/configuration/domain.xml</tt> file if you are running your server in a managed domain. The following is an example of configuration in WildFly 8:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:security:1.0&quot;&gt;
+  &lt;security-domains&gt;
+    &lt;security-domain name=&quot;mcp_ldap_domain&quot; type=&quot;default&quot;&gt;
+      &lt;authentication&gt;
+        &lt;login-module code=&quot;org.jboss.security.auth.spi.LdapLoginModule&quot; flag=&quot;required&quot;&gt;
+          &lt;module-option name=&quot;java.naming.factory.initial&quot; value=&quot;com.sun.jndi.ldap.LdapCtxFactory&quot;&gt;
+            &lt;module-option name=&quot;java.naming.security.authentication&quot; value=&quot;simple&quot;&gt;
+              ...
+            &lt;/module-option&gt;
+          &lt;/module-option&gt;
+        &lt;/login-module&gt;
+      &lt;/authentication&gt;
+    &lt;/security-domain&gt;
+  &lt;/security-domains&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    The XML parser has also changed in WildFly 8. In previous releases, you specified the module options as element content like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;module-option name=&quot;java.naming.factory.initial&quot;&gt;com.sun.jndi.ldap.LdapCtxFactory&lt;/module-option&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    In WildFly 8, the module options must be specified as element attributes with &quot;value=&quot; as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;module-option name=&quot;java.naming.factory.initial&quot; value=&quot;com.sun.jndi.ldap.LdapCtxFactory&quot;/&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-MigratefromJBossMessagingtoHornetQ"  >
+        <h2>Migrate from JBoss Messaging to HornetQ</h2>
+    
+            <p>
+    JBoss Messaging will no longer be included in EAP 6. If your application uses JBoss Messaging as the messaging provider, you will need to make changes to your application to use HornetQ.            </p>
+        <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Beforeyoustart"  >
+        <h3>Before you start</h3>
+    
+<ol class=" "><li class=" ">            <p>
+    Shut down the client and server.            </p>
+    </li><li class=" ">            <p>
+    Make a backup of any JBoss Messaging data. &nbsp;Message data is stored in a database, and the tables are prefixed with &quot;JBM_&quot;. &nbsp;Backup these tables as necessary.            </p>
+    </li></ol>    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Transferconfigurations"  >
+        <h3>Transfer configurations</h3>
+    
+            <p>
+    Transfer the existing JBoss Messaging configurations to the WildFly 8&nbsp;configuration. These configurations are located in deployment descriptors on the server running JBoss Messaging. This includes the following configurations:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Connection Factory service configuration files - these files contain JMS connection factories deployed with JBoss Messaging. JBoss Messaging stores these files in a file called <tt class=" ">connection-factories-service.xml</tt> in the deploy/messaging directory of your application server.            </p>
+    </li><li class=" ">            <p>
+    Destination service configurations - these files contain JMS queues and topics deployed with JBoss Messaging. By default, these are stored in a <tt class=" ">destinations-service.xml</tt> in the deploy/messaging directory of your application server.            </p>
+    </li><li class=" ">            <p>
+    Message bridge service configurations - these files contain bridge services deployed with JBoss Messaging. No bridges are deployed by default, so the name of the deployment file will vary, depending on your JBoss Messaging installation. &nbsp;<strong class=" ">Note</strong>: WildFly 8&nbsp;doesn't currently support JMS bridges configured in standalone*.xml. &nbsp;This will change in a future version.            </p>
+    </li></ul>            <p>
+    Refer to <a href="https://docs.jboss.org/author/display/WFLY8/Messaging+configuration">Messaging configuration</a> for details on HornetQ configurations.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Modifyapplicationcode"  >
+        <h3>Modify application code</h3>
+    
+            <p>
+    If the application code uses standard JMS, no code changes are required. &nbsp;However, if the application will be connecting to a cluster (which is outside the scope of the JMS specification) please carefully review the HornetQ documentation on clustering semantics as HornetQ and JBoss Messaging have taken substantially different approaches in their respective implementations of clustering functionality.            </p>
+                <p>
+    If the application code uses features specific to JBoss Messaging, modify the code to use equivalent features available in HornetQ (if available).            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Migrateexistingmessages"  >
+        <h3>Migrate existing messages</h3>
+    
+            <p>
+    Move any messages in the JBoss Messaging database to the HornetQ journal via a JMS bridge. &nbsp;Instructions for this are available <a href="https://community.jboss.org/wiki/BridgeJMSMessagesFromAS5ToAS7">here</a>.            </p>
+                <p>
+    For more information on HornetQ, see <a href="http://www.jboss.org/hornetq/docs">HornetQ Project Documentation</a> and the <a href="http://www.jboss.org/hornetq">HornetQ homepage</a>.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ChangesyouneedtomakeforClustering"  >
+        <h2>Changes you need to make for Clustering</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-StartingWildFly8%26nbsp%3Bwithclusteringenabled"  >
+        <h3>Starting WildFly 8&#160;with clustering enabled</h3>
+    
+            <p>
+    To enable clustering in AS5 and AS6, you needed to start your server instances using the &quot;all&quot; profile (or some derivation of it).<br/>e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ ./bin/run.sh -c all</code></pre>
+        </div>
+    </div>
+            <p>
+    In WildFly 8, the method of enabling clustering depends on whether your servers are started via the domain controller, or as standalone servers.<br/>To enable clustering for servers started via the domain controller, update your domain.xml and designate a server group to use the &quot;ha&quot; profile and &quot;ha-sockets&quot; socket binding group:<br/>e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;server-groups&gt;
+  &lt;server-group name=&quot;main-server-group&quot; profile=&quot;ha&quot;&gt;
+    &lt;jvm name=&quot;default&quot;&gt;
+      &lt;heap size=&quot;64m&quot; max-size=&quot;512m&quot;/&gt;
+    &lt;/jvm&gt;
+    &lt;socket-binding-group ref=&quot;ha-sockets&quot;/&gt;
+  &lt;/server-group&gt;
+&lt;/server-group&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    To enable clustering for standalone servers, start the server using the appropriate configuration file:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ ./bin/standalone.sh --server-config=standalone-ha.xml -Djboss.node.name=UNIQUE_NODE_NAME</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Specifyingthebindaddress"  >
+        <h3>Specifying the bind address</h3>
+    
+            <p>
+    In AS5 and AS6, you would typically indicate the bind address used for clustering via the &quot;-b&quot; command line argument.<br/>e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ ./bin/run.sh -c all -b 192.168.0.2</code></pre>
+        </div>
+    </div>
+            <p>
+    In WildFly 8, bind addresses are explicitly defined by the relevant socket bindings within the WildFly 8&nbsp;configuration files.  For servers started via the domain controller, bind addresses are specified within <tt class=" ">domain/configuration/host.xml</tt>.  For standalone servers, bind addresses are specified within the <tt class=" ">standalone-ha.xml</tt>:<br/>e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interfaces&gt;
+  &lt;interface name=&quot;management&quot;&gt;
+    &lt;inet-address value=&quot;192.168.0.2&quot;/&gt;
+  &lt;/interface&gt;
+  &lt;interface name=&quot;public&quot;&gt;
+    &lt;inet-address value=&quot;192.168.0.2&quot;/&gt;
+  &lt;/interface&gt;
+&lt;/interfaces&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;socket-binding-groups&gt;
+  &lt;socket-binding-group name=&quot;ha-sockets&quot; default-interface=&quot;public&quot;&gt;
+    &lt;!-- ... --&gt;
+  &lt;/socket-binding-group&gt;
+&lt;/socket-binding-groups&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    In the example above, the &quot;public&quot; interface is specified as the default interface for all sockets within the &quot;ha-sockets&quot; socket binding group.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Configure%7B%7BjvmRoute%7D%7Dtosupport%7B%7Bmodjk%7D%7Dand%7B%7Bmodproxy%7D%7D"  >
+        <h3>Configure  jvmRoute  to support  mod_jk  and  mod_proxy</h3>
+    
+            <p>
+    In previous releases, the web server <tt class=" ">jvmRoute</tt> was configured using a property in the <tt class=" ">server.xml</tt> file. In AS 7, the <tt class=" ">jvmRoute</tt> attribute is configured in the web subsystem of the server configuration file using the <tt class=" ">instance-id</tt> attribute as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>subsystem xmlns=&quot;urn:jboss:domain:web:1.1&quot; default-virtual-server=&quot;default-host&quot; native=&quot;false&quot; instance-id=&quot;{JVM_ROUTE_SERVER}&quot;&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">JVM_ROUTE_SERVER</tt> above should be replaced by the jvmRoute server ID.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Specifyingmulticastaddress%2Fport"  >
+        <h3>Specifying multicast address/port</h3>
+    
+            <p>
+    In AS5 and AS6, you could specify the multicast address and port used for intra-cluster communication using the command line arguments &quot;-u&quot; and &quot;-m&quot;, respectively.<br/>e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./bin/run.sh -c all -u 228.11.11.11 -m 45688</code></pre>
+        </div>
+    </div>
+            <p>
+    In WildFly 8, the multicast address and port used for intra-cluster communication are defined by the socket-binding referenced by the relevant JGroups protocol stack.<br/>e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:jgroups:1.0&quot; default-stack=&quot;udp&quot;&gt;
+  &lt;stack name=&quot;udp&quot;&gt;
+    &lt;transport type=&quot;UDP&quot; socket-binding=&quot;jgroups-udp&quot;/&gt;
+    &lt;!-- ... --&gt;
+  &lt;/stack&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;socket-binding-groups&gt;
+  &lt;socket-binding-group name=&quot;ha-sockets&quot; default-interface=&quot;public&quot;&gt;
+    &lt;!-- ... --&gt;
+    &lt;socket-binding name=&quot;jgroups-udp&quot; port=&quot;55200&quot; multicast-address=&quot;228.11.11.11&quot; multicast-port=&quot;45688&quot;/&gt;
+    &lt;!-- ... --&gt;
+  &lt;/socket-binding-group&gt;
+&lt;/socket-binding-groups&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    If you prefer to specify the multicast address and port in the command line, you can define the multicast address and ports as system properties and then use those properties on the command line when you start the server. In the following example, &quot;jboss.mcast.addr&quot; is the variable for the multicast address and &quot;jboss.mcast.port&quot; is the variable for the port.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;socket-binding name=&quot;jgroups-udp&quot; port=&quot;55200&quot;
+     multicast-address=&quot;${jboss.mcast.addr:230.0.0.4}&quot;
+     multicast-port=&quot;${jboss.mcast.port:45688}&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    You can then start your server using the following command line arguments:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ ./bin/domain.sh -Djboss.mcast.addr=228.11.11.11 -Djboss.mcast.port=45688</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Usinganalternateprotocolstack"  >
+        <h3>Using an alternate protocol stack</h3>
+    
+            <p>
+    In AS5 &amp; AS6, you could manipulate the default protocol stack used for all clustering services via the &quot;jboss.default.jgroups.stack&quot; system property.<br/>e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./bin/run.sh -c all -Djboss.default.jgroups.stack=tcp</code></pre>
+        </div>
+    </div>
+            <p>
+    In WildFly 8, the default protocol stack is defined by the JGroups subsystem within domain.xml or standalone-ha.xml.<br/>e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:jgroups:1.0&quot; default-stack=&quot;udp&quot;&gt;
+  &lt;stack name=&quot;udp&quot;&gt;
+    &lt;!-- ... --&gt;
+  &lt;/stack&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-HASingletonDeployment"  >
+        <h2>HA Singleton Deployment</h2>
+    
+            <p>
+    TODO: This topic needs content            </p>
+        </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Additionalchangesyoumayneedtomake"  >
+        <h2>Additional changes you may need to make</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ChangeMavenpluginname"  >
+        <h3>Change Maven plugin name</h3>
+    
+            <p>
+    The jboss-maven-plugin has not been updated and does not work In WildFly 8. You must use org.jboss.as.plugins:jboss-as-maven-plugin to deploy to the correct directory.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UpdateApplicationsThatUseServicestyleDeployments"  >
+        <h3>Update Applications That Use Service-style Deployments</h3>
+    
+            <p>
+    Although AS 7 no longer uses service-style descriptors, the container supports these service-style deployments without change where possible. This means that if you used <tt class=" ">jboss-service.xml</tt> or <tt class=" ">jboss-beans.xml</tt> deployment descriptors in your AS5/AS6 application, they should run with little or no modification in AS 7. You can continue to package the files in the EAR or SAR, or you can place the files directly in the deployments directory. If you are running a standalone server, the deployments directory is located here: <tt class=" ">JBOSS_HOME/standalone/deployments/</tt>.&nbsp;            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-DebugandResolveMigrationIssues"  >
+        <h2>Debug and Resolve Migration Issues</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-DebugandresolveClassNotFoundExceptionsandNoCLassDefFoundErrors"  >
+        <h3>Debug and resolve ClassNotFoundExceptions and NoCLassDefFoundErrors</h3>
+    
+            <p>
+    ClassNotFoundExceptions can occur due to application packaging issues, unresolved dependencies, or missing archives. If the class specified is a class you have created in your application, the problem is mostly likely a packaging issue. If the class is is external to your project, you may need to explicitly define the dependencies on other modules or possibly copy an archive from a previous framework.            </p>
+        <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Changetheapplicationstructuretofindclasseswithintheapplication"  >
+        <h4>Change the application structure to find classes within the application</h4>
+    
+            <p>
+    If the class specified in the exception is a class written specifically for the application, for example, a business class, you may need to change the packaging of the application. Due to modular class loading changes, your application may no longer be able to find classes within the EAR or WAR. In his case, you may need to move JARs to a different location within the application archive or modify class-path information so classes can be found. For more information on EAR and WAR packaging, see &quot;WAR Class Loading&quot; and &quot;EAR Class Loading&quot; in <a href="https://docs.jboss.org/author/display/AS7/Class+Loading+in+WFLY8">Class Loading in AS7.</a>            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-HowtofindtheJBossmoduledependency"  >
+        <h4>How to find the JBoss module dependency</h4>
+    
+            <p>
+    For other classes, to resolve the dependency you will find the JAR that contains the class specified by the ClassNotFoundException by looking in the JBoss WildFly 8&nbsp;modules directory. If you find a module for the class, you must add a dependency to the manifest entry.            </p>
+                <p>
+    For example, if you see this ClassNotFoundException trace in the log:            </p>
+                <p>
+    &nbsp;&nbsp;&nbsp; Caused by: java.lang.ClassNotFoundException: org.apache.commons.logging.Log from [Module &quot;deployment.TopicIndex.war:main&quot; from Service Module Loader]<br/>&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; at org.jboss.modules.ModuleClassLoader.findClass(ModuleClassLoader.java:188)            </p>
+                <p>
+    Find the JBoss module containing this class by doing one of the following:            </p>
+    <ol class=" "><li class=" ">            <p>
+    You can use Tattletale to find the JBoss module name. See the section: <a href="https://docs.jboss.org/author/display/WFLY8/Developer+Guide#DeveloperGuide-UseTattletaletofindapplicationdependencies">Use Tattletale to find application dependencies</a>.            </p>
+    </li><li class=" ">            <p>
+    You can manually find the module dependencies.            </p>
+    <ol class=" "><li class=" ">            <p>
+    First determine if there is an obvious module for the class            </p>
+    <ol class=" "><li class=" ">            <p>
+    Navigate to the <tt class=" ">JBOSS_HOME/modules</tt> directory and look for the module path.            </p>
+    </li><li class=" ">            <p>
+    in this case, under modules, there is org/apache/commons/logging            </p>
+    </li><li class=" ">            <p>
+    Open the <tt class=" ">JBOSS_HOME/modules/org/apache/commons/logging/main/module.xml</tt> file and find the module name.            </p>
+    </li><li class=" ">            <p>
+    Add the module name to the Dependencies in the <tt class=" ">MANIFEST.MF</tt> file:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Dependencies: org.apache.commons.logging</code></pre>
+        </div>
+    </div>
+</li></ol></li><li class=" ">            <p>
+    If there is no obvious module path for the class            </p>
+    <ol class=" "><li class=" ">            <p>
+    Determine which JAR contains the class.            </p>
+    </li><li class=" ">            <p>
+    Find the module containing the JAR in the <tt class=" ">JBOSS_HOME/modules</tt> directory and determine the module name.            </p>
+    </li><li class=" ">            <p>
+    The module name to the Dependencies in the <tt class=" ">MANIFEST.MF</tt> file            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Dependencies: org.dom4j,org.slf4j.jcl-over-slf4j</code></pre>
+        </div>
+    </div>
+</li></ol></li></ol></li></ol>    </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-HowtofindtheJARinpreviousinstall"  >
+        <h4>How to find the JAR in previous install</h4>
+    
+            <p>
+    If the class is not found in a JAR packaged in a module defined by the WildFly 8&nbsp;server, find the JAR in your EAP 5.x install or your prior server's lib directory and copy it to your application's <tt class=" ">lib/</tt> directory.            </p>
+                <p>
+    For example, when you migrate the Seam Booking application from EAP 5.1, you see this ClassNotFoundException in the log:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Caused by: java.lang.NoClassDefFoundError: org/hibernate/validator/ClassValidator<br/>&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; at java.lang.Class.getDeclaredMethods0(Native Method) [:1.6.0_25]            </p>
+    <ol class=" "><li class=" ">            <p>
+    Open a terminal and navigate to the <tt class=" ">EAP5_HOME/</tt> directory.            </p>
+    </li><li class=" ">            <p>
+    Issue the command:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>grep 'org.hibernate.validator.ClassValidator r' `find . \-name '*.jar'`</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    You should see this (one of many) for the result:  Binary file ./jboss-eap-5.1/seam/lib/hibernate-validator.jar matches            </p>
+    </li><li class=" ">            <p>
+    Copy this JAR to the application's <tt class=" ">lib/</tt> directory.            </p>
+    </li><li class=" ">            <p>
+    Rebuild and redeploy the application            </p>
+    </li></ol>    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-DebugandresolveClassCastExceptions"  >
+        <h3>Debug and resolve ClassCastExceptions</h3>
+    
+            <p>
+    This usually happens because the class is being loaded by a different class loader than the class it extends. It can also be a result of the same class existing in multiple JARs.            </p>
+        <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-RemoveanyunnecessaryJARsfromtheApplicationarchive"  >
+        <h4>Remove any unnecessary JARs from the Application archive</h4>
+    
+            <p>
+    First find the JAR that contains the class and determine how it is being loaded. Often you need to find and remove the JAR from the application's WAR or EAR. Then you must find the dependent JBoss module containing the class, and explicitly define the dependency in the <tt class=" ">MANIFEST.MF</tt> file.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Excludeanyconflictingdependenciesusingthe%7B%7Bjbossdeploymentstructure.xml%7D%7Dfile"  >
+        <h4>Exclude any conflicting dependencies using the  jboss-deployment-structure.xml  file</h4>
+    
+            <p>
+    There are cases where you will need to copy in older JARs for your applcation. If the newer JARs are loaded as automatic dependencies in WildFly 8, you may see ClassCastExceptions and need to exclude the conflicting module dependencies. This will prevent the server from adding the dependencies. This is an example of the <tt class=" ">exclusions</tt> element in the <tt class=" ">jboss-deployment-structure.xml</tt> file:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;exclusions&gt;
+    &lt;module name=&quot;org.javassist&quot; /&gt;
+&lt;/exclusions&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Debugandresolveclassloadingissues"  >
+        <h3>Debug and resolve class loading issues</h3>
+    
+            <p>
+    If you are not able to figure out how the classes are loaded, you can often resolve the problem by printing class loader information to the log. For example, if you see the following ClassCastException in the log:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>java.lang.ClassCastException: com.example1.Foo1 cannot be cast to com.example2.Foo2</code></pre>
+        </div>
+    </div>
+            <p>
+    In your code, print the class loader information by logging            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>logger.info(&quot;Class loader for foo1: &quot; + com.example1.Foo1.getClass().getClassLoader().toString());
+logger.info(&quot;Class loader for foo2: &quot; + com.example2.Foo2.getClass().getClassLoader().toString());</code></pre>
+        </div>
+    </div>
+            <p>
+    The ModuleClassLoader information in the log will show which modules are loading the classes and, based on your application, you will need to determine the best approach to resolve the issue. You might have to remove or move a conflicting JARs, add dependencies through the <tt class=" ">MANIFEST.MF</tt> or <tt class=" ">jboss-deployment-structure.xml</tt> file or excluding dependencies in the <tt class=" ">jboss-deployment-structure.xml</tt> file.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-DebugandresolveNoSuchMethodExceptions"  >
+        <h3>Debug and resolve  NoSuchMethodExceptions</h3>
+    
+            <p>
+    A NoSuchMethodException indicates a class version mismatch between JAR files. It indicates your application's calling class was compiled using a different version of the JAR than the one used by the application server runtime.&nbsp; This can occur when you package different versions of common libraries your application, for example Hibernate.  This can also happen if you migrate between versions of JBoss EAP and do not recompile your application against the updated EAP jars. To resolve this problem, remove any common JARs from your application archive, add any dependencies as described above, recompile and deploy your application.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-DebugandresolveDuplicateServiceExceptions"  >
+        <h3>Debug and resolve DuplicateServiceExceptions</h3>
+    
+            <p>
+    If you get a DuplicateServiceException for a subdeployment of a JAR  or a message that the WAR application has already been installed when  you deploy your EAR in WildFly 8, it may be due to the way JBoss WS handles  the deployment. In AS6, JBossWS introduced a Context Root Mapping Algorithm or rules for servlet based endpoints to allow it to become seamlessly compatible with TCK6. This means that if you have a WAR and a JAR with the same name within an  EAR, it may create a web context with the same name as the JAR which  will conflict with the WAR context. You can resolve this issue in one of the following ways:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Rename  the JAR file to a name that is different than the WAR.            </p>
+    </li><li class=" ">            <p>
+    Provide a &lt;context-root&gt; element in the in <tt class=" ">jboss-web.xml</tt> file.            </p>
+    </li><li class=" ">            <p>
+    Provide a &lt;context-root&gt; element in the in <tt class=" ">jboss-webservices.xml</tt> file.            </p>
+    </li><li class=" ">            <p>
+    Customize the &lt;context-root&gt; for the WAR in the <tt class=" ">application.xml</tt> file.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-DebugandresolveJBossSeamdebugpageerrors."  >
+        <h3>Debug and resolve JBoss Seam debug page errors.</h3>
+    
+            <p>
+    Usually the root cause of the exception can be found in one of the links on this page, for example, under the Component org.jboss.seam.caughtException. Use the same technique above under &ldquo;How to Resolve ClassNotFoundExceptions or NoCLassDefFoundErrors&rdquo; to resolve the dependencies.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-EJB2.xSupport"  >
+        <h2>EJB 2.x Support</h2>
+    
+            <p>
+    As 7.1 provides support for EJB 2.1, however, you need to make a few code modifications and must start the server with the full profile.            </p>
+        <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ModifytheCodetoUsetheNewJNDINamespaceRules"  >
+        <h3>Modify the Code to Use the New JNDI Namespace Rules</h3>
+    
+            <p>
+    Like EJB 3.0, you must use the full JNDI prefix with EJB 2.1. For more information on the new JNDI namespace rules and code examples, see the section 'Update application JNDI namespace names' above.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ReplaceJBossAOPInterceptors"  >
+        <h3>Replace JBoss AOP Interceptors</h3>
+    
+            <p>
+    JBoss AOP (Aspect Oriented Programming) is no longer included in WildFly. In previous releases, JBoss AOP was used by the EJB container. However, in AS 7, the EJB container uses a new mechanism. If your application uses JBoss AOP, you need modify your application code as follows.            </p>
+    <ul class=" "><li class=" ">            <p>
+    Standard EJB3 configurations that were made in the <tt class=" ">ejb3-interceptors-aop.xml</tt> file are now done in the server configuration file. For a standalone server, this is the <tt class=" ">standalone/configuration/standalone.xml</tt> file. If you are running your server in a managed domain, this is the <tt class=" ">domain/configuration/domain.xml</tt> file.            </p>
+    </li><li class=" ">            <p>
+    Applications that integrate AOP interceptors into the EJB layer must be redesigned to use EJB3 interceptors and CDI. Server side interceptors can be changed to EJB3 interceptors, but there is no client side interceptor in AS 7.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Modifythe%7B%7Bjbossweb.xml%7D%7DFileDescriptor"  >
+        <h3>Modify the  jboss-web.xml  File Descriptor</h3>
+    
+            <p>
+    Modify the &lt;jndi-name&gt; for each &lt;ejb-ref&gt; to use the new JNDI fully qualified lookup format.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Replacethe%7B%7Bjboss.xml%7D%7Ddeploymentdescriptorfile"  >
+        <h3>Replace the  jboss.xml  deployment descriptor file</h3>
+    
+            <p>
+    The <tt class=" ">jboss-ejb3.xml</tt> deployment descriptor replaces the <tt class=" ">jboss.xml</tt> deployment descriptor to override and add to the features provided by the Java Enterprise Edition (EE) defined <tt class=" ">ejb3-jar.xml</tt> deployment descriptor. The new file is incompatible with <tt class=" ">jboss.xml</tt>, and the jboss.xml is now ignored in deployments.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-StarttheServerwiththeFullProfiles"  >
+        <h3>Start the Server with the Full Profiles</h3>
+    
+            <p>
+    EJB 2.1 requires the Java Enterprise Edition 6 Full Profile. To start AS 7 with the full profile, pass the argument &quot;-c standalone-full.xml&quot; on the command line when you start the server.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Migrationrequiredforothercomponents"  >
+        <h2>Migration required for other components</h2>
+    
+            <p>
+    ToDo: Conplete this section            </p>
+        </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-HowtomigrateSeam2archivesto%26nbsp%3BWildFly8"  >
+        <h2>How to migrate Seam 2 archives to&#160;WildFly 8</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Overview8"  >
+        <h3>Overview</h3>
+    
+            <p>
+    When you migrate a Seam 2 application, you will follow the steps outlined in the migration guide. You will need to configure the datasource as noted above. You will need to specify any module dependencies. You will also need to determine if the application has any dependencies on archives that do not ship with AS7 and copy any dependent JARs into the application <tt class=" ">lib/</tt> directory.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Updatethedatasourceconfiguration"  >
+        <h3>Update the datasource configuration</h3>
+    
+            <p>
+    Some Seam 2 examples use a default JDBC datasource named <tt class=" ">java:/ExampleDS</tt>. The easiest way is to define this datasource is to add the following datasource definition to the <tt class=" ">JBOSS_HOME/standalone/configuration/standalone.xml</tt> file the :            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;datasource name=&quot;ExampleDS&quot; jndi-name=&quot;java:/ExampleDS&quot; enabled=&quot;true&quot; jta=&quot;true&quot; use-java-context=&quot;true&quot; use-ccm=&quot;true&quot;&gt;
+   &lt;connection-url&gt;jdbc:h2:mem:test;DB_CLOSE_DELAY=-1&lt;/connection-url&gt;
+   &lt;driver&gt;h2&lt;/driver&gt;
+   &lt;security&gt;
+      &lt;user-name&gt;sa&lt;/user-name&gt;
+      &lt;password&gt;sa&lt;/password&gt;
+   &lt;/security&gt;
+&lt;/datasource&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    This definition is a copy of the default HSQL datasource defined in WildFly.            </p>
+                <p>
+    You can also add the datasource using the jboss-cli command line interface:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ JBOSS_HOME/bin/jboss-cli.sh --connect
+[standalone@localhost:9999 /] data-source add --name=ExampleDS --jndi-name=java:/ExampleDS --connection-url=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1 --driver-name=h2 --user-name=sa --password=sa</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Addanyrequireddependencies"  >
+        <h3>Add any required dependencies</h3>
+    
+            <p>
+    Since Seam 2 applications use JSF 1.2, you will need to add dependencies for the JSF 1.2 modules and exclude the JSF 2.0 modules. You will need to create a <tt class=" ">jboss-deployment-structure.xml</tt> file in the EAR <tt class=" ">META-INF/</tt> directory that contains the following data:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-deployment-structure xmlns=&quot;urn:jboss:deployment-structure:1.0&quot;&gt;
+    &lt;deployment&gt;
+        &lt;dependencies&gt;
+             &lt;module name=&quot;javax.faces.api&quot; slot=&quot;1.2&quot; export=&quot;true&quot;/&gt;
+             &lt;module name=&quot;com.sun.jsf-impl&quot; slot=&quot;1.2&quot; export=&quot;true&quot;/&gt;
+        &lt;/dependencies&gt;
+    &lt;/deployment&gt;
+    &lt;sub-deployment name=&quot;jboss-seam-booking.war&quot;&gt;
+        &lt;exclusions&gt;
+            &lt;module name=&quot;javax.faces.api&quot; slot=&quot;main&quot;/&gt;
+            &lt;module name=&quot;com.sun.jsf-impl&quot; slot=&quot;main&quot;/&gt;
+        &lt;/exclusions&gt;
+        &lt;dependencies&gt;
+            &lt;module name=&quot;javax.faces.api&quot; slot=&quot;1.2&quot;/&gt;
+            &lt;module name=&quot;com.sun.jsf-impl&quot; slot=&quot;1.2&quot;/&gt;
+        &lt;/dependencies&gt;
+    &lt;/sub-deployment&gt;
+&lt;/jboss-deployment-structure&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    If your application uses any third-party logging frameworks you will need add dependencies as described in that section of the migration guide.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Copydependentarchivesfromoutsideframeworksorotherlocations"  >
+        <h3>Copy dependent archives from outside frameworks or other locations</h3>
+    
+            <p>
+    Even if your Seam 2 application uses Hibernate 3, you may still be able to run with the Hibernate 4 module packaged in WildFly. Some hibernate classes are no longer available and you may need to copy one or more of the older hibernate JARs into the <tt class=" ">/lib</tt> directory. If you end up with ClassNotFoundExceptions or ClassCastExceptions involving hibernate classes, you may have to exclude the hibernate module in the deployments section of the <tt class=" ">META-INF/jboss-deployment-structure.xml</tt>            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-deployment-structure xmlns=&quot;urn:jboss:deployment-structure:1.0&quot;&gt;
+    &lt;deployment&gt;
+        &lt;exclusions&gt;
+            &lt;module name=&quot;org.hibernate&quot;/&gt;
+        &lt;/exclusions&gt;
+    &lt;deployment&gt;
+&lt;/jboss-deployment-structure&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Seam2JPAexampledeploymenton%26nbsp%3BWildFly"  >
+        <h3>Seam 2 JPA example deployment on&#160;WildFly</h3>
+    
+<ol class=" "><li class=" ">            <p>
+    Remove the jboss-web.xml file from the jboss-seam-jpa.war/WEB-INF/ directory - Defined class loading in jboss-web.xml is now default behaviour.            </p>
+    </li><li class=" ">            <p>
+    Comment or remove hibernate property in jboss-seam-jpa.war/WEB-INF/classes/META-INF/persistence.xml:            </p>
+        <blockquote>
+            <p>
+    &lt;!<del class=" ">- &lt;property name=&quot;hibernate.cache.provider_class&quot; value=&quot;org.hibernate.cache.HashtableCacheProvider&quot;/&gt; -</del>&gt;            </p>
+            </blockquote>
+</li><li class=" ">            <p>
+    Add the following dependencies from seam distribution (seam/lib directory) into<br/><i class=" ">jboss-seam-jpa.war/WEB-INF/lib</i> directory, which were in JBoss AS 5/6 and are upgraded in WildFly&nbsp;to higher major version:            </p>
+    <ul class=" "><li class=" ">            <p>
+    slf4j-api.jar            </p>
+    </li><li class=" ">            <p>
+    slf4j-log4j12.jar            </p>
+    </li><li class=" ">            <p>
+    hibernate-entitymanager.jar            </p>
+    </li><li class=" ">            <p>
+    hibernate-core.jar            </p>
+    </li><li class=" ">            <p>
+    hibernate-annotations.jar            </p>
+    </li><li class=" ">            <p>
+    hibernate-commons-annotations.jar            </p>
+    </li><li class=" ">            <p>
+    hibernate-validator.jar            </p>
+    </li></ul></li><li class=" ">            <p>
+    Add jboss-deployment-structure.xml to <i class=" ">jboss-seam-jpa.war/WEB-INF/</i> with the following content in it:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-deployment-structure&gt;
+   &lt;deployment&gt;
+        &lt;exclusions&gt;
+          &lt;module name=&quot;javax.faces.api&quot; slot=&quot;main&quot;/&gt;
+          &lt;module name=&quot;com.sun.jsf-impl&quot; slot=&quot;main&quot;/&gt;
+        &lt;/exclusions&gt;
+        &lt;dependencies&gt;
+          &lt;module name=&quot;org.apache.log4j&quot; /&gt;
+          &lt;module name=&quot;org.dom4j&quot; /&gt;
+          &lt;module name=&quot;org.apache.commons.logging&quot; /&gt;
+          &lt;module name=&quot;org.apache.commons.collections&quot; /&gt;
+          &lt;module name=&quot;javax.faces.api&quot; slot=&quot;1.2&quot;/&gt;
+          &lt;module name=&quot;com.sun.jsf-impl&quot; slot=&quot;1.2&quot;/&gt;
+        &lt;/dependencies&gt;
+    &lt;/deployment&gt;
+&lt;/jboss-deployment-structure&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+                </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <a href="66322750.html">Name</a>            </td>
+                <td rowspan="1" colspan="1">
+    <a href="66322750.html">Size</a>            </td>
+                <td rowspan="1" colspan="1">
+    Creator            </td>
+                <td rowspan="1" colspan="1">
+    <a href="66322750.html">Creation Date</a>            </td>
+                <td rowspan="1" colspan="1">
+    Comment            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    XML File                <a href="https://docs.jboss.org/author/download/attachments/66322750/jboss-deployment-structure.xml">jboss-deployment-structure.xml</a>            </td>
+                <td rowspan="1" colspan="1">
+    0.6 kB            </td>
+                <td rowspan="1" colspan="1">
+    <a href="https://docs.jboss.org/author/display/~manarh">Marek Novotny</a>            </td>
+                <td rowspan="1" colspan="1">
+    Jul 18, 2011 04:50            </td>
+                <td rowspan="1" colspan="1">
+    jboss-deployment-structure.xml for Seam 2 JPA example migration            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+</li></ol>    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-HowtodebugandresolveSeam2JNDIerrors"  >
+        <h3>How to debug and resolve Seam 2 JNDI errors</h3>
+    
+            <p>
+    When you migrate a Seam 2 application, you may see javax.naming.NameNotFoundException errors in the log like the following:            </p>
+                <p>
+    &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; javax.naming.NameNotFoundException: Name 'jboss-seam-booking' not found in context ''            </p>
+                <p>
+    If you don't want to modify JNDI lookups throughout the code, you can modify the application's components.xml file.            </p>
+    <ol class=" "><li class=" ">            <p>
+    First, you will need to replace the existing core-init element as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;!-- &lt;core:init jndi-pattern=&quot;jboss-seam-booking/#{ejbName}/local&quot; debug=&quot;true&quot; distributable=&quot;false&quot;/&gt;   --&gt;
+ &lt;core:init debug=&quot;true&quot; distributable=&quot;false&quot;/&gt;</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Next, find the JNDI binding INFO messages that are printed in the server log when the application is deployed. The JNDI binding messages should look similar to this:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15:01:16,138 INFO <a href="https://docs.jboss.org/author/pages/createpage.action?spaceKey=WFLY8&amp;title=org.jboss.as.ejb3.deployment.processors.EjbJndiBindingsDeploymentUnitProcessor&amp;linkCreation=true&amp;fromPageId=66322750">org.jboss.as.ejb3.deployment.processors.EjbJndiBindingsDeploymentUnitProcessor</a> (MSC service thread 1-1) JNDI bindings for session bean<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; named AuthenticatorAction in &nbsp; deployment unit subdeployment &quot;jboss-seam-booking.jar&quot; of deployment &quot;jboss-seam-booking.ear&quot; are as follows:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;         java:global/jboss-seam-booking/jboss-seam-booking.jar/AuthenticatorAction!org.jboss.seam.example.booking.Authenticator<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;	java:app/jboss-seam-booking.jar/AuthenticatorAction!org.jboss.seam.example.booking.Authenticator<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;         java:module/AuthenticatorAction!org.jboss.seam.example.booking.Authenticator<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;         java:global/jboss-seam-booking/jboss-seam-booking.jar/AuthenticatorAction<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;         java:app/jboss-seam-booking.jar/AuthenticatorAction<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;&nbsp; java:module/AuthenticatorAction            </p>
+    </li><li class=" ">            <p>
+    For each JNDI binding INFO message in the log, add a matching component element to the components.xml file:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;component class=&quot;org.jboss.seam.example.booking.AuthenticatorAction&quot; jndi-name=&quot;java:app/jboss-seam-booking.jar/AuthenticatorAction&quot; /&gt;</code></pre>
+        </div>
+    </div>
+</li></ol>    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-RunningSeam3archiveson%26nbsp%3BWildFly"  >
+        <h2>Running Seam 3 archives on&#160;WildFly</h2>
+    
+            <p>
+    ToDo: Complete this section            </p>
+        </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-MigratingSpringapplications"  >
+        <h2>Migrating Spring applications</h2>
+    
+            <p>
+    For information on how to migrate Spring applications, see details at the <a href="https://docs.jboss.org/author/display/WFLY8/Spring+applications+development+and+migration+guide">Spring applications development and migration guide</a>.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-ToolsThatCanAssistwithMigration"  >
+        <h2>Tools That Can Assist with Migration</h2>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UseTattletaletofindapplicationdependencies"  >
+        <h3>Use Tattletale to find application dependencies</h3>
+    
+            <p>
+    Due to the modular class loading changes, you might run into ClassNotFoundExceptions or ClassCastExceptions when you migrate your application. To resolve these dependencies, you will need to find the JARs that contain the classes specified by the exceptions.            </p>
+                <p>
+    Tattletale is an excellent tool that recursively scans your application and provides detailed reports about its contents. Tattletale 1.2.0.Beta2 or later contains additional support to help with the new JBoss Modules class loading used in WildFly. Tattletale's &quot;jbossas7&quot; report can be used to to automatically identify and specify dependent module names in your application's <tt class=" ">jboss-deployment-structure.xml</tt> file.            </p>
+        <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-InstallTattletale"  >
+        <h4>Install Tattletale</h4>
+    
+<ol class=" "><li class=" ">            <p>
+    Download Tattletale version 1.2.0.Beta2 or newer from <a href="http://sourceforge.net/projects/jboss/files/JBoss%20Tattletale/">http://sourceforge.net/projects/jboss/files/JBoss%20Tattletale/</a>.            </p>
+    </li><li class=" ">            <p>
+    Unzip the file into the directory of your choice.            </p>
+    </li><li class=" ">            <p>
+    Modify the <tt class=" ">TATTLETALE_HOME/jboss-tattletale.properties</tt> file by adding jbossas7 to the &quot;profiles&quot; property.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>profiles=java5, java6, ee6, jbossas7</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Uncomment scan and reports in the properties file.            </p>
+    </li></ol>    </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-CreateandreviewtheTattletalereport"  >
+        <h4>Create and review the Tattletale report</h4>
+    
+<ol class=" "><li class=" ">            <p>
+    Create the Tattletale report by issuing the command:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>java -jar TATTLETALE_HOME/tattletale.jar APPLICATION_ARCHIVE OUTPUT_DIRECTORY</code></pre>
+        </div>
+    </div>
+            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>java -jar ~/tattletale-1.2.0.Beta1/tattletale.jar applications/jboss-seam-booking.ear output-results/</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    In a browser, open the <tt class=" ">OUTPUT_DIRECTORY/index.html</tt> file and click on &quot;JBoss A7&quot; under the &quot;Reports&quot; section.            </p>
+    <ol class=" "><li class=" ">            <p>
+    The column on the left lists the archives used by the application. Click on the ARCHIVE_NAME link to view details about the archive, such as its location, manifest information, and classes it contains.            </p>
+    </li><li class=" ">            <p>
+    The <tt class=" ">jboss-deployment-structure.xml</tt> link in the column on the right shows how to specify the module dependency for the archive in the left column. Click on this link to see how to define the deployment dependency module information for this archive.            </p>
+    </li></ol></li></ol>    <div class="confbox admonition admonition-note">
+        
+            <p>
+    Tattletale will only find dependencies on the application classes. It will not find dependencies that may be required by classes your application calls or by classes in other JARs included under your application's <tt class=" ">WEB-INF/lib</tt> directory. To identify external dependencies, you will need to look at the &quot;Depends On&quot; report.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-IronJacamarDatasourceandResourceAdapterMigrationTool"  >
+        <h3>IronJacamar Datasource and Resource Adapter Migration Tool</h3>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-Summary"  >
+        <h4>Summary</h4>
+    
+            <p>
+    In previous versions of the application server, datasources and resource adapters were configured and deployed using a file with a suffix of *-ds.xml. The IronJacamar 1.1 distribution contains a migration tool that can be used to convert the datasource and resource adapter configuration files from previous releases into the configuration format expected by the WildFly&nbsp;server. The tool parses the source configuration file from the previous release, then creates and writes an XML snippet in the appropriate format that can be copied and pasted under the correct subsystem in the server configuration file.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-DownloadandinstallIronJacamar"  >
+        <h4>Download and install IronJacamar</h4>
+    
+<ol class=" "><li class=" ">            <p>
+    Download IronJacamar 1.1 from here: <a href="http://www.jboss.org/ironjacamar/downloads/">http://www.jboss.org/ironjacamar/downloads/ </a>.            </p>
+    </li><li class=" ">            <p>
+    Unzip the file into a directory of your choice.            </p>
+    </li><li class=" ">            <p>
+    The converter script can be found in the IRONJACAMAR distribution in the following locations:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Linux script: <tt class=" ">IRONJACAMAR_HOME/doc/as/converter.sh</tt>            </p>
+    </li><li class=" ">            <p>
+    Windows batch file: <tt class=" ">IRONJACAMAR_HOME/doc/as/converter.bat</tt>            </p>
+    </li></ol></li></ol>    <div class="confbox admonition admonition-note">
+        
+            <p>
+    The tool will do a best effort to convert all old attributes and elements to the new format. It will be necessary to make additional changes to the generated file. In the following examples, we will need to make a few changes to the resulting XML. Please, consult this documentation for additional information.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UsetheIronJacamarMigrationTooltoconvertadatasourceconfigurationfile."  >
+        <h4>Use the IronJacamar Migration Tool to convert a datasource configuration file.</h4>
+    
+<ol class=" "><li class=" ">            <p>
+    Open a terminal or command prompt and CD to the <tt class=" ">IRONJACAMAR_HOME/docs/as/</tt> directory.            </p>
+    </li><li class=" ">            <p>
+    For Linux, run the converter script by typing the following command in the terminal:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./converter.sh -ds FULLY_QUALIFIED_SOURCE_FILE_NAME FULLY_QUALIFIED_TARGET_FILE_NAME</code></pre>
+        </div>
+    </div>
+            <p>
+    For Windows, type:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>converter -ds FULLY_QUALIFIED_SOURCE_FILE_NAME FULLY_QUALIFIED_TARGET_FILE_NAME</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Copy the XML snippet from the target file into the server configuration file under the <tt class=" ">subsystem xmlns=&quot;urn:jboss:domain:datasources:1.0&quot;</tt> <tt class=" ">datasources</tt> element.            </p>
+    <ol class=" "><li class=" ">            <p>
+    If you are running in domain mode, you need to copy the XML snippet into the <tt class=" ">domain/configuration/domain.xml</tt> file.            </p>
+    </li><li class=" ">            <p>
+    If you are running in standalone mode, you need to copy the XML snippet into the <tt class=" ">standalone/configuration/standalone.xml</tt> file.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    The tool generates the <tt class=" ">datasources</tt> and <tt class=" ">datasource</tt> element. If you have existing datasources, you need only copy the <tt class=" ">datasource</tt> element into the configuration file.            </p>
+        </div>
+    
+</li></ol></li></ol>            <p>
+    Here is an example of the datasource configuration file for the Seam Booking example that shipped with EAP 5.x:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;datasources&gt;
+  &lt;local-tx-datasource&gt;
+    &lt;jndi-name&gt;bookingDatasource&lt;/jndi-name&gt;
+    &lt;connection-url&gt;jdbc:hsqldb:.&lt;/connection-url&gt;
+    &lt;driver-class&gt;org.hsqldb.jdbcDriver&lt;/driver-class&gt;
+    &lt;user-name&gt;sa&lt;/user-name&gt;
+    &lt;password&gt;&lt;/password&gt;
+  &lt;/local-tx-datasource&gt;
+&lt;/datasources&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The generated file will contain a <tt class=" ">driver-class</tt> element. The preferred way to define the driver class is using a <tt class=" ">drivers</tt> element. Here is the converted XML with the <tt class=" ">driver-class</tt> and <tt class=" ">drivers</tt> modifications as configured in the WildFly&nbsp;configuration file:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:datasources:1.0&quot;&gt;
+  &lt;datasources&gt;
+    &lt;datasource enabled=&quot;true&quot; jndi-name=&quot;java:jboss/datasources/bookingDatasource&quot; jta=&quot;true&quot;
+            pool-name=&quot;bookingDatasource&quot; use-ccm=&quot;true&quot; use-java-context=&quot;true&quot;&gt;
+      &lt;connection-url&gt;jdbc:hsqldb:.&lt;/connection-url&gt;
+      &lt;!-- We commented out the following driver-class element since it is not the preferred way to define this.
+              -&lt;driver-class&gt;org.hsqldb.jdbcDriver&lt;/driver-class&gt;-                                                --&gt;
+      &lt;transaction-isolation&gt;TRANSACTION_NONE&lt;/transaction-isolation&gt;
+      &lt;pool&gt;
+        &lt;prefill&gt;false&lt;/prefill&gt;
+        &lt;use-strict-min&gt;false&lt;/use-strict-min&gt;
+        &lt;flush-strategy&gt;FailingConnectionOnly&lt;/flush-strategy&gt;
+      &lt;/pool&gt;
+      &lt;security&gt;
+        &lt;user-name&gt;sa&lt;/user-name&gt;
+        &lt;password/&gt;
+      &lt;/security&gt;
+      &lt;validation&gt;
+        &lt;validate-on-match&gt;false&lt;/validate-on-match&gt;
+        &lt;background-validation&gt;false&lt;/background-validation&gt;
+        &lt;use-fast-fail&gt;false&lt;/use-fast-fail&gt;
+      &lt;/validation&gt;
+      &lt;timeout/&gt;
+      &lt;statement&gt;
+        &lt;track-statements&gt;false&lt;/track-statements&gt;
+      &lt;/statement&gt;
+    &lt;/datasource&gt;
+    &lt;!-- The following drivers element was not in the generated XML snippet. We added this manually. --&gt;
+    &lt;drivers&gt;
+      &lt;driver name=&quot;h2&quot; module=&quot;com.h2database.h2&quot;&gt;
+        &lt;xa-datasource-class&gt;org.h2.jdbcx.JdbcDataSource&lt;/xa-datasource-class&gt;
+        &lt;/driver&gt;
+      &lt;/drivers&gt;
+  &lt;/datasources&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322750_HowdoImigratemyapplicationfromAS5orAS6toWildFly-UsetheIronJacamarMigrationTooltoconvertaresourceadapterconfigurationfile."  >
+        <h4>Use the IronJacamar Migration Tool to convert a resource adapter configuration file.</h4>
+    
+<ol class=" "><li class=" ">            <p>
+    Open a terminal or command prompt and CD to the <tt class=" ">IRONJACAMAR_HOME/docs/as/</tt> directory.            </p>
+    </li><li class=" ">            <p>
+    For Linux, run the converter script by typing the following command in the terminal:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./converter.sh -ra FULLY_QUALIFIED_SOURCE_FILE_NAME FULLY_QUALIFIED_TARGET_FILE_NAME</code></pre>
+        </div>
+    </div>
+            <p>
+    For Windows, type:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./converter.sh -ra FULLY_QUALIFIED_SOURCE_FILE_NAME FULLY_QUALIFIED_TARGET_FILE_NAME</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Copy the XML snippet from the target file into the server configuration file under the <tt class=" ">subsystem xmlns=&quot;urn:jboss:domain:resource-adapters:1.0&quot;</tt> element.            </p>
+    <ol class=" "><li class=" ">            <p>
+    If you are running in domain mode, you need to copy the XML snippet into the <tt class=" ">domain/configuration/domain.xml</tt> file.            </p>
+    </li><li class=" ">            <p>
+    If you are running in standalone mode, you need to copy the XML snippet into the <tt class=" ">standalone/configuration/standalone.xml</tt> file.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    The tool generates the <tt class=" ">resource-adapters</tt> and <tt class=" ">resource-adapter</tt> element. If you have existing resource-adapters, you need to copy only the <tt class=" ">resource-adapter</tt> element into the configuration file.            </p>
+        </div>
+    
+</li></ol></li></ol>            <p>
+    Here is an example of the <tt class=" ">mttestadapter-ds.xml</tt> resource-adapter configuration file from the EAP-5.x TestSuite.:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+  &lt;!-- ==================================================================== --&gt;
+  &lt;!-- ConnectionManager setup for jboss test adapter                       --&gt;
+  &lt;!-- Build jmx-api (build/build.sh all) and view for config documentation --&gt;
+  &lt;!-- ==================================================================== --&gt;
+&lt;connection-factories&gt;
+  &lt;tx-connection-factory&gt;
+    &lt;jndi-name&gt;JBossTestCF&lt;/jndi-name&gt;
+    &lt;xa-transaction/&gt;
+    &lt;rar-name&gt;jbosstestadapter.rar&lt;/rar-name&gt;
+    &lt;connection-definition&gt;javax.resource.cci.ConnectionFactory&lt;/connection-definition&gt;
+    &lt;config-property name=&quot;IntegerProperty&quot; type=&quot;java.lang.Integer&quot;&gt;2&lt;/config-property&gt;
+    &lt;config-property name=&quot;BooleanProperty&quot; type=&quot;java.lang.Boolean&quot;&gt;false&lt;/config-property&gt;
+    &lt;config-property name=&quot;DoubleProperty&quot; type=&quot;java.lang.Double&quot;&gt;5.5&lt;/config-property&gt;
+    &lt;config-property name=&quot;UrlProperty&quot; type=&quot;java.net.URL&quot;&gt;http://www.jboss.org&lt;/config-property&gt;
+    &lt;config-property name=&quot;sleepInStart&quot; type=&quot;long&quot;&gt;200&lt;/config-property&gt;
+    &lt;config-property name=&quot;sleepInStop&quot; type=&quot;long&quot;&gt;200&lt;/config-property&gt;
+  &lt;/tx-connection-factory&gt;
+  &lt;tx-connection-factory&gt;
+    &lt;jndi-name&gt;JBossTestCF2&lt;/jndi-name&gt;
+    &lt;xa-transaction/&gt;
+    &lt;rar-name&gt;jbosstestadapter.rar&lt;/rar-name&gt;
+    &lt;connection-definition&gt;javax.resource.cci.ConnectionFactory&lt;/connection-definition&gt;
+    &lt;config-property name=&quot;IntegerProperty&quot; type=&quot;java.lang.Integer&quot;&gt;2&lt;/config-property&gt;
+    &lt;config-property name=&quot;BooleanProperty&quot; type=&quot;java.lang.Boolean&quot;&gt;false&lt;/config-property&gt;
+    &lt;config-property name=&quot;DoubleProperty&quot; type=&quot;java.lang.Double&quot;&gt;5.5&lt;/config-property&gt;
+    &lt;config-property name=&quot;UrlProperty&quot; type=&quot;java.net.URL&quot;&gt;http://www.jboss.org&lt;/config-property&gt;
+    &lt;config-property name=&quot;sleepInStart&quot; type=&quot;long&quot;&gt;200&lt;/config-property&gt;
+    &lt;config-property name=&quot;sleepInStop&quot; type=&quot;long&quot;&gt;200&lt;/config-property&gt;
+  &lt;/tx-connection-factory&gt;
+  &lt;tx-connection-factory&gt;
+    &lt;jndi-name&gt;JBossTestCFByTx&lt;/jndi-name&gt;
+    &lt;xa-transaction/&gt;
+    &lt;track-connection-by-tx&gt;true&lt;/track-connection-by-tx&gt;
+    &lt;rar-name&gt;jbosstestadapter.rar&lt;/rar-name&gt;
+    &lt;connection-definition&gt;javax.resource.cci.ConnectionFactory&lt;/connection-definition&gt;
+    &lt;config-property name=&quot;IntegerProperty&quot; type=&quot;java.lang.Integer&quot;&gt;2&lt;/config-property&gt;
+    &lt;config-property name=&quot;BooleanProperty&quot; type=&quot;java.lang.Boolean&quot;&gt;false&lt;/config-property&gt;
+    &lt;config-property name=&quot;DoubleProperty&quot; type=&quot;java.lang.Double&quot;&gt;5.5&lt;/config-property&gt;
+    &lt;config-property name=&quot;UrlProperty&quot; type=&quot;java.net.URL&quot;&gt;http://www.jboss.org&lt;/config-property&gt;
+    &lt;config-property name=&quot;sleepInStart&quot; type=&quot;long&quot;&gt;200&lt;/config-property&gt;
+    &lt;config-property name=&quot;sleepInStop&quot; type=&quot;long&quot;&gt;200&lt;/config-property&gt;
+  &lt;/tx-connection-factory&gt;
+&lt;/connection-factories&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    You will need to replace the class-name attribute &quot;FIXME_MCF_CLASS_NAME&quot; in the generated XML snippet with the class name of the managed connection factory, in this case, &quot;org.jboss.test.jca.adapter.TestManagedConnectionFactory&quot;. Here is the server configuration file with the newly generated and edited configuration data:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:resource-adapters:1.0&quot;&gt;
+&lt;resource-adapters&gt;
+  &lt;resource-adapter&gt;
+    &lt;archive&gt;jbosstestadapter.rar&lt;/archive&gt;
+    &lt;transaction-support&gt;XATransaction&lt;/transaction-support&gt;
+    &lt;connection-definitions&gt;
+      &lt;!-- We replaced the following &quot;FIXME_MCF_CLASS_NAME&quot; class-name value with the correct class name
+            &lt;connection-definition class-name=&quot;FIXME_MCF_CLASS_NAME&quot; enabled=&quot;true&quot;
+                  jndi-name=&quot;java:jboss/JBossTestCF&quot; pool-name=&quot;JBossTestCF&quot; use-ccm=&quot;true&quot; use-java-context=&quot;true&quot;&gt; --&gt;
+      &lt;connection-definition class-name=&quot;org.jboss.test.jca.adapter.TestManagedConnectionFactory&quot; enabled=&quot;true&quot;
+                  jndi-name=&quot;java:jboss/JBossTestCF&quot; pool-name=&quot;JBossTestCF&quot; use-ccm=&quot;true&quot; use-java-context=&quot;true&quot;&gt;
+        &lt;config-property name=&quot;IntegerProperty&quot;&gt;2&lt;/config-property&gt;
+        &lt;config-property name=&quot;sleepInStart&quot;&gt;200&lt;/config-property&gt;
+        &lt;config-property name=&quot;sleepInStop&quot;&gt;200&lt;/config-property&gt;
+        &lt;config-property name=&quot;BooleanProperty&quot;&gt;false&lt;/config-property&gt;
+        &lt;config-property name=&quot;UrlProperty&quot;&gt;http://www.jboss.org&lt;/config-property&gt;
+        &lt;config-property name=&quot;DoubleProperty&quot;&gt;5.5&lt;/config-property&gt;
+        &lt;pool&gt;
+          &lt;prefill&gt;false&lt;/prefill&gt;
+          &lt;use-strict-min&gt;false&lt;/use-strict-min&gt;
+          &lt;flush-strategy&gt;FailingConnectionOnly&lt;/flush-strategy&gt;
+        &lt;/pool&gt;
+        &lt;security&gt;
+          &lt;application/&gt;
+        &lt;/security&gt;
+        &lt;timeout/&gt;
+        &lt;validation&gt;
+          &lt;background-validation&gt;false&lt;/background-validation&gt;
+          &lt;use-fast-fail&gt;false&lt;/use-fast-fail&gt;
+        &lt;/validation&gt;
+      &lt;/connection-definition&gt;
+    &lt;/connection-definitions&gt;
+  &lt;/resource-adapter&gt;
+  &lt;resource-adapter&gt;
+    &lt;archive&gt;jbosstestadapter.rar&lt;/archive&gt;
+    &lt;transaction-support&gt;XATransaction&lt;/transaction-support&gt;
+    &lt;connection-definitions&gt;
+       &lt;!-- We replaced the following &quot;FIXME_MCF_CLASS_NAME&quot; class-name value with the correct class name
+             &lt;connection-definition class-name=&quot;FIXME_MCF_CLASS_NAME&quot; enabled=&quot;true&quot;
+                   jndi-name=&quot;java:jboss/JBossTestCF2&quot; pool-name=&quot;JBossTestCF2&quot; use-ccm=&quot;true&quot; use-java-context=&quot;true&quot;&gt; --&gt;
+      &lt;connection-definition class-name=&quot;org.jboss.test.jca.adapter.TestManagedConnectionFactory&quot; enabled=&quot;true&quot;
+              jndi-name=&quot;java:jboss/JBossTestCF2&quot; pool-name=&quot;JBossTestCF2&quot; use-ccm=&quot;true&quot; use-java-context=&quot;true&quot;&gt;
+        &lt;config-property name=&quot;IntegerProperty&quot;&gt;2&lt;/config-property&gt;
+        &lt;config-property name=&quot;sleepInStart&quot;&gt;200&lt;/config-property&gt;
+        &lt;config-property name=&quot;sleepInStop&quot;&gt;200&lt;/config-property&gt;
+        &lt;config-property name=&quot;BooleanProperty&quot;&gt;false&lt;/config-property&gt;
+        &lt;config-property name=&quot;UrlProperty&quot;&gt;http://www.jboss.org&lt;/config-property&gt;
+        &lt;config-property name=&quot;DoubleProperty&quot;&gt;5.5&lt;/config-property&gt;
+        &lt;pool&gt;
+          &lt;prefill&gt;false&lt;/prefill&gt;
+          &lt;use-strict-min&gt;false&lt;/use-strict-min&gt;
+          &lt;flush-strategy&gt;FailingConnectionOnly&lt;/flush-strategy&gt;
+        &lt;/pool&gt;
+        &lt;security&gt;
+          &lt;application/&gt;
+        &lt;/security&gt;
+        &lt;timeout/&gt;
+        &lt;validation&gt;
+          &lt;background-validation&gt;false&lt;/background-validation&gt;
+          &lt;use-fast-fail&gt;false&lt;/use-fast-fail&gt;
+        &lt;/validation&gt;
+      &lt;/connection-definition&gt;
+    &lt;/connection-definitions&gt;
+  &lt;/resource-adapter&gt;
+  &lt;resource-adapter&gt;
+    &lt;archive&gt;jbosstestadapter.rar&lt;/archive&gt;
+    &lt;transaction-support&gt;XATransaction&lt;/transaction-support&gt;
+    &lt;connection-definitions&gt;
+      &lt;!-- We replaced the following &quot;FIXME_MCF_CLASS_NAME&quot; class-name value with the correct class name
+             &lt;connection-definition class-name=&quot;FIXME_MCF_CLASS_NAME&quot; enabled=&quot;true&quot;
+                   jndi-name=&quot;java:jboss/JBossTestCFByTx&quot; pool-name=&quot;JBossTestCFByTx&quot; use-ccm=&quot;true&quot; use-java-context=&quot;true&quot;&gt; --&gt;
+      &lt;connection-definition class-name=&quot;org.jboss.test.jca.adapter.TestManagedConnectionFactory&quot; enabled=&quot;true&quot;
+              jndi-name=&quot;java:jboss/JBossTestCFByTx&quot; pool-name=&quot;JBossTestCFByTx&quot; use-ccm=&quot;true&quot; use-java-context=&quot;true&quot;&gt;
+        &lt;config-property name=&quot;IntegerProperty&quot;&gt;2&lt;/config-property&gt;
+        &lt;config-property name=&quot;sleepInStart&quot;&gt;200&lt;/config-property&gt;
+        &lt;config-property name=&quot;sleepInStop&quot;&gt;200&lt;/config-property&gt;
+        &lt;config-property name=&quot;BooleanProperty&quot;&gt;false&lt;/config-property&gt;
+        &lt;config-property name=&quot;UrlProperty&quot;&gt;http://www.jboss.org&lt;/config-property&gt;
+        &lt;config-property name=&quot;DoubleProperty&quot;&gt;5.5&lt;/config-property&gt;
+        &lt;pool&gt;
+          &lt;prefill&gt;false&lt;/prefill&gt;
+          &lt;use-strict-min&gt;false&lt;/use-strict-min&gt;
+          &lt;flush-strategy&gt;FailingConnectionOnly&lt;/flush-strategy&gt;
+        &lt;/pool&gt;
+        &lt;security&gt;
+          &lt;application/&gt;
+        &lt;/security&gt;
+        &lt;timeout/&gt;
+        &lt;validation&gt;
+          &lt;background-validation&gt;false&lt;/background-validation&gt;
+          &lt;use-fast-fail&gt;false&lt;/use-fast-fail&gt;
+        &lt;/validation&gt;
+      &lt;/connection-definition&gt;
+    &lt;/connection-definitions&gt;
+  &lt;/resource-adapter&gt;
+&lt;/resource-adapters&gt;&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    For more information about this migration tool, go to <a href="http://docs.jboss.org/ironjacamar/userguide/1.1/en-US/html/tools.html#tools_migration">IronJacamar Migration Tool </a>.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Description of the Management Model</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Description of the Management Model</h1>
+        </div>
+        
+        <div id="66322746" class="content prepend-top">
+            <p>
+    A detailed description of the resources, attributes and operations that make up the management model provided by an individual WildFly instance or by any Domain Controller or slave Host Controller process can be queried using the <tt class=" ">read-resource-description</tt>, <tt class=" ">read-operation-names</tt>, <tt class=" ">read-operation-description</tt> and <tt class=" ">read-child-types</tt> operations described in the <a href="66322742.html">Global operations</a> section. In this section we provide details on what's included in those descriptions.            </p>
+        <div class="section-2"  id="66322746_DescriptionoftheManagementModel-DescriptionoftheWildFlyManagedResources"  >
+        <h2>Description of the WildFly Managed Resources</h2>
+    
+            <p>
+    All portions of the management model exposed by WildFly 8 are addressable via an ordered list of key/value pairs. For each addressable <i class=" "><a href="66322693.html">Management Resource</a></i>, the following descriptive information will be available:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of this portion of the model            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">attributes</tt> &ndash; Map of String (the attribute name) to complex structure &ndash; the configuration attributes available in this portion of the model. See <a href="66322746.html#66322746_DescriptionoftheManagementModel-attributedescription">below</a> for the representation of each attribute.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">operations</tt> &ndash; Map of String (the operation name) to complex structure &ndash; the operations that can be targetted at this address. See <a href="66322746.html#66322746_DescriptionoftheManagementModel-operationdescription">below</a> for the representation of each operation.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">children</tt> &ndash; Map of String (the type of child) to complex structure &ndash; the relationship of this portion of the model to other addressable portions of the model. See <a href="66322746.html#66322746_DescriptionoftheManagementModel-childrendescription">below</a> for the representation of each child relationship.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">head-comment-allowed</tt> &ndash; boolean &ndash; indicates whether this portion of the model can store an XML comment that would be written in the persistent form of the model (e.g. domain.xml) before the start of the XML element that represents this portion of the model. This item is optional, and if not present defaults to true. (Note: storing XML comments in the in-memory model is not currently supported. This description key is for future use.)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">tail-comment-allowed</tt> &ndash; boolean &ndash; similar to <tt class=" ">head-comment-allowed</tt>, but indicates whether a comment just before the close of the XML element is supported. A tail comment can only be supported if the element has child elements, in which case a comment can be inserted between the final child element and the element's closing tag. This item is optional, and if not present defaults to true. (Note: storing XML comments in the in-memory model is not currently supported. This description key is for future use.)            </p>
+    </li></ul>            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;description =&gt; &quot;A manageable resource&quot;,
+     &quot;tail-comment-allowed&quot; =&gt; false,
+     &quot;attributes&quot; =&gt; {
+          &quot;foo&quot; =&gt; {
+               .... details of attribute foo
+          }
+      },
+     &quot;operations&quot; =&gt; {
+          &quot;start&quot; =&gt; {
+               .... details of the start operation
+          }
+      },
+     &quot;children&quot; =&gt; {
+          &quot;bar&quot; =&gt; {
+               .... details of the relationship with children of type &quot;bar&quot;
+          }
+      }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322746_DescriptionoftheManagementModel-attributedescription"><a name="66322746_DescriptionoftheManagementModel-attributedescription"></a></span>
+            </p>
+        <div class="section-3"  id="66322746_DescriptionoftheManagementModel-DescriptionofanAttribute"  >
+        <h3>Description of an Attribute</h3>
+    
+            <p>
+    An attribute is a portion of the management model that is not directly addressable. Instead, it is conceptually a property of an addressable <a href="66322693.html">management resource</a>. For each attribute in the model, the following descriptive information will be available:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of the attribute            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">type</tt> &ndash; <tt class=" ">org.jboss.dmr.ModelType</tt> &ndash; the type of the attribute value. One of the enum values BIG_DECIMAL, BIG_INTEGER, BOOLEAN, BYTES, DOUBLE, INT, LIST, LONG, OBJECT, PROPERTY, STRING. Most of these are self-explanatory. An OBJECT will be represented in the detyped model as a map of string keys to values of some other legal type, conceptually similar to a <tt class=" ">javax.management.openmbean.CompositeData</tt>. A PROPERTY is a single key/value pair, where the key is a string, and the value is of some other legal type.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">value-type</tt> &ndash; ModelType or complex structure &ndash; Only present if type is LIST or OBJECT. If all elements in the LIST or all the values of the OBJECT type are of the same type, this will be one of the ModelType enums BIG_DECIMAL, BIG_INTEGER, BOOLEAN, BYTES, DOUBLE, INT,  LONG, STRING. Otherwise, <tt class=" ">value-type</tt> will detail the structure of the attribute value, enumerating the value's fields and the type of their value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">expressions-allowed</tt> &ndash; boolean &ndash; indicates whether the value of the attribute may be of type <tt class=" ">ModelType.EXPRESSION</tt>, instead of its standard type (see <tt class=" ">type</tt> and <tt class=" ">value-type</tt> above for discussion of an attribute's standard type.) A value of ModelType.EXPRESSION contains a system-property substitution expression that the server will resolve against the server-side system property map before using the value. For example, an attribute named max-threads may have an expression value of <tt class=" ">${example.pool.max-threads:10</tt>} instead of just 10. Default value if not present is false.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">required</tt> &ndash; boolean &ndash; true if the attribute will always exist in a representation of its portion of the model; false if it may not (implying a null value.) If not present, true is the default.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">storage</tt> &ndash; String &ndash; Either &quot;configuration&quot; or &quot;runtime&quot;. If &quot;configuration&quot;, the attribute's value is stored as part of the persistent configuration (e.g. in domain.xml, host.xml or standalone.xml.) If &quot;runtime&quot; the attribute's value is not stored in the persistent configuration; the value only exists as long as the resource is running.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">access-type</tt> &ndash; String &ndash; One of &quot;read-only&quot;, &quot;read-write&quot; or &quot;metric&quot;. Whether an attribute value can be written, or can only read. A &quot;metric&quot; is a read-only attribute whose value is not stored in the persistent configuration, and whose value may change due to activity on the server. If an attribute is &quot;read-write&quot;, the resource will expose an operation named &quot;write-attribute&quot; whose &quot;name&quot; parameter will accept this attribute's name and whose &quot;value&quot; parameter will accept a valid value for this attribute. That operation will be the standard means of updating this attribute's value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">restart-required</tt> &ndash; String &ndash; One of &quot;no-services&quot;, &quot;all-services&quot;, &quot;resource-services&quot; or &quot;jvm&quot;. Only relevant to attributes whose access-type is read-write. Indicates whether execution of a write-attribute operation whose name parameter specifies this attribute requires a restart of services (or an entire JVM) in order for the change to take effect in the runtime . See discussion of &quot;<a href="66322746.html#66322746_DescriptionoftheManagementModel-applyingruntimeupdates">Applying Updates to Runtime Services</a>&quot; below.  Default value is &quot;no-services&quot;.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">alternatives</tt> &ndash; List of string &ndash; Indicates an exclusive relationship between attributes. If this attribute is defined, the other attributes listed in this descriptor's value should be undefined (even if their required descriptor says true; i.e. the presence of this attribute satisfies the requirement.) Default is undefined; i.e. this does not apply to most attributes.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">requires</tt> &ndash; List of string &ndash; Indicates that if this attribute has a value (other than undefined), the other attributes listed in this descriptor's value must also have a value, even if their required descriptor says false. This would typically be used in conjunction with alternatives. For example, attributes &quot;a&quot; and &quot;b&quot; are required, but are alternatives to each other; &quot;c&quot; and &quot;d&quot; are optional. But &quot;b&quot; requires &quot;c&quot; and &quot;d&quot;, so if &quot;b&quot; is used, &quot;c&quot; and &quot;d&quot; must also be defined. Default is undefined; i.e. this does not apply to most attributes.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">head-comment-allowed</tt> &ndash; boolean &ndash; indicates whether the model can store an XML comment that would be written in the persistent form of the model (e.g. domain.xml) before the start of the XML element that represents this attribute. This item is optional, and if not present defaults to false. (This is a different default from what is used for an entire management resource, since model attributes often map to XML attributes, which don't allow comments.) (Note: storing XML comments in the in-memory model is not currently supported. This description key is for future use.)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">tail-comment-allowed</tt> &ndash; boolean &ndash; similar to head-comment-allowed, but indicates whether a comment just before the close of the XML element is supported. A tail comment can only be supported if the element has child elements, in which case a comment can be inserted between the final child element and the element's closing tag. This item is optional, and if not present defaults to false. (This is a different default from what is used for an entire management resource, since model attributes often map to XML attributes, which don't allow comments.) (Note: storing XML comments in the in-memory model is not currently supported. This description key is for future use.)            </p>
+    </li><li class=" ">            <p>
+    arbitrary key/value pairs that further describe the attribute value, e.g. &quot;max&quot; =&gt; 2. See &quot;<a href="66322746.html#66322746_DescriptionoftheManagementModel-arbitrarydescriptors">Arbitrary Descriptors</a>&quot; below.            </p>
+    </li></ul>            <p>
+    Some examples:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&quot;foo&quot; =&gt; {
+     &quot;description&quot; =&gt; &quot;The foo&quot;,
+     &quot;type&quot; =&gt; INT,
+     &quot;max&quot; =&gt; 2
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&quot;bar&quot; =&gt; {
+     &quot;description&quot; =&gt; &quot;The bar&quot;,
+     &quot;type&quot; =&gt; OBJECT,
+     &quot;value-type&quot; =&gt; {
+          &quot;size&quot; =&gt; INT,
+          &quot;color&quot; =&gt; STRING
+     }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322746_DescriptionoftheManagementModel-operationdescription"><a name="66322746_DescriptionoftheManagementModel-operationdescription"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322746_DescriptionoftheManagementModel-DescriptionofanOperation"  >
+        <h3>Description of an Operation</h3>
+    
+            <p>
+    A management resource may have operations associated with it. The description of an operation will include the following information:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">operation-name</tt> &ndash; String &ndash; the name of the operation            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of the operation            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">request-properties</tt> &ndash; Map of String to complex structure &ndash; description of the parameters of the operation. Keys are the names of the parameters, values are descriptions of the parameter value types. See <a href="66322746.html#66322746_DescriptionoftheManagementModel-paramdescription">below</a> for details on the description of parameter value types.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">reply-properties</tt> &ndash; complex structure, or empty &ndash; description of the return value of the operation, with an empty node meaning void. See <a href="66322746.html#66322746_DescriptionoftheManagementModel-paramdescription">below</a> for details on the description of operation return value types.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">restart-required</tt> &ndash; String &ndash; One of &quot;no-services&quot;, &quot;all-services&quot;, &quot;resource-services&quot; or &quot;jvm&quot;. Indicates whether the operation makes a configuration change that requires a restart of services (or an entire JVM) in order for the change to take effect in the runtime. See discussion of &quot;<a href="66322746.html#66322746_DescriptionoftheManagementModel-applyingruntimeupdates">Applying Updates to Runtime Services</a>&quot; below.  Default value is &quot;no-services&quot;.            </p>
+    </li></ul>            <p>
+        <span id="66322746_DescriptionoftheManagementModel-paramdescription"><a name="66322746_DescriptionoftheManagementModel-paramdescription"></a></span>
+            </p>
+        <div class="section-4"  id="66322746_DescriptionoftheManagementModel-DescriptionofanOperationParameterorReturnValue"  >
+        <h4>Description of an Operation Parameter or Return Value</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of the parameter or return value            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">type</tt> &ndash; <tt class=" ">org.jboss.dmr.ModelType</tt> &ndash; the type of the parameter or return value. One of the enum values BIG_DECIMAL, BIG_INTEGER, BOOLEAN, BYTES, DOUBLE, INT, LIST, LONG, OBJECT, PROPERTY, STRING.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">value-type</tt> &ndash; <tt class=" ">ModelType</tt> or complex structure &ndash; Only present if type is LIST or OBJECT. If all elements in the LIST or all the values of the OBJECT type are of the same type, this will be one of the ModelType enums  BIG_DECIMAL, BIG_INTEGER, BOOLEAN, BYTES, DOUBLE, INT, LIST, LONG, PROPERTY, STRING. Otherwise, value-type will detail the structure of the attribute value, enumerating the value's fields and the type of their value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">expressions-allowed</tt> &ndash; boolean &ndash; indicates whether the value of the the parameter or return value may be of type <tt class=" ">ModelType.EXPRESSION</tt>, instead its standard type (see type and value-type above for discussion of the standard type.) A value of ModelType.EXPRESSION contains a system-property substitution expression that the server will resolve against the server-side system property map before using the value. For example, a parameter named max-threads may have an expression value of <tt class=" ">${example.pool.max-threads:10</tt>} instead of just 10. Default value if not present is false.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">required</tt> &ndash; boolean &ndash; Only relevant to parameters. true if the parameter must be present in the request object used to invoke the operation; false if it can omitted. If not present, true is the default.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">nillable</tt> &ndash; boolean &ndash; true if null is a valid value.  If not present, false is the default.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">restart-required</tt> &ndash; String &ndash; One of &quot;no-services&quot;, &quot;all-services&quot;, &quot;resource-services&quot; or &quot;jvm&quot;. Only relevant to attributes whose access-type is read-write. Indicates whether execution of a write-attribute operation whose name parameter specifies this attribute requires a restart of services (or an entire JVM) in order for the change to take effect in the runtime . See discussion of &quot;<a href="66322746.html#66322746_DescriptionoftheManagementModel-applyingruntimeupdates">Applying Updates to Runtime Services</a>&quot; below.  Default value is &quot;no-services&quot;.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">alternatives</tt> &ndash; List of string &ndash; Indicates an exclusive relationship between parameters. If this attribute is defined, the other parameters listed in this descriptor's value should be undefined (even if their required descriptor says true; i.e. the presence of this parameter satisfies the requirement.) Default is undefined; i.e. this does not apply to most parameters.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">requires</tt> &ndash; List of string &ndash; Indicates that if this parameter has a value (other than undefined), the other parameters listed in this descriptor's value must also have a value, even if their required descriptor says false. This would typically be used in conjunction with alternatives. For example, parameters &quot;a&quot; and &quot;b&quot; are required, but are alternatives to each other; &quot;c&quot; and &quot;d&quot; are optional. But &quot;b&quot; requires &quot;c&quot; and &quot;d&quot;, so if &quot;b&quot; is used, &quot;c&quot; and &quot;d&quot; must also be defined. Default is undefined; i.e. this does not apply to most parameters.            </p>
+    </li><li class=" ">            <p>
+    arbitrary key/value pairs that further describe the attribute value, e.g. &quot;max&quot; =&gt;2. See &quot;<a href="66322746.html#66322746_DescriptionoftheManagementModel-arbitrarydescriptors">Arbitrary Descriptors</a>&quot; below.            </p>
+    </li></ul>            <p>
+        <span id="66322746_DescriptionoftheManagementModel-arbitrarydescriptors"><a name="66322746_DescriptionoftheManagementModel-arbitrarydescriptors"></a></span>
+            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322746_DescriptionoftheManagementModel-ArbitraryDescriptors"  >
+        <h3>Arbitrary Descriptors</h3>
+    
+            <p>
+    The description of an attribute, operation parameter or operation return value type can include arbitrary key/value pairs that provide extra information. Whether a particular key/value pair is present depends on the context, e.g. a pair with key &quot;max&quot; would probably only occur as part of the description of some numeric type.            </p>
+                <p>
+    Following are standard keys and their expected value type. If descriptor authors want to add an arbitrary key/value pair to some descriptor and the semantic matches the meaning of one of the following items, the standard key/value type must be used.            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">min</tt> &ndash; int &ndash; the minimum value of some numeric type. The absence of this item implies there is no minimum value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max</tt> &ndash; int &ndash; the maximum value of some numeric type. The absence of this item implies there is no maximum value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">min-length</tt> &ndash; int &ndash; the minimum length of some string, list or byte[] type. The absence of this item implies a minimum length of zero.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max-length</tt> &ndash; int &ndash; the maximum length of some string, list or byte[]. The absence of this item implies there is no maximum value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">nillable</tt> &ndash; boolean &ndash; whether null or a ModelNode of type <tt class=" ">ModelType.UNDEFINED</tt> is a legal value. The absence of this item implies false; i.e. null/undefined is not a legal value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">allowed</tt> &ndash; List &ndash; a list of legal values. The type of the elements in the list should match the type of the attribute.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">default</tt> &ndash; the default value for the attribute if not present in the model            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">unit</tt> - The unit of the value, if one is applicable - e.g. ns, ms, s, m, h, KB, MB, TB. See the <tt class=" ">org.jboss.as.controller.client.helpers.MeasurementUnit</tt> in the org.jboss.as:jboss-as-controller-client artifact for a listing of legal measurement units..            </p>
+    </li></ul>            <p>
+    Some examples:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;operation-name&quot; =&gt; &quot;incrementFoo&quot;,
+     &quot;description&quot; =&gt; &quot;Increase the value of the 'foo' attribute by the given amount&quot;,
+     &quot;request-properties&quot; =&gt; {
+          &quot;increment&quot; =&gt; {
+               &quot;type&quot; =&gt; INT,
+               &quot;description&quot; =&gt; &quot;The amount to increment&quot;,
+               &quot;required&quot; =&gt; true
+     }},
+     &quot;reply-properties&quot; =&gt; {
+               &quot;type&quot; =&gt; INT,
+               &quot;description&quot; =&gt; &quot;The new value&quot;,
+     }
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;operation-name&quot; =&gt; &quot;start&quot;,
+     &quot;description&quot; =&gt; &quot;Starts the thing&quot;,
+     &quot;request-properties&quot; =&gt; {},
+     &quot;reply-properties&quot; =&gt; {}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322746_DescriptionoftheManagementModel-childdescription"><a name="66322746_DescriptionoftheManagementModel-childdescription"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322746_DescriptionoftheManagementModel-DescriptionofParent%2FChildRelationships"  >
+        <h3>Description of Parent/Child Relationships</h3>
+    
+            <p>
+    The address used to target an addressable portion of the model must be an ordered list of key value pairs. The effect of this requirement is the addressable portions of the model naturally form a tree structure, with parent nodes in the tree defining what the valid keys are and the children defining what the valid values are. The parent node also defines the cardinality of the relationship. The description of the parent node includes a children element that describes these relationships:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     ....
+     &quot;children&quot; =&gt; {
+          &quot;connector&quot; =&gt; {
+               .... description of the relationship with children of type &quot;connector&quot;
+          },
+          &quot;virtual-host&quot; =&gt; {
+               .... description of the relationship with children of type &quot;virtual-host&quot;
+          }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The description of each relationship will include the following elements:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of the relationship            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">min-occurs</tt> &ndash; int, either 0 or 1 &ndash; Minimum number of children of this type that must exist in a valid model. If not present, the default value is 0.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max-occurs</tt> &ndash; int &ndash; Maximum number of children of this type that may exist in a valid model. If not present, the default value is Integer.MAX_VALUE, i.e. there is no limit.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">allowed</tt> &ndash; List of strings &ndash; legal values for children names. If not present, there is no restriction on children names.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">model-description</tt> &ndash; either &quot;undefined&quot; or a complex structure &ndash; This is the full description of the child resource (its text description, attributes, operations, children) as detailed above. This may also be &quot;undefined&quot;, i.e. a null value, if the query that asked for the parent node's description did not include the &quot;recursive&quot; param set to true.            </p>
+    </li></ul>            <p>
+    Example with if the recursive flag was set to true:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;description&quot; =&gt; &quot;The connectors used to handle client connections&quot;,
+     &quot;min-occurs&quot; &gt; 1,
+     &quot;model-description&quot; =&gt; {
+          &quot;description&quot; =&gt; &quot;Handles client connections&quot;,
+          &quot;attributes =&gt; {
+               ... details of children as documented above
+          },
+          &quot;operations&quot; =&gt; {
+               .... details of operations as documented above
+          },
+          &quot;children&quot; =&gt; {
+               .... details of the children's children
+          }
+     }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    If the recursive flag was false:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;description&quot; =&gt; &quot;The connectors used to handle client connections&quot;,
+     &quot;min-occurs&quot; &gt; 1,
+     &quot;model-description&quot; =&gt; undefined
+}</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322746_DescriptionoftheManagementModel-applyingruntimeupdates"><a name="66322746_DescriptionoftheManagementModel-applyingruntimeupdates"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322746_DescriptionoftheManagementModel-ApplyingUpdatestoRuntimeServices"  >
+        <h3>Applying Updates to Runtime Services</h3>
+    
+            <p>
+    An attribute or operation description may include a &quot;<tt class=" ">restart-required</tt>&quot; descriptor; this section is an explanation of the meaning of that descriptor.            </p>
+                <p>
+    An operation that changes a management resource's persistent configuration usually can also also affect a runtime service associated with the resource. For example, there is a runtime service associated with any host.xml or standalone.xml <tt class=" ">&lt;interface&gt;</tt> element; other services in the runtime depend on that service to provide the <tt class=" ">InetAddress</tt> associated with the interface. In many cases, an update to a resource's persistent configuration can be immediately applied to the associated runtime service. The runtime service's state is updated to reflect the new value(s).            </p>
+                <p>
+    However, in many cases the runtime service's state cannot be updated without restarting the service. Restarting a service can have broad effects. A restart of a service A will trigger a restart of other services B, C and D that depend A, triggering a restart of services that depend on B, C and D, etc. Those service restarts may very well disrupt handling of end-user requests.            </p>
+                <p>
+    Because restarting a service can be disruptive to end-user request handling, the handlers for management operations will not restart any service without some form of explicit instruction from the end user indicating a service restart is desired. In a few cases, simply executing the operation is an indication the user wants services to restart (e.g. a <tt class=" ">/host=master/server-config=server-one:restart</tt> operation in a managed domain, or a <tt class=" ">/:reload</tt> operation on a standalone server.) For all other cases, if an operation (or attribute write) cannot be performed without restarting a service, the metadata describing the operation or attribute will include a &quot;<tt class=" ">restart-required</tt>&quot; descriptor whose value indicates what is necessary for the operation to affect the runtime:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">no-services</tt> &ndash; Applying the operation to the runtime does not require the restart of any services. This value is the default if the restart-required descriptor is not present.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">all-services</tt> &ndash; The operation can only immediately update the persistent configuration; applying the operation to the runtime will require a subsequent restart of all services in the affected VM. Executing the operation will put the server into a &quot;<tt class=" ">reload-required</tt>&quot; state. Until a restart of all services is performed the response to this operation and to any subsequent operation will include a response header &quot;<tt class=" ">process-state&quot; =&gt; &quot;reload-required</tt>&quot;. For a standalone server, a restart of all services can be accomplished by executing the <tt class=" ">/:reload</tt> CLI command. For a server in a managed domain, restarting all services currently requires a full restart of the affected server VM (e.g. <tt class=" ">/host=master/server-config=server-one:restart</tt>).            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jvm</tt> --The operation can only immediately update the persistent configuration; applying the operation to the runtime will require a full process restart (i.e. stop the JVM and launch a new JVM). Executing the operation will put the server into a &quot;<tt class=" ">restart-required</tt>&quot; state. Until a restart is performed the response to this operation and to any subsequent operation will include a response header &quot;<tt class=" ">process-state&quot; =&gt; &quot;restart-required</tt>&quot;. For a standalone server, a full process restart requires first stopping the server via OS-level operations (Ctrl-C, kill) or via the <tt class=" ">/:shutdown</tt> CLI command, and then starting the server again from the command line. For a server in a managed domain, restarting a server requires executing the <tt class=" ">/host=&lt;host&gt;/server-config=&lt;server&gt;:restart</tt> operation.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">resource-services</tt> &ndash; The operation can only immediately update the persistent configuration; applying the operation to the runtime will require a subsequent restart of some services associated with the resource. If the operation includes the request header <tt class=" ">&quot;allow-resource-service-restart&quot; =&gt; true</tt>, the handler for the operation will go ahead and restart the runtime service. Otherwise executing the operation will put the server into a &quot;<tt class=" ">reload-required</tt>&quot; state. (See the discussion of &quot;<tt class=" ">all-services</tt>&quot; above for more on the &quot;<tt class=" ">reload-required</tt>&quot; state.)            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

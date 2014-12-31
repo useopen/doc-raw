@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Web services configuration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Web services configuration</h1>
+        </div>
+        
+        <div id="66322711" class="content prepend-top">
+    <div class="section-2"  id="66322711_Webservicesconfiguration-Domainmanagement"  >
+        <h2>Domain management</h2>
+    
+            <p>
+    JBossWS components are provided to the application server through the webservices subsystem.&nbsp; JBossWS components handle the processing of WS endpoints.&nbsp; The subsystem supports the configuration of published endpoint addresses, and endpoint handler chains.&nbsp; A default webservice subsystem is provided in the server's domain and standalone configuration files.            </p>
+        <div class="section-3"  id="66322711_Webservicesconfiguration-Structureofthewebservicessubsystem"  >
+        <h3>Structure of the webservices subsystem</h3>
+    
+    <div class="section-4"  id="66322711_Webservicesconfiguration-Publishedendpointaddress"  >
+        <h4>Published endpoint address</h4>
+    
+            <p>
+    JBossWS supports the rewriting of the <tt class=" ">&lt;soap:address&gt;</tt>&nbsp;element of endpoints published in WSDL contracts.&nbsp; This feature is useful for controlling the server address that is advertised to clients for each endpoint.            </p>
+                <p>
+    The following elements are available and can be modified (all are optional and require server restart upon modification):            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Type            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    modify-wsdl-address            </td>
+                <td rowspan="1" colspan="1">
+    boolean            </td>
+                <td rowspan="1" colspan="1">
+    This boolean enables and disables the address rewrite functionality.<br/><br/>When modify-wsdl-address is set to true and the content of &lt;soap:address&gt; is a valid URL, JBossWS will rewrite the URL using the values of wsdl-host and wsdl-port or wsdl-secure-port.<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>When modify-wsdl-address is set to false and the content of &lt;soap:address&gt; is a valid URL, JBossWS will not rewrite the URL.&nbsp; The &lt;soap:address&gt; URL will be used.<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;<br/>When the content of &lt;soap:address&gt; is not a valid URL, JBossWS will rewrite it no matter what the setting of modify-wsdl-address.<br/><br/>If modify-wsdl-address is set to true and wsdl-host is not defined or explicitly set to <i class=" ">'</i><tt class=" ">jbossws.undefined.host</tt><i class=" ">'&nbsp;</i> the content of &lt;soap:address&gt; URL is use.&nbsp; JBossWS uses the requester's host when rewriting the &lt;soap:address&gt;<br/><br/>When modify-wsdl-address is not defined JBossWS uses a default value of true.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    wsdl-host            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+                <td rowspan="1" colspan="1">
+    The hostname / IP address to be used for rewriting <tt class=" ">&lt;soap:address&gt;</tt>.<br/>If&nbsp;<tt class=" ">wsdl-host</tt>&nbsp;is set to&nbsp;<tt class=" ">jbossws.undefined.host</tt>, JBossWS uses the requester's host when rewriting the&nbsp;<tt class=" ">&lt;soap:address&gt;</tt><br/>When wsdl-host is not defined JBossWS uses a default value of '<tt class=" ">jbossws.undefined.host</tt>'.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    wsdl-port            </td>
+                <td rowspan="1" colspan="1">
+    int            </td>
+                <td rowspan="1" colspan="1">
+    Set this property to explicitly define the HTTP port that will be used for rewriting the SOAP address.<br/>Otherwise the HTTP port will be identified by querying the list of installed HTTP connectors.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    wsdl-secure-port            </td>
+                <td rowspan="1" colspan="1">
+    int            </td>
+                <td rowspan="1" colspan="1">
+    Set this property to explicitly define the HTTPS port that will be used for rewriting the SOAP address.<br/>Otherwise the HTTPS port will be identified by querying the list of installed HTTPS connectors.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-4"  id="66322711_Webservicesconfiguration-Predefinedendpointconfigurations"  >
+        <h4>Predefined endpoint configurations</h4>
+    
+            <p>
+    JBossWS enables extra setup configuration data to be predefined and associated with an endpoint implementation.&nbsp; Predefined endpoint configurations can be used for JAX-WS client and JAX-WS endpoint setup.&nbsp; Endpoint configurations can include JAX-WS handlers and key/value properties declarations.&nbsp; This feature provides a convenient way to add handlers to WS endpoints and to set key/value properties that control JBossWS and Apache CXF internals (<a href="https://docs.jboss.org/author/display/JBWS/Apache+CXF+integration#ApacheCXFintegration-Deploymentdescriptorproperties">see Apache CXF configuration</a>).            </p>
+                <p>
+    The webservices subsystem provides <a href="http://www.jboss.org/schema/jbossas/jboss-as-webservices_1_2.xsd">schema</a> to support the definition of named sets of endpoint configuration data.&nbsp; Annotation, <i class=" ">org.jboss.ws.api.annotation.EndpointConfig</i> is provided to map the named configuration to the endpoint implementation.            </p>
+                <p>
+    There is no limit to the number of endpoint configurations that can be defined within the webservices subsystem.&nbsp; Each endpoint configuration must have a name that is unique within the webservices subsystem.&nbsp; Endpoint configurations defined in the webservices subsystem are available for reference by name through the annotation to any endpoint in a deployed application.            </p>
+                <p>
+    WildFly ships with two predefined endpoint configurations.&nbsp; Standard-Endpoint-Config is the default configuration.&nbsp; Recording-Endpoint-Config is an example of custom endpoint configuration and includes a recording handler.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;endpoint&quot; =&gt; {},
+        &quot;modify-wsdl-address&quot; =&gt; true,
+        &quot;wsdl-host&quot; =&gt; expression &quot;${jboss.bind.address:127.0.0.1}&quot;,
+        &quot;endpoint-config&quot; =&gt; {
+            &quot;Standard-Endpoint-Config&quot; =&gt; undefined,
+            &quot;Recording-Endpoint-Config&quot; =&gt; undefined
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-info">
+        
+            <p>
+    The <tt class=" ">Standard-Endpoint-Config</tt> is a special endpoint configuration.&nbsp; It is used for any endpoint that does not have an explicitly assigned endpoint configuration.            </p>
+        </div>
+    
+    <div class="section-5"  id="66322711_Webservicesconfiguration-Endpointconfigs"  >
+        <h5>Endpoint configs</h5>
+    
+            <p>
+    Endpoint configs are defined using <tt class=" ">the endpoint-config</tt> element.&nbsp; Each endpoint configuration may include properties and handlers set to the endpoints associated to the configuration.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=Recording-Endpoint-Config:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;post-handler-chain&quot; =&gt; undefined,
+        &quot;property&quot; =&gt; undefined,
+        &quot;pre-handler-chain&quot; =&gt; {&quot;recording-handlers&quot; =&gt; undefined}
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A new endpoint configuration can be added as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=My-Endpoint-Config:add
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;response-headers&quot; =&gt; {
+        &quot;operation-requires-restart&quot; =&gt; true,
+        &quot;process-state&quot; =&gt; &quot;restart-required&quot;
+    }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-5"  id="66322711_Webservicesconfiguration-Handlerchains"  >
+        <h5>Handler chains</h5>
+    
+            <p>
+    Each endpoint configuration may be associated with zero or more PRE and POST handler chains.&nbsp; Each handler chain may include JAXWS handlers.&nbsp; For outbound messages the PRE handler chains are executed before any handler that is attached to the endpoint using the standard means, such as with annotation @HandlerChain, and POST handler chains are executed after those objects have executed.&nbsp; For inbound messages the POST handler chains are executed before any handler that is attached to the endpoint using the standard means and the PRE handler chains are executed after those objects have executed.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>* Server inbound messages
+Client --&gt; ... --&gt; POST HANDLER --&gt; ENDPOINT HANDLERS --&gt; PRE HANDLERS --&gt; Endpoint
+
+* Server outbound messages
+Endpoint --&gt; PRE HANDLER --&gt; ENDPOINT HANDLERS --&gt; POST HANDLERS --&gt; ... --&gt; Client</code></pre>
+        </div>
+    </div>
+            <p>
+    The protocol-binding attribute must be used to set the protocols for which the chain will be triggered.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=Recording-Endpoint-Config/pre-handler-chain=recording-handlers:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;protocol-bindings&quot; =&gt; &quot;##SOAP11_HTTP ##SOAP11_HTTP_MTOM ##SOAP12_HTTP ##SOAP12_HTTP_MTOM&quot;,
+        &quot;handler&quot; =&gt; {&quot;RecordingHandler&quot; =&gt; undefined}
+    },
+    &quot;response-headers&quot; =&gt; {&quot;process-state&quot; =&gt; &quot;restart-required&quot;}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A new handler chain can be added as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=My-Endpoint-Config/post-handler-chain=my-handlers:add(protocol-bindings=&quot;##SOAP11_HTTP&quot;)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;response-headers&quot; =&gt; {
+        &quot;operation-requires-restart&quot; =&gt; true,
+        &quot;process-state&quot; =&gt; &quot;restart-required&quot;
+    }
+}
+[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=My-Endpoint-Config/post-handler-chain=my-handlers:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;handler&quot; =&gt; undefined,
+        &quot;protocol-bindings&quot; =&gt; &quot;##SOAP11_HTTP&quot;
+    },
+    &quot;response-headers&quot; =&gt; {&quot;process-state&quot; =&gt; &quot;restart-required&quot;}
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-5"  id="66322711_Webservicesconfiguration-Handlers"  >
+        <h5>Handlers</h5>
+    
+            <p>
+    JAXWS handler can be added in handler chains:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=Recording-Endpoint-Config/pre-handler-chain=recording-handlers/handler=RecordingHandler:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;class&quot; =&gt; &quot;org.jboss.ws.common.invocation.RecordingServerHandler&quot;},
+    &quot;response-headers&quot; =&gt; {&quot;process-state&quot; =&gt; &quot;restart-required&quot;}
+}
+[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=My-Endpoint-Config/post-handler-chain=my-handlers/handler=foo-handler:add(class=&quot;org.jboss.ws.common.invocation.RecordingServerHandler&quot;)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;response-headers&quot; =&gt; {
+        &quot;operation-requires-restart&quot; =&gt; true,
+        &quot;process-state&quot; =&gt; &quot;restart-required&quot;
+    }
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+            <div class="title">Endpoint-config handler classloading</div>
+        
+            <p>
+    The <tt class=" ">class</tt> attribute is used to provide the fully qualified class name of the handler.&nbsp; At deploy time, an instance of the class is created for each referencing deployment.&nbsp; For class creation to succeed, either the deployment classloader or the classloader for module, <tt class=" ">org.jboss.as.webservices.server.integration,</tt> must to be able to load the handler class.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322711_Webservicesconfiguration-Runtimeinformation"  >
+        <h2>Runtime information</h2>
+    
+            <p>
+    Each web service endpoint is exposed through the deployment that provides the endpoint implementation. Each endpoint can be queried as a deployment resource. For further information please consult the chapter &quot;Application Deployment&quot;. Each web service endpoint specifies a web context and a WSDL Url:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /deployment=&quot;*&quot;/subsystem=webservices/endpoint=&quot;*&quot;:read-resource
+{
+   &quot;outcome&quot; =&gt; &quot;success&quot;,
+   &quot;result&quot; =&gt; [{
+       &quot;address&quot; =&gt; [
+           (&quot;deployment&quot; =&gt; &quot;jaxws-samples-handlerchain.war&quot;),
+           (&quot;subsystem&quot; =&gt; &quot;webservices&quot;),
+           (&quot;endpoint&quot; =&gt; &quot;jaxws-samples-handlerchain:TestService&quot;)
+       ],
+       &quot;outcome&quot; =&gt; &quot;success&quot;,
+       &quot;result&quot; =&gt; {
+           &quot;class&quot; =&gt; &quot;org.jboss.test.ws.jaxws.samples.handlerchain.EndpointImpl&quot;,
+           &quot;context&quot; =&gt; &quot;jaxws-samples-handlerchain&quot;,
+           &quot;name&quot; =&gt; &quot;TestService&quot;,
+           &quot;type&quot; =&gt; &quot;JAXWS_JSE&quot;,
+           &quot;wsdl-url&quot; =&gt; &quot;http://localhost:8080/jaxws-samples-handlerchain?wsdl&quot;
+       }
+   }]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322711_Webservicesconfiguration-ComponentReference"  >
+        <h2>Component Reference</h2>
+    
+            <p>
+        <span style="color: #333333;">
+The web service subsystem is provided by the JBossWS project. For a detailed description of the available configuration properties, please consult the project documentation.    </span>
+            </p>
+        <div class="confbox panel">
+    <ul class=" "><li class=" ">            <p>
+    JBossWS homepage:&nbsp;<a href="http://www.jboss.org/jbossws">http://www.jboss.org/jbossws</a>            </p>
+    </li><li class=" ">            <p>
+    Project Documentation: &nbsp;<a href="https://docs.jboss.org/author/display/JBWS">https://docs.jboss.org/author/display/JBWS</a>            </p>
+    </li></ul>    </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

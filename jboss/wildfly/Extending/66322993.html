@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Expressions</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Expressions</h1>
+        </div>
+        
+        <div id="66322993" class="content prepend-top">
+            <p>
+    Expressions are mechanism that enables you to support variables in your attributes, for instance when you want the value of attribute to be resolved using system / environment properties.            </p>
+                <p>
+    An example expression is            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>${jboss.bind.address.management:127.0.0.1}</code></pre>
+        </div>
+    </div>
+            <p>
+    which means that the value should be taken from a system property named <tt class=" ">jboss.bind.address.management</tt> and if it is not defined use <tt class=" ">127.0.0.1</tt>.            </p>
+        <div class="section-2"  id="66322993_Expressions-Whatexpressiontypesaresupported"  >
+        <h2>What expression types are supported</h2>
+    
+<ul class=" "><li class=" ">            <p>
+    System properties, which are resolved using <tt class=" ">java.lang.System.getProperty(String key)</tt>            </p>
+    </li><li class=" ">            <p>
+    Environment properties, which are resolved using <tt class=" ">java.lang.System.getEnv(String name)</tt>.            </p>
+    </li><li class=" ">            <p>
+    Security vault expressions, resolved against the security vault configured for the server or Host Controller that needs to resolve the expression.            </p>
+    </li></ul>            <p>
+    In all cases, the syntax for the expression is     <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>${expression_to_resolve}</code></pre>
+        </div>
+    </div>
+            </p>
+                <p>
+    For an expression meant to be resolved against environment properties, the <tt class=" ">expression_to_resolve</tt> must be prefixed with <tt class=" ">env.</tt>. The portion after <tt class=" ">env.</tt> will be the name passed to <tt class=" ">java.lang.System.getEnv(String name)</tt>.            </p>
+                <p>
+    Security vault expressions do not support default values (i.e. the <tt class=" ">127.0.0.1</tt> in the  <tt class=" ">jboss.bind.address.management:127.0.0.1</tt> example above.)            </p>
+        </div>
+    
+    <div class="section-2"  id="66322993_Expressions-Howtosupportexpressionsinsubsystems"  >
+        <h2>How to support expressions in subsystems</h2>
+    
+            <p>
+    The easiest way is by using AttributeDefinition, which provides support for expressions just by using it correctly.            </p>
+                <p>
+    When we create an AttributeDefinition all we need to do is mark that is allows expressions. Here is an example how to define an attribute that allows expressions to be used.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>SimpleAttributeDefinition MY_ATTRIBUTE =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new SimpleAttributeDefinitionBuilder(&quot;my-attribute&quot;, ModelType.INT, true)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; .setAllowExpression(true)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .setDefaultValue(new ModelNode(1))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .build();</code></pre>
+        </div>
+    </div>
+            <p>
+    Then later when you are parsing the xml configuration you should use the MY_ATTRIBUTE attribute definition to set the value to the management operation ModelNode you are creating.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>....
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String attr = reader.getAttributeLocalName(i);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String value = reader.getAttributeValue(i);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (attr.equals(&quot;my-attribute&quot;)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MY_ATTRIBUTE.parseAndSetParameter(value, operation, reader);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else if (attr.equals(&quot;suffix&quot;)) {
+.....</code></pre>
+        </div>
+    </div>
+            <p>
+    Note that this just helps you to properly set the value to the model node you are working on, so no need to additionally set anything to the model for this attribute. Method parseAndSetParameter parses the value that was read from xml for possible expressions in it and if it finds any it creates special model node that defines that node is of type ModelType.EXPRESSION.            </p>
+                <p>
+    Later in your operation handlers where you implement populateModel and have to store the value from the operation to the configuration model you also use this MY_ATTRIBUTE attribute definition.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code> @Override
+&nbsp;protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MY_ATTRIBUTE.validateAndSet(operation,model);
+&nbsp;}</code></pre>
+        </div>
+    </div>
+            <p>
+    This will make sure that the attribute that is stored from the operation to the model is valid and nothing is lost. It also checks the value stored in the operation ModelNode, and if it isn't already ModelType.EXPRESSION, it checks if the value is a string that contains the expression syntax. If so, the value stored in the model will be of type ModelType.EXPRESSION. Doing this ensures that expressions are properly handled when they appear in operations that weren't created by the subsystem parser, but are instead passed in from CLI or admin console users.            </p>
+                <p>
+    As last step we need to use the value of the attribute. This is usually needed inside of the <tt class=" ">performRuntime</tt> method            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code> protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model, ServiceVerificationHandler verificationHandler, List&lt;ServiceController&lt;?&gt;&gt; newControllers) throws OperationFailedException {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ....
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; final int attributeValue = MY_ATTRIBUTE.resolveModelAttribute(context, model).asInt();&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...
+
+&nbsp;&nbsp;&nbsp; }</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see resolving of attribute's value is not done until it is needed for use in the subsystem's runtime services. The resolved value is not stored in the configuration model, the unresolved expression is. That way we do not lose any information in the model and can assure that also marshalling is done properly, where we must marshall back the unresolved value.            </p>
+                <p>
+    Attribute definitinon also helps you with that:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code> public void writeContent(XMLExtendedStreamWriter writer, SubsystemMarshallingContext context) throws XMLStreamException {
+&nbsp;&nbsp;&nbsp; ....
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MY_ATTRIBUTE.marshallAsAttribute(sessionData, writer);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MY_OTHER_ATTRIBUTE.marshallAsElement(sessionData, false, writer);
+&nbsp;&nbsp;&nbsp; ...
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+    <head>
+        <meta name="dtb:uid" content="HighAvailabilityGuide"/>
+                <meta name="dtb:depth" content="4"/>
+        <meta name="dtb:totalPageCount" content="0"/>
+        <meta name="dtb:maxPageNumber" content="0"/>
+    </head>
+    <docTitle>
+        <text>High Availability Guide</text>
+    </docTitle>
+    <navMap>
+
+        
+                <navPoint id="_66322833" playOrder="1">
+            <navLabel>
+                <text>High Availability Guide</text>
+            </navLabel>
+            <content src="66322833.html"/>
+                                                        <navPoint id="_66322836" playOrder="2">
+                    <navLabel>
+                        <text>WildFly 8 Cluster Howto</text>
+                    </navLabel>
+                    <content src="66322836.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322918" playOrder="3">
+                    <navLabel>
+                        <text>EJB Services</text>
+                    </navLabel>
+                    <content src="66322918.html"/>
+                                                                        <navPoint id="_69370424" playOrder="4">
+                    <navLabel>
+                        <text>EJB Subsystem</text>
+                    </navLabel>
+                    <content src="69370424.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_69370402" playOrder="5">
+                    <navLabel>
+                        <text>Introduction To High Availability Services</text>
+                    </navLabel>
+                    <content src="69370402.html"/>
+                </navPoint>
+                                                                            <navPoint id="_69370411" playOrder="6">
+                    <navLabel>
+                        <text>Changes From Previous Versions</text>
+                    </navLabel>
+                    <content src="69370411.html"/>
+                </navPoint>
+                                                                            <navPoint id="_69370417" playOrder="7">
+                    <navLabel>
+                        <text>Related Issues</text>
+                    </navLabel>
+                    <content src="69370417.html"/>
+                </navPoint>
+                                                                            <navPoint id="_69370436" playOrder="8">
+                    <navLabel>
+                        <text>HTTP Services</text>
+                    </navLabel>
+                    <content src="69370436.html"/>
+                                                                        <navPoint id="_69534460" playOrder="9">
+                    <navLabel>
+                        <text>Subsystem Support</text>
+                    </navLabel>
+                    <content src="69534460.html"/>
+                                                                        <navPoint id="_69370420" playOrder="10">
+                    <navLabel>
+                        <text>JGroups Subsystem</text>
+                    </navLabel>
+                    <content src="69370420.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_69370422" playOrder="11">
+                    <navLabel>
+                        <text>Infinispan Subsystem</text>
+                    </navLabel>
+                    <content src="69370422.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                                            <navPoint id="_69370438" playOrder="12">
+                    <navLabel>
+                        <text>Clustered Web Sessions</text>
+                    </navLabel>
+                    <content src="69370438.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_69370440" playOrder="13">
+                    <navLabel>
+                        <text>Clustered SSO</text>
+                    </navLabel>
+                    <content src="69370440.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_69370442" playOrder="14">
+                    <navLabel>
+                        <text>Load Balancing</text>
+                    </navLabel>
+                    <content src="69370442.html"/>
+                                                                        <navPoint id="_66322834" playOrder="15">
+                    <navLabel>
+                        <text>Apache httpd</text>
+                    </navLabel>
+                    <content src="66322834.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322835" playOrder="16">
+                    <navLabel>
+                        <text>mod_cluster Subsystem</text>
+                    </navLabel>
+                    <content src="66322835.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_69370447" playOrder="17">
+                    <navLabel>
+                        <text>Hibernate</text>
+                    </navLabel>
+                    <content src="69370447.html"/>
+                </navPoint>
+                                                                            <navPoint id="_84836504" playOrder="18">
+                    <navLabel>
+                        <text>Load Balanced HA Standalone Cluster - Howto</text>
+                    </navLabel>
+                    <content src="84836504.html"/>
+                </navPoint>
+                                        </navPoint>
+    </navMap>
+</ncx>

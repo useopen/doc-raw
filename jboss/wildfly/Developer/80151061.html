@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Local JNDI</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Local JNDI</h1>
+        </div>
+        
+        <div id="80151061" class="content prepend-top">
+            <p>
+    The Java EE platform specification defines the following JNDI contexts:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">java:comp</tt> - The namespace is scoped to the current component (i.e. EJB)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">java:module</tt> - Scoped to the current module            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">java:app</tt> - Scoped to the current application            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">java:global</tt> - Scoped to the application server            </p>
+    </li></ul>            <p>
+    In addition to the standard namespaces, WildFly also provides the following two global namespaces:            </p>
+    <ul class=" "><li class=" ">            <p>
+    java:jboss            </p>
+    </li><li class=" ">            <p>
+    java:/            </p>
+    </li></ul>    <div class="confbox admonition admonition-note">
+        
+            <p>
+    Only entries within the&nbsp;<tt class=" ">java:jboss/exported</tt> context are accessible over remote JNDI.            </p>
+        </div>
+    
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    For web deployments <tt class=" ">java:comp</tt> is aliased to <tt class=" ">java:module</tt>, so EJB's deployed in a war do not have their own comp namespace.            </p>
+        </div>
+    
+    <div class="section-2"  id="80151061_LocalJNDIReference-BindingentriestoJNDI"  >
+        <h2>Binding entries to JNDI</h2>
+    
+            <p>
+    There are several methods that can be used to bind entries into JNDI in WildFly.            </p>
+        <div class="section-3"  id="80151061_LocalJNDIReference-Usingadeploymentdescriptor"  >
+        <h3>Using a deployment descriptor</h3>
+    
+            <p>
+    For Java EE applications the recommended way is to use a <a href="https://docs.jboss.org/author/display/AS71/Deployment+Descriptors+used+In+AS7.1">deployment descriptor</a> to create the binding. For example the following <tt class=" ">web.xml</tt> binds the string <tt class=" ">&quot;Hello World&quot;</tt> to <tt class=" ">java:global/mystring</tt> and the string <tt class=" ">&quot;Hello Module&quot;</tt> to <tt class=" ">java:comp/env/hello</tt> (any non absolute JNDI name is relative to <tt class=" ">java:comp/env</tt> context).            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;web-app xmlns=&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd&quot;
+         version=&quot;3.1&quot;&gt;
+    &lt;env-entry&gt;
+        &lt;env-entry-name&gt;java:global/mystring&lt;/env-entry-name&gt;
+        &lt;env-entry-type&gt;java.lang.String&lt;/env-entry-type&gt;
+        &lt;env-entry-value&gt;Hello World&lt;/env-entry-value&gt;
+    &lt;/env-entry&gt;
+    &lt;env-entry&gt;
+        &lt;env-entry-name&gt;hello&lt;/env-entry-name&gt;
+        &lt;env-entry-type&gt;java.lang.String&lt;/env-entry-type&gt;
+        &lt;env-entry-value&gt;Hello Module&lt;/env-entry-value&gt;
+    &lt;/env-entry&gt;
+&lt;/web-app&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    For more details, see the <a href="http://jcp.org/en/jsr/detail?id=342">Java EE Platform Specification</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="80151061_LocalJNDIReference-Programatically"  >
+        <h3>Programatically</h3>
+    
+    <div class="section-4"  id="80151061_LocalJNDIReference-JavaEEApplications"  >
+        <h4>Java EE Applications</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="80151061_LocalJNDIReference-"  >
+        <h4></h4>
+    
+            <p>
+    Standard Java EE applications may use the standard JNDI API, included with Java SE, to bind entries in the global namespaces (the standard <tt class=" ">java:comp</tt>, <tt class=" ">java:module</tt> and <tt class=" ">java:app</tt> namespaces are read-only, as mandated by the Java EE Platform Specification).            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  InitialContext initialContext = new InitialContext();
+  initialContext.bind(&quot;java:global/a&quot;, 100);</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    There is no need to unbind entries created programatically, since WildFly tracks which bindings belong to a deployment, and the bindings are automatically removed when the deployment is undeployed.            </p>
+        </div>
+    
+    <div class="section-5"  id="80151061_LocalJNDIReference-WildFlyModulesandExtensions"  >
+        <h5>WildFly Modules and Extensions</h5>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="80151061_LocalJNDIReference-2"  >
+        <h4></h4>
+    
+            <p>
+    With respect to code in WildFly Modules/Extensions, which is executed out of a Java EE application context, using the standard JNDI API may result in a UnsupportedOperationException if the target namespace uses a WritableServiceBasedNamingStore. To work around that, the bind() invocation needs to be wrapped using WildFly proprietary APIs:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  InitialContext initialContext = new InitialContext();
+  WritableServiceBasedNamingStore.pushOwner(serviceTarget);
+  try {
+    initialContext.bind(&quot;java:global/a&quot;, 100);
+  } finally {
+    WritableServiceBasedNamingStore.popOwner();
+  }</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    The ServiceTarget removes the bind when uninstalled, thus using one out of the module/extension domain usage should be avoided, unless entries are removed using unbind().            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="80151061_LocalJNDIReference-NamingSubsystemConfiguration"  >
+        <h3>Naming Subsystem Configuration</h3>
+    
+            <p>
+    It is also possible to bind to one of the three global namespaces using configuration in the naming subsystem. This can be done by either editing the <tt class=" ">standalone.xml/domain.xml</tt> file directly, or through the management API.            </p>
+                <p>
+    Four different types of bindings are supported:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Simple - A primitive or java.net.URL entry (default is&nbsp;<tt class=" ">java.lang.String</tt>).            </p>
+    </li><li class=" ">            <p>
+    Object Factory - This allows to to specify the <tt class=" ">javax.naming.spi.ObjectFactory</tt> that is used to create the looked up value.            </p>
+    </li><li class=" ">            <p>
+    External Context - An external context to federate, such as an LDAP Directory Service&nbsp;            </p>
+    </li><li class=" ">            <p>
+    Lookup - The allows to create JNDI aliases, when this entry is looked up it will lookup the target and return the result.            </p>
+    </li></ul>            <p>
+    An example standalone.xml might look like:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:naming:2.0&quot; &gt;
+  &lt;bindings&gt;
+    &lt;simple name=&quot;java:global/a&quot; value=&quot;100&quot; type=&quot;int&quot; /&gt;
+    &lt;simple name=&quot;java:global/jbossDocs&quot; value=&quot;https://docs.jboss.org&quot; type=&quot;java.net.URL&quot; /&gt;
+&nbsp;   &lt;object-factory name=&quot;java:global/b&quot; module=&quot;com.acme&quot; class=&quot;org.acme.MyObjectFactory&quot; /&gt;
+    &lt;external-context name=&quot;java:global/federation/ldap/example&rdquo; class=&quot;javax.naming.directory.InitialDirContext&quot; cache=&quot;true&quot;&gt;
+      &lt;environment&gt;
+        &lt;property name=&quot;java.naming.factory.initial&quot; value=&ldquo;com.sun.jndi.ldap.LdapCtxFactory&rdquo; /&gt;
+        &lt;property name=&quot;java.naming.provider.url&quot; value=&ldquo;ldap://ldap.example.com:389&rdquo; /&gt;
+        &lt;property name=&quot;java.naming.security.authentication&quot; value=&ldquo;simple&rdquo; /&gt;
+        &lt;property name=&quot;java.naming.security.principal&quot; value=&ldquo;uid=admin,ou=system&rdquo; /&gt;
+        &lt;property name=&quot;java.naming.security.credentials&quot; value=&ldquo;secret&rdquo; /&gt;
+      &lt;/environment&gt;
+    &lt;/external-context&gt;
+    &lt;lookup name=&quot;java:global/c&quot; lookup=&quot;java:global/b&quot; /&gt;
+ &lt;/bindings&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The CLI may also be used to bind an entry. As an example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=naming/binding=java\:global\/mybinding:add(binding-type=simple, type=long, value=1000)</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    WildFly's Administrator Guide includes a section describing in detail the Naming subsystem configuration.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="80151061_LocalJNDIReference-RetrievingentriesfromJNDI"  >
+        <h2>Retrieving entries from JNDI</h2>
+    
+    <div class="section-3"  id="80151061_LocalJNDIReference-ResourceInjection"  >
+        <h3>Resource Injection</h3>
+    
+            <p>
+    For Java EE applications the recommended way to lookup a JNDI entry is to use <tt class=" ">@Resource</tt> injection:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  @Resource(lookup = &quot;java:global/mystring&quot;)
+  private String myString;
+
+  @Resource(name = &quot;hello&quot;)
+  private String hello;
+
+  @Resource
+  ManagedExecutorService executor;</code></pre>
+        </div>
+    </div>
+            <p>
+    Note that <tt class=" ">@Resource</tt> is more than a JNDI lookup, it also binds an entry in the component's JNDI environment. The new bind JNDI name is defined by <tt class=" ">@Resource</tt>'s <tt class=" ">name</tt> attribute, which value, if unspecified, is the Java type concatenated with&nbsp;<tt class=" ">/</tt>&nbsp;and the field's name, for instance <tt class=" ">java.lang.String/myString</tt>. More, similar to when using deployment descriptors to bind JNDI entries. unless the name is an absolute JNDI name, it is considered relative to&nbsp;<tt class=" ">java:comp/env</tt>. For instance, with respect to the field named <tt class=" ">myString</tt> above, the <tt class=" ">@Resource</tt>'s <tt class=" ">lookup</tt> attribute instructs WildFly to lookup the value in <tt class=" ">java:global/mystring</tt>, bind it in <tt class=" ">java:comp/env/java.lang.String/myString</tt>, and then inject such value into the field.            </p>
+                <p>
+    With respect to the field named <tt class=" ">hello</tt>, there is no <tt class=" ">lookup</tt> attribute value defined, so the responsibility to provide the entry's value is delegated to the deployment descriptor. Considering that the deployment descriptor was the <tt class=" ">web.xml</tt> previously shown, which defines an environment entry with same <tt class=" ">hello</tt> name, then WildFly inject the valued defined in the deployment descriptor into the field.            </p>
+                <p>
+    The <tt class=" ">executor</tt> field has no attributes specified, so the bind's name would default to <tt class=" ">java:comp/env/javax.enterprise.concurrent.ManagedExecutorService/executor</tt>, but there is no such entry in the deployment descriptor, and when that happens it's up to WildFly to provide a default value or null, depending on the field's Java type. In this particular case WildFly would inject the default instance of a managed executor service, the value in <tt class=" ">java:comp/DefaultManagedExecutorService</tt>, as mandated by the EE Concurrency Utilities 1.0 Specification (JSR 236).            </p>
+        </div>
+    
+    <div class="section-3"  id="80151061_LocalJNDIReference-StandardJavaSEJNDIAPI"  >
+        <h3>Standard Java SE JNDI API</h3>
+    
+            <p>
+    Java EE applications may use, without any additional configuration needed, the standard JNDI API to lookup an entry from JNDI:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  String myString = (String) new InitialContext().lookup(&quot;java:global/mystring&quot;);</code></pre>
+        </div>
+    </div>
+            <p>
+    or simply            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  String myString = InitialContext.doLookup(&quot;java:global/mystring&quot;);</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

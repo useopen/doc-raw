@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>JMX subsystem configuration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>JMX subsystem configuration</h1>
+        </div>
+        
+        <div id="66322718" class="content prepend-top">
+            <p>
+    The JMX subsystem registers a service with the Remoting endpoint so that remote access to JMX can be obtained over the exposed Remoting connector.            </p>
+                <p>
+    This is switched on by default in standalone mode and accessible over port 9990 but in domain mode is switched off so needs to be enabled - in domain mode the port will be the port of the Remoting connector for the WildFly 8&nbsp;instance to be monitored.            </p>
+                <p>
+    To use the connector you can access it in the standard way using a <tt class=" ">service:jmx</tt> URL:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+
+public class JMXExample {
+
+    public static void main(String[] args) throws Exception {
+        //Get a connection to the WildFly 8 MBean server on localhost
+        String host = &quot;localhost&quot;;
+        int port = 9990;  // management-web port
+        String urlString =
+            System.getProperty(&quot;jmx.service.url&quot;,&quot;service:jmx:http-remoting-jmx://&quot; + host + &quot;:&quot; + port);
+        JMXServiceURL serviceURL = new JMXServiceURL(urlString);
+        JMXConnector jmxConnector = JMXConnectorFactory.connect(serviceURL, null);
+        MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
+
+        //Invoke on the WildFly 8 MBean server
+        int count = connection.getMBeanCount();
+        System.out.println(count);
+       &nbsp;jmxConnector.close();
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    You also need to set your classpath when running the above example.&nbsp; The following script covers Linux.&nbsp; If your environment is much different, paste your script when you have it working.            </p>
+        <div class="confbox panel">
+                <p>
+    !/bin/bash            </p>
+                <p>
+    # specify your WildFly 8&nbsp;folder<br/>export YOUR_JBOSS_HOME=~/WildFly8            </p>
+                <p>
+    java -classpath $YOUR_JBOSS_HOME/bin/client/jboss-client.jar:./ JMXExample            </p>
+        </div>
+            <p>
+    You can also connect using jconsole.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    If using jconsole use the <tt class=" ">jconsole.sh</tt> and <tt class=" ">jconsole.bat</tt> scripts included in the /bin directory of the WildFly 8&nbsp;distribution as these set the classpath as required to connect over Remoting.            </p>
+        </div>
+    
+            <p>
+    In addition to the standard JVM MBeans, the WildFly 8&nbsp;MBean server contains the following MBeans:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    JMX ObjectName            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.msc:type=container,name=jboss-as</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Exposes management operations on the JBoss Modular Service Container, which is the dependency injection framework at the heart of WildFly 8. It is useful for debugging dependency problems, for example if you are integrating your own subsystems, as it exposes operations to dump all services and their current states            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.naming:type=JNDIView</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Shows what is bound in JNDI            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.modules:type=ModuleLoader,name=*</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This collection of MBeans exposes management operations on JBoss Modules classloading layer. It is useful for debugging dependency problems arising from missing module dependencies            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    <div class="section-2"  id="66322718_JMXsubsystemconfiguration-Auditlogging"  >
+        <h2>Audit logging</h2>
+    
+            <p>
+    Audit logging for the JMX MBean server managed by the JMX subsystem. The resource is at <tt class=" ">/subsystem=jmx/configuration=audit-log</tt> and its attributes are similar to the ones mentioned for <tt class=" ">/core-service=management/access=audit/logger=audit-log</tt> in <a href="69536296.html">Audit logging</a>.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">enabled</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> to enable logging of the JMX operations            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">log-boot</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> to log the JMX operations when booting the server, <tt class=" ">false</tt> otherwise            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">log-read-only</tt>            </td>
+                <td rowspan="1" colspan="1">
+    If <tt class=" ">true</tt> all operations will be audit logged, if <tt class=" ">false</tt> only operations that change the model will be logged            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    Then which handlers are used to log the management operations are configured as <tt class=" ">handler=*</tt> children of the logger. These handlers and their formatters are defined in the global <tt class=" ">/core-service=management/access=audit</tt> section mentioned in <a href="69536296.html">Audit logging</a>.            </p>
+        <div class="section-3"  id="66322718_JMXsubsystemconfiguration-JSONFormatter"  >
+        <h3>JSON Formatter</h3>
+    
+            <p>
+    The same JSON Formatter is used as described in <a href="69536296.html">Audit logging</a>. However the records for MBean Server invocations have slightly different fields from those logged for the core management layer.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>2013-08-29 18:26:29 - {
+    &quot;type&quot; : &quot;jmx&quot;,
+    &quot;r/o&quot; : false,
+    &quot;booting&quot; : false,
+    &quot;version&quot; : &quot;8.0.0.Beta1-SNAPSHOT&quot;,
+    &quot;user&quot; : &quot;$local&quot;,
+    &quot;domainUUID&quot; : null,
+    &quot;access&quot; : &quot;JMX&quot;,
+    &quot;remote-address&quot; : &quot;127.0.0.1/127.0.0.1&quot;,
+    &quot;method&quot; : &quot;invoke&quot;,
+    &quot;sig&quot; : [
+        &quot;javax.management.ObjectName&quot;,
+        &quot;java.lang.String&quot;,
+        &quot;[Ljava.lang.Object;&quot;,
+        &quot;[Ljava.lang.String;&quot;
+    ],
+    &quot;params&quot; : [
+        &quot;java.lang:type=Threading&quot;,
+        &quot;getThreadInfo&quot;,
+        &quot;[Ljava.lang.Object;@5e6c33c&quot;,
+        &quot;[Ljava.lang.String;@4b681c69&quot;
+    ]
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    It includes an optional timestamp and then the following information in the json record            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Field name            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">type</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This will have the value <tt class=" ">jmx</tt> meaning it comes from the jmx subsystem            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">r/o</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> if the operation has read only impact on the MBean(s)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">booting</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> if the operation was executed during the bootup process, <tt class=" ">false</tt> if it was executed once the server is up and running            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">version</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The version number of the WildFly instance            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">user</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The username of the authenticated user.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">domainUUID</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This is not currently populated for JMX operations            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">access</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This can have one of the following values:<br/>*<tt class=" ">NATIVE</tt> - The operation came in through the native management interface, for example the CLI<br/>*<tt class=" ">HTTP</tt> - The operation came in through the domain HTTP interface, for example the admin console<br/>*<tt class=" ">JMX</tt> - The operation came in through the JMX subsystem. See <a href="66322718.html">JMX</a> for how to configure audit logging for JMX.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">remote-address</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The address of the client executing this operation            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">method</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The name of the called MBeanServer method            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">sig</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The signature of the called called MBeanServer method            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">params</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The actual parameters passed in to the MBeanServer method, a simple <tt class=" ">Object.toString()</tt> is called on each parameter.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">error</tt>            </td>
+                <td rowspan="1" colspan="1">
+    If calling the MBeanServer method resulted in an error, this field will be populated with <tt class=" ">Throwable.getMessage()</tt>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

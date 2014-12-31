@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Advanced User Guide</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Advanced User Guide</h1>
+        </div>
+        
+        <div id="66322814" class="content prepend-top">
+<ul class=" "><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-Logging">Logging</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-JAXWSHandlerapproach">JAX-WS Handler approach</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-ApacheCXFapproach">Apache CXF approach</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-Systemproperty">System property</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-Manualinterceptoradditionandloggingfeature">Manual interceptor addition and logging feature</a>            </p>
+    </li></ul></li></ul></li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-WS%5Csupport">WS-* support</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-Addressrewrite">Address rewrite</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-Serverconfigurationoptions">Server configuration options</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-Dynamicrewrite">Dynamic rewrite</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-Configurationthroughdeploymentdescriptor">Configuration through deployment descriptor</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-contextrootelement">context-root element</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-confignameandconfigfileelements">config-name and config-file elements</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-propertyelement">property element</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-portcomponentelement">port-component element</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-webservicedescriptionelement">webservice-description element</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-SchemavalidationofSOAPmessages">Schema validation of SOAP messages</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322814.html#66322814_AdvancedUserGuide-JAXBIntroductions">JAXB Introductions</a>            </p>
+    </li></ul>    <div class="section-2"  id="66322814_AdvancedUserGuide-Logging"  >
+        <h2>Logging</h2>
+    
+            <p>
+    Logging of inbound and outbound messages is a common need. Different approaches are available for achieving that:            </p>
+        <div class="section-3"  id="66322814_AdvancedUserGuide-JAXWSHandlerapproach"  >
+        <h3>WS Handler approach</h3>
+    
+            <p>
+    A portable way of performing logging is writing a simple JAX-WS handler dumping the messages that are passed in it; the handler can be added to the desired client/endpoints (programmatically / using <tt class=" ">@HandlerChain</tt> JAX-WS annotation).            </p>
+                <p>
+    The <a href="66322822.html">predefined client and endpoint configuration</a> mechanism allows user to add the logging handler to any client/endpoint or to some of them only (in which case the <tt class=" ">@EndpointConfig</tt> annotation / JBossWS API is required though).            </p>
+        </div>
+    
+    <div class="section-3"  id="66322814_AdvancedUserGuide-ApacheCXFapproach"  >
+        <h3>Apache CXF approach</h3>
+    
+            <p>
+    Apache CXF also comes with logging interceptors that can be easily used to log messages to the console or configured client/server log files. Those interceptors can be added to client, endpoint and buses in multiple ways:            </p>
+        <div class="section-4"  id="66322814_AdvancedUserGuide-Systemproperty"  >
+        <h4>System property</h4>
+    
+            <p>
+    Setting the <tt class=" ">org.apache.cxf.logging.enabled</tt>&nbsp; system property to true causes the logging interceptors to be added to any <tt class=" ">Bus</tt> instance being created on the JVM.            </p>
+        <div class="confbox admonition admonition-info">
+        
+            <p>
+    On WildFly, the system property is easily set by adding what follows to the standalone / domain server configuration just after the extensions section:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;system-properties&gt;
+  &lt;property name=&quot;org.apache.cxf.logging.enabled&quot; value=&quot;true&quot;/&gt;
+&lt;/system-properties&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322814_AdvancedUserGuide-Manualinterceptoradditionandloggingfeature"  >
+        <h4>Manual interceptor addition and logging feature</h4>
+    
+            <p>
+    Logging interceptors can be selectively added to endpoints using the Apache CXF annotations <tt class=" ">@org.apache.cxf.interceptor.InInterceptors</tt> and <tt class=" ">@org.apache.cxf.interceptor.OutInterceptors</tt>. The same is achieved on client side by programmatically adding new instances of the logging interceptors to the client or the bus.            </p>
+                <p>
+    Alternatively, Apache CXF also comes with a <tt class=" ">org.apache.cxf.feature.LoggingFeature</tt> that can be used on clients and endpoints (either annotating them with <tt class=" ">@org.apache.cxf.feature.Features</tt> or directly with <tt class=" ">@org.apache.cxf.annotations.Logging</tt>).            </p>
+                <p>
+    Finally, the interceptors and feature can also be configured using Spring descriptors when Spring is available for the JBossWS-CXF integration on the application server.            </p>
+                <p>
+    Please refer to the <a href="http://cxf.apache.org/docs/debugging-and-logging.html#DebuggingandLogging-LoggingMessages">Apache CXF documentation</a> for more details.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322814_AdvancedUserGuide-WS%5Csupport"  >
+        <h2>* support</h2>
+    
+            <p>
+    JBossWS includes most of the WS-* specification functionalities through the integration with Apache CXF. In particular, the whole WS-Security Policy framework is fully supported, enabling full contract driven configuration of complex features like WS-Security.            </p>
+                <p>
+    In details information available further down in this documentation book.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322814_AdvancedUserGuide-Addressrewrite"  >
+        <h2>Address rewrite</h2>
+    
+            <p>
+    JBossWS allows users to configure the <i class=" ">soap:address</i> attribute in the wsdl contract of deployed services.            </p>
+        <div class="section-3"  id="66322814_AdvancedUserGuide-Serverconfigurationoptions"  >
+        <h3>Server configuration options</h3>
+    
+            <p>
+    The configuration options are part of the <a href="https://docs.jboss.org/author/display/WFLY8/Web+services+configuration">webservices subsystem section</a> of the application server domain model.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:webservices:1.1&quot; xmlns:javaee=&quot;http://java.sun.com/xml/ns/javaee&quot;
+  xmlns:jaxwsconfig=&quot;urn:jboss:jbossws-jaxws-config:4.0&quot;&gt;
+  &lt;wsdl-host&gt;localhost&lt;/wsdl-host&gt;
+  &lt;modify-wsdl-address&gt;true&lt;/modify-wsdl-address&gt;
+&lt;!--
+  &lt;wsdl-port&gt;8080&lt;/wsdl-port&gt;
+  &lt;wsdl-secure-port&gt;8443&lt;/wsdl-secure-port&gt;
+--&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    If the content of <i class=" ">&lt;soap:address&gt;</i> in the wsdl is a valid URL, JBossWS will not rewrite it unless <i class=" ">modify-wsdl-address</i> is true. If the content of <i class=" ">&lt;soap:address&gt;</i> is not a valid URL instead, JBossWS will always rewrite it using the attribute values given below. Please note that the variable <i class=" ">${jboss.bind.address}</i> can be used to set the address which the application is bound to at each startup.            </p>
+                <p>
+    The wsdl-secure-port and wsdl-port attributes are used to explicitly define the ports to be used for rewriting the SOAP address. If these attributes are not set, the ports will be identified by querying the list of installed connectors. If multiple connectors are found the port of the first connector is used.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322814_AdvancedUserGuide-Dynamicrewrite"  >
+        <h3>Dynamic rewrite</h3>
+    
+            <p>
+    When the application server is bound to multiple addresses or non-trivial real-world network architectures cause request for different external addresses to hit the same endpoint, a static rewrite of the soap:address may not be enough. JBossWS allows for both the soap:address in the wsdl and the wsdl address in the console to be rewritten with the host use in the client request. This way, users always get the right wsdl address assuming they're connecting to an instance having the endpoint they're looking for. To trigger this behaviour, the <i class=" ">jbossws.undefined.host</i> value has to be specified for the <i class=" ">wsdl-host</i> element.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;wsdl-host&gt;jbossws.undefined.host&lt;/wsdl-host&gt;
+&lt;modify-wsdl-address&gt;true&lt;/modify-wsdl-address&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Of course, when a confidential transport address is required, the addresses are always rewritten using https protocol and the port currently configured for the https/ssl connector.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322814_AdvancedUserGuide-Configurationthroughdeploymentdescriptor"  >
+        <h2>Configuration through deployment descriptor</h2>
+    
+            <p>
+    The <tt class=" ">jboss-webservices.xml</tt> deployment descriptor can be used to provide additional configuration for a given deployment.&nbsp;The expected location of it is:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">META-INF/jboss-webservices.xml</tt> for EJB webservice deployments            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">WEB-INF/jboss-webservices.xml</tt> for POJO webservice deployments and EJB webservice endpoints bundled in <tt class=" ">war</tt> archives            </p>
+    </li></ul>            <p>
+    The structure of file is the following (schemas are available <a href="http://anonsvn.jboss.org/repos/jbossws/spi/trunk/src/main/resources/schema/">here</a>):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;webservices&gt;
+  &lt;context-root/&gt;?
+  &lt;config-name/&gt;?
+  &lt;config-file/&gt;?
+  &lt;property&gt;*
+    &lt;name/&gt;
+    &lt;value/&gt;
+  &lt;/property&gt;
+  &lt;port-component&gt;*
+    &lt;ejb-name/&gt;
+    &lt;port-component-name/&gt;
+    &lt;port-component-uri/&gt;?
+    &lt;auth-method/&gt;?
+    &lt;transport-guarantee/&gt;?
+    &lt;secure-wsdl-access/&gt;?
+  &lt;/port-component&gt;
+  &lt;webservice-description&gt;*
+    &lt;webservice-description-name/&gt;
+    &lt;wsdl-publish-location/&gt;?
+  &lt;/webservice-description&gt;
+&lt;/webservices&gt;</code></pre>
+        </div>
+    </div>
+    <div class="section-3"  id="66322814_AdvancedUserGuide-contextrootelement"  >
+        <h3>context-root element</h3>
+    
+            <p>
+    Element <tt class=" ">&lt;context-root&gt;</tt> can be used to customize context root of webservices deployment.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;webservices&gt;
+  &lt;context-root&gt;foo&lt;/context-root&gt;
+&lt;/webservices&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322814_AdvancedUserGuide-confignameandconfigfileelements"  >
+        <h3>config-name and config-file elements</h3>
+    
+            <p>
+    Elements <tt class=" ">&lt;config-name&gt;</tt> and <tt class=" ">&lt;config-file&gt;</tt> can be used to associate any endpoint provided in the deployment with a given <a href="66322822.html">endpoint configuration</a>. Endpoint configuration are either specified in the referenced config file or in the WildFly domain model (webservices subsystem). For further details on the endpoint configurations and their management in the domain model, please see the related <a href="https://docs.jboss.org/author/display/WFLY8/Web+services+configuration">documentation</a>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;webservices&gt;
+  &lt;config-name&gt;Standard WSSecurity Endpoint&lt;/config-name&gt;
+  &lt;config-file&gt;META-INF/custom.xml&lt;/config-file&gt;
+&lt;/webservices&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322814_AdvancedUserGuide-propertyelement"  >
+        <h3>property element</h3>
+    
+            <p>
+    <tt class=" ">&lt;property&gt;</tt> elements can be used to setup simple property values to configure the ws stack behavior. Allowed property names and values are mentioned in the guide under related topics.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;property&gt;
+  &lt;name&gt;prop.name&lt;/name&gt;
+  &lt;value&gt;prop.value&lt;/value&gt;
+&lt;/property&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322814_AdvancedUserGuide-portcomponentelement"  >
+        <h3>port-component element</h3>
+    
+            <p>
+    Element <tt class=" ">&lt;port-component&gt;</tt> can be used to customize EJB endpoint target URI or to configure security related properties.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;webservices&gt;
+  &lt;port-component&gt;
+    &lt;ejb-name&gt;TestService&lt;/ejb-name&gt;
+    &lt;port-component-name&gt;TestServicePort&lt;/port-component-name&gt;
+    &lt;port-component-uri&gt;/*&lt;/port-component-uri&gt;
+    &lt;auth-method&gt;BASIC&lt;/auth-method&gt;
+    &lt;transport-guarantee&gt;NONE&lt;/transport-guarantee&gt;
+    &lt;secure-wsdl-access&gt;true&lt;/secure-wsdl-access&gt;
+  &lt;/port-component&gt;
+&lt;/webservices&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322814_AdvancedUserGuide-webservicedescriptionelement"  >
+        <h3>webservice-description element</h3>
+    
+            <p>
+    Element <tt class=" ">&lt;webservice-description&gt;</tt> can be used to customize (override) webservice WSDL publish location.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;webservices&gt;
+  &lt;webservice-description&gt;
+    &lt;webservice-description-name&gt;TestService&lt;/webservice-description-name&gt;
+    &lt;wsdl-publish-location&gt;file:///bar/foo.wsdl&lt;/wsdl-publish-location&gt;
+  &lt;/webservice-description&gt;
+&lt;/webservices&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322814_AdvancedUserGuide-SchemavalidationofSOAPmessages"  >
+        <h2>Schema validation of SOAP messages</h2>
+    
+            <p>
+    Apache CXF has a feature for validating incoming and outgoing SOAP messages on both client and server side. The validation is performed against the relevant schema in the endpoint wsdl contract (server side) or the wsdl contract used for building up the service proxy (client side).            </p>
+                <p>
+    Schema validation can be turned on programmatically on client side            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>((BindingProvider)proxy).getRequestContext().put(&quot;schema-validation-enabled&quot;, true);</code></pre>
+        </div>
+    </div>
+            <p>
+    or using the <tt class=" ">@org.apache.cxf.annotations.SchemaValidation</tt> annotation on server side            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import javax.jws.WebService;
+import org.apache.cxf.annotations.SchemaValidation;
+
+@WebService(...)
+@SchemaValidation
+public class ValidatingHelloImpl implements Hello {
+   ...
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Alternatively, any endpoint and client running in-container can be associated to a JBossWS <a href="66322822.html">predefined configuration</a> having the <tt class=" ">schema-validation-enabled</tt> property set to <tt class=" ">true</tt>&nbsp;in the referenced config file.            </p>
+                <p>
+    Finally, JBossWS also allows for server-wide (default) setup of schema validation by using the&nbsp;<i class=" ">Standard-Endpoint-Config</i> and&nbsp;<i class=" ">Standard-Client-Config</i> special configurations (which apply to any client / endpoint unless a different configuration is specified for them)            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:webservices:1.2&quot;&gt;
+    ...
+    &lt;endpoint-config name=&quot;Standard-Endpoint-Config&quot;&gt;
+        &lt;property name=&quot;schema-validation-enabled&quot; value=&quot;true&quot;/&gt;
+    &lt;/endpoint-config&gt;
+    ...
+    &lt;client-config name=&quot;Standard-Client-Config&quot;&gt;
+        &lt;property name=&quot;schema-validation-enabled&quot; value=&quot;true&quot;/&gt;
+    &lt;/client-config&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322814_AdvancedUserGuide-JAXBIntroductions"  >
+        <h2>JAXB Introductions</h2>
+    
+            <p>
+    As Kohsuke Kawaguchi wrote on <a href="http://weblogs.java.net/blog/kohsuke/archive/2007/07/binding_3rd_par.html">his blog</a>, one common complaint from the JAXB users is the lack of support for binding 3rd party classes. The scenario is this:  you are trying to annotate your classes with JAXB annotations to make it XML bindable, but some of the classes are coming from libraries and JDK, and thus you cannot put necessary JAXB annotations on it.            </p>
+                <p>
+    To solve this JAXB has been designed to provide hooks for programmatic introduction of annotations to the runtime.            </p>
+                <p>
+    This is currently leveraged by the JBoss JAXB Introductions project, using which users can define annotations in XML and make JAXB see those as if those were in the class files (perhaps coming from 3rd party libraries).            </p>
+                <p>
+    Take a look at the <a href="http://community.jboss.org/docs/DOC-10075">JAXB Introductions page</a> on the wiki and at the examples in the sources.            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

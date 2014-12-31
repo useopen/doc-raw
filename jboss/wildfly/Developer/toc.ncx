@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+    <head>
+        <meta name="dtb:uid" content="DeveloperGuide "/>
+                <meta name="dtb:depth" content="4"/>
+        <meta name="dtb:totalPageCount" content="0"/>
+        <meta name="dtb:maxPageNumber" content="0"/>
+    </head>
+    <docTitle>
+        <text>Developer Guide </text>
+    </docTitle>
+    <navMap>
+
+        
+                <navPoint id="_66322748" playOrder="1">
+            <navLabel>
+                <text>Developer Guide</text>
+            </navLabel>
+            <content src="66322748.html"/>
+                                                        <navPoint id="_66322825" playOrder="2">
+                    <navLabel>
+                        <text>Application Client Reference</text>
+                    </navLabel>
+                    <content src="66322825.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322831" playOrder="3">
+                    <navLabel>
+                        <text>CDI Reference</text>
+                    </navLabel>
+                    <content src="66322831.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322749" playOrder="4">
+                    <navLabel>
+                        <text>Class Loading in WildFly</text>
+                    </navLabel>
+                    <content src="66322749.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322805" playOrder="5">
+                    <navLabel>
+                        <text>Deployment Descriptors used In WildFly</text>
+                    </navLabel>
+                    <content src="66322805.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322797" playOrder="6">
+                    <navLabel>
+                        <text>Development Guidelines and Recommended Practices</text>
+                    </navLabel>
+                    <content src="66322797.html"/>
+                </navPoint>
+                                                                            <navPoint id="_80151131" playOrder="7">
+                    <navLabel>
+                        <text>EE Concurrency Utilities</text>
+                    </navLabel>
+                    <content src="80151131.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322753" playOrder="8">
+                    <navLabel>
+                        <text>EJB 3 Reference Guide</text>
+                    </navLabel>
+                    <content src="66322753.html"/>
+                                                                        <navPoint id="_66322757" playOrder="9">
+                    <navLabel>
+                        <text>Container interceptors</text>
+                    </navLabel>
+                    <content src="66322757.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322754" playOrder="10">
+                    <navLabel>
+                        <text>EJB3 subsystem configuration guide</text>
+                    </navLabel>
+                    <content src="66322754.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322756" playOrder="11">
+                    <navLabel>
+                        <text>EJB IIOP Guide</text>
+                    </navLabel>
+                    <content src="66322756.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322755" playOrder="12">
+                    <navLabel>
+                        <text>jboss-ejb3.xml Reference</text>
+                    </navLabel>
+                    <content src="66322755.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_81854707" playOrder="13">
+                    <navLabel>
+                        <text>JBoss remoting transaction propagation</text>
+                    </navLabel>
+                    <content src="81854707.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322758" playOrder="14">
+                    <navLabel>
+                        <text>Securing EJBs</text>
+                    </navLabel>
+                    <content src="66322758.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_66322770" playOrder="15">
+                    <navLabel>
+                        <text>EJB invocations from a remote client using JNDI</text>
+                    </navLabel>
+                    <content src="66322770.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322798" playOrder="16">
+                    <navLabel>
+                        <text>EJB invocations from a remote server instance</text>
+                    </navLabel>
+                    <content src="66322798.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322763" playOrder="17">
+                    <navLabel>
+                        <text>Example Applications - Migrated to WildFly</text>
+                    </navLabel>
+                    <content src="66322763.html"/>
+                                                                        <navPoint id="_66322765" playOrder="18">
+                    <navLabel>
+                        <text>Order Application Migration from EAP5.1 to WildFly 8</text>
+                    </navLabel>
+                    <content src="66322765.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322764" playOrder="19">
+                    <navLabel>
+                        <text>Seam 2 Booking EAR Migration of Binaries - Step by Step</text>
+                    </navLabel>
+                    <content src="66322764.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_66322750" playOrder="20">
+                    <navLabel>
+                        <text>How do I migrate my application from AS5 or AS6 to WildFly</text>
+                    </navLabel>
+                    <content src="66322750.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322826" playOrder="21">
+                    <navLabel>
+                        <text>How do I migrate my application to WildFly from other application servers</text>
+                    </navLabel>
+                    <content src="66322826.html"/>
+                                                                        <navPoint id="_66322827" playOrder="22">
+                    <navLabel>
+                        <text>How do I migrate my application from WebLogic to WildFly</text>
+                    </navLabel>
+                    <content src="66322827.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322828" playOrder="23">
+                    <navLabel>
+                        <text>How do I migrate my application from WebSphere to WildFly</text>
+                    </navLabel>
+                    <content src="66322828.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_66322752" playOrder="24">
+                    <navLabel>
+                        <text>Implicit module dependencies for deployments</text>
+                    </navLabel>
+                    <content src="66322752.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322769" playOrder="25">
+                    <navLabel>
+                        <text>JAX-RS Reference Guide</text>
+                    </navLabel>
+                    <content src="66322769.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322767" playOrder="26">
+                    <navLabel>
+                        <text>JNDI Reference</text>
+                    </navLabel>
+                    <content src="66322767.html"/>
+                                                                        <navPoint id="_80151061" playOrder="27">
+                    <navLabel>
+                        <text>Local JNDI Reference</text>
+                    </navLabel>
+                    <content src="80151061.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_80151063" playOrder="28">
+                    <navLabel>
+                        <text>Remote JNDI Reference</text>
+                    </navLabel>
+                    <content src="80151063.html"/>
+                                                                        <navPoint id="_80151133" playOrder="29">
+                    <navLabel>
+                        <text>Remote JNDI Reference Update Draft</text>
+                    </navLabel>
+                    <content src="80151133.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_66322759" playOrder="30">
+                    <navLabel>
+                        <text>JPA Reference Guide</text>
+                    </navLabel>
+                    <content src="66322759.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322766" playOrder="31">
+                    <navLabel>
+                        <text>OSGi</text>
+                    </navLabel>
+                    <content src="66322766.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322829" playOrder="32">
+                    <navLabel>
+                        <text>Remote EJB invocations via JNDI - EJB client API or remote-naming project</text>
+                    </navLabel>
+                    <content src="66322829.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322832" playOrder="33">
+                    <navLabel>
+                        <text>Scoped EJB client contexts</text>
+                    </navLabel>
+                    <content src="66322832.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322762" playOrder="34">
+                    <navLabel>
+                        <text>Spring applications development and migration guide</text>
+                    </navLabel>
+                    <content src="66322762.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322809" playOrder="35">
+                    <navLabel>
+                        <text>Webservices reference guide</text>
+                    </navLabel>
+                    <content src="66322809.html"/>
+                                                                        <navPoint id="_66322810" playOrder="36">
+                    <navLabel>
+                        <text>JAX-WS User Guide</text>
+                    </navLabel>
+                    <content src="66322810.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322811" playOrder="37">
+                    <navLabel>
+                        <text>JAX-WS Tools</text>
+                    </navLabel>
+                    <content src="66322811.html"/>
+                                                                        <navPoint id="_66322812" playOrder="38">
+                    <navLabel>
+                        <text>wsconsume</text>
+                    </navLabel>
+                    <content src="66322812.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322813" playOrder="39">
+                    <navLabel>
+                        <text>wsprovide</text>
+                    </navLabel>
+                    <content src="66322813.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                                            <navPoint id="_66322814" playOrder="40">
+                    <navLabel>
+                        <text>Advanced User Guide</text>
+                    </navLabel>
+                    <content src="66322814.html"/>
+                                                                        <navPoint id="_66322822" playOrder="41">
+                    <navLabel>
+                        <text>Predefined client and endpoint configurations</text>
+                    </navLabel>
+                    <content src="66322822.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322815" playOrder="42">
+                    <navLabel>
+                        <text>Authentication</text>
+                    </navLabel>
+                    <content src="66322815.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322816" playOrder="43">
+                    <navLabel>
+                        <text>Apache CXF integration</text>
+                    </navLabel>
+                    <content src="66322816.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322817" playOrder="44">
+                    <navLabel>
+                        <text>WS-Addressing</text>
+                    </navLabel>
+                    <content src="66322817.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322818" playOrder="45">
+                    <navLabel>
+                        <text>WS-Security</text>
+                    </navLabel>
+                    <content src="66322818.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322823" playOrder="46">
+                    <navLabel>
+                        <text>WS-Trust and STS</text>
+                    </navLabel>
+                    <content src="66322823.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322819" playOrder="47">
+                    <navLabel>
+                        <text>WS-Reliable Messaging</text>
+                    </navLabel>
+                    <content src="66322819.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322821" playOrder="48">
+                    <navLabel>
+                        <text>SOAP over JMS</text>
+                    </navLabel>
+                    <content src="66322821.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322820" playOrder="49">
+                    <navLabel>
+                        <text>HTTP Proxy</text>
+                    </navLabel>
+                    <content src="66322820.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66486734" playOrder="50">
+                    <navLabel>
+                        <text>WS-Discovery</text>
+                    </navLabel>
+                    <content src="66486734.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_75137137" playOrder="51">
+                    <navLabel>
+                        <text>WS-Policy</text>
+                    </navLabel>
+                    <content src="75137137.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                                            <navPoint id="_66322824" playOrder="52">
+                    <navLabel>
+                        <text>JBoss Modules and WS applications</text>
+                    </navLabel>
+                    <content src="66322824.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                        </navPoint>
+    </navMap>
+</ncx>

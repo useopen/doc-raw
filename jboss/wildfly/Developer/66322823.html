@@ -1,0 +1,930 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Trust and STS</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Trust and STS</h1>
+        </div>
+        
+        <div id="66322823" class="content prepend-top">
+<ul class=" "><li class=" ">            <p>
+    <a href="66322823.html#66322823_WS-TrustandSTS-WSTrustoverview">WS-Trust overview</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322823.html#66322823_WS-TrustandSTS-SecurityTokenService">Security Token Service</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322823.html#66322823_WS-TrustandSTS-ApacheCXFsupport">Apache CXF support</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322823.html#66322823_WS-TrustandSTS-Example">Example</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322823.html#66322823_WS-TrustandSTS-Endpoint">Endpoint</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322823.html#66322823_WS-TrustandSTS-Client">Client</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322823.html#66322823_WS-TrustandSTS-ApacheCXFSTS">Apache CXF STS</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322823.html#66322823_WS-TrustandSTS-PicketLinkSTS">PicketLink STS</a>            </p>
+    </li></ul></li></ul>    <div class="section-2"  id="66322823_WS-TrustandSTS-WSTrustoverview"  >
+        <h2>Trust overview</h2>
+    
+            <p>
+    The <a href="https://www.oasis-open.org/standards#wstrustv1.4">WS-Trust</a> specification defines&nbsp;extensions to WS-Security&nbsp;to deal with the issuing, renewing, and validating of security tokens; it also defines how to establish, assess the presence of, and broker trust relationships between participants in a secure message exchange.            </p>
+                <p>
+    Complex applications spanning multiple domains typically suffer from the need for&nbsp;generating and sharing multiple keys; moreover dealing with services updates when credentials change is usually painful. With WS-Trust, a trusted <i class=" ">Security Token Service (STS)</i> can be used to obtain security tokens which are then used as authentication / authorization. A&nbsp;client authenticates itself with the STS based on policies and requirements defined by the STS; the STS then provides a security token (e.g. a SAML token) that the client then uses to talk to the target service; the service can validate that token to make sure it really came from the trusted STS.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322823_WS-TrustandSTS-SecurityTokenService"  >
+        <h2>Security Token Service</h2>
+    
+            <p>
+    The security token service is the core of the WS-Trust extension to WS-Security; it is a service that offers some or all of the following functionalities:            </p>
+    <ul class=" "><li class=" ">            <p>
+    issuing security tokens of different types depending on the received credentials            </p>
+    </li><li class=" ">            <p>
+    validation of security tokens            </p>
+    </li><li class=" ">            <p>
+    renewal of security tokens            </p>
+    </li><li class=" ">            <p>
+    cancellation of security tokens            </p>
+    </li><li class=" ">            <p>
+    transformation of security tokens into different type ones            </p>
+    </li></ul>            <p>
+    In the basic scenario, the WSDL contract for an endpoint service will usually include a WS-Security policy stating that a particular security token type is required to access the service. Clients reading that contract will ask the STS for a security token of the required type and attach it to the message invocation to the service. The endpoint service will locally validate the received token or dispatch it to the STS for validation.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322823_WS-TrustandSTS-ApacheCXFsupport"  >
+        <h2>Apache CXF support</h2>
+    
+            <p>
+    JBossWS inherits Apache CXF support for WS-Trust, which is fully integration with WS-Security Policy support. On client side, a <tt class=" ">STSClient</tt> is used to contact the STS and e.g get the security token; the <tt class=" ">STSClient</tt> can either be programmatically provided or automatically created by CXF runtime (through policy support) and configured through properties as done with plain WS-Security (keystore locations, aliases, etc.).            </p>
+                <p>
+    Any specification compliant STS can be used; however Apache CXF comes with its own STS implementation, which can be deployed on WildFly using JBossWS integration too. Detailed information on the Apache CXF STS implementation in a multiple blog post series <a href="http://coheigea.blogspot.it/2011/10/apache-cxf-sts-documentation-part-i.html">here</a>.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322823_WS-TrustandSTS-Example"  >
+        <h2>Example</h2>
+    
+            <p>
+    Here is an example of a basic WS-Trust scenario. A service provider published a WSDL with policy assertions establishing who the communication must happen. A SAML 2.0 token issued by an STS is required to access the service endpoint. The client will authenticate itself to the STS using a UsernameToken over the symmetric binding and the STS will issue it the desired SAML 2.0 token, which the client will then forwards to the service provider endpoint. As the <tt class=" ">IssuedToken</tt> is defined as the <tt class=" ">InitiatorToken</tt> of the Asymmetric binding in the policy of the service provider, the client will use the associated secret key for message signing.            </p>
+        <div class="section-3"  id="66322823_WS-TrustandSTS-Endpoint"  >
+        <h3>Endpoint</h3>
+    
+            <p>
+    The service provider is a contract-first endpoint and the need for WS-Trust communication is completely driven by the wsdl. It comes with policies requiring signature and encryption of messages and setting the WS-Trust requirements (SAML 2.0 security token and STS location). WS-AddressingMetadata is used to specify the wsdl location of the STS and the servive/port name in it to be used:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+&lt;definitions targetNamespace=&quot;http://www.jboss.org/jbossws/ws-extensions/wssecuritypolicy&quot; name=&quot;SecurityService&quot;
+		xmlns:tns=&quot;http://www.jboss.org/jbossws/ws-extensions/wssecuritypolicy&quot;
+		xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;
+		xmlns:soap=&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot;
+		xmlns=&quot;http://schemas.xmlsoap.org/wsdl/&quot;
+		xmlns:wsp=&quot;http://www.w3.org/ns/ws-policy&quot;
+		xmlns:wsam=&quot;http://www.w3.org/2007/05/addressing/metadata&quot;
+        xmlns:wsu=&quot;http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd&quot;
+        xmlns:wsaws=&quot;http://www.w3.org/2005/08/addressing&quot;
+        xmlns:sp=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702&quot;
+        xmlns:t=&quot;http://docs.oasis-open.org/ws-sx/ws-trust/200512&quot;&gt;
+  &lt;types&gt;
+    &lt;xsd:schema&gt;
+      &lt;xsd:import namespace=&quot;http://www.jboss.org/jbossws/ws-extensions/wssecuritypolicy&quot; schemaLocation=&quot;SecurityService_schema1.xsd&quot;/&gt;
+    &lt;/xsd:schema&gt;
+  &lt;/types&gt;
+  &lt;message name=&quot;sayHello&quot;&gt;
+    &lt;part name=&quot;parameters&quot; element=&quot;tns:sayHello&quot;/&gt;
+  &lt;/message&gt;
+  &lt;message name=&quot;sayHelloResponse&quot;&gt;
+    &lt;part name=&quot;parameters&quot; element=&quot;tns:sayHelloResponse&quot;/&gt;
+  &lt;/message&gt;
+  &lt;portType name=&quot;ServiceIface&quot;&gt;
+    &lt;operation name=&quot;sayHello&quot;&gt;
+      &lt;input message=&quot;tns:sayHello&quot;/&gt;
+      &lt;output message=&quot;tns:sayHelloResponse&quot;/&gt;
+    &lt;/operation&gt;
+  &lt;/portType&gt;
+  &lt;binding name=&quot;SecurityServicePortBinding&quot; type=&quot;tns:ServiceIface&quot;&gt;
+    &lt;wsp:PolicyReference URI=&quot;#AsymmetricSAML2Policy&quot; /&gt;
+    &lt;soap:binding transport=&quot;http://schemas.xmlsoap.org/soap/http&quot; style=&quot;document&quot;/&gt;
+    &lt;operation name=&quot;sayHello&quot;&gt;
+      &lt;soap:operation soapAction=&quot;&quot;/&gt;
+      &lt;input&gt;
+        &lt;soap:body use=&quot;literal&quot;/&gt;
+        &lt;wsp:PolicyReference URI=&quot;#Input_Policy&quot; /&gt;
+      &lt;/input&gt;
+      &lt;output&gt;
+        &lt;soap:body use=&quot;literal&quot;/&gt;
+        &lt;wsp:PolicyReference URI=&quot;#Output_Policy&quot; /&gt;
+      &lt;/output&gt;
+    &lt;/operation&gt;
+  &lt;/binding&gt;
+  &lt;service name=&quot;SecurityService&quot;&gt;
+    &lt;port name=&quot;SecurityServicePort&quot; binding=&quot;tns:SecurityServicePortBinding&quot;&gt;
+      &lt;soap:address location=&quot;http://localhost:8080/jaxws-samples-wsse-policy-trust/SecurityService&quot;/&gt;
+    &lt;/port&gt;
+  &lt;/service&gt;
+
+  &lt;wsp:Policy wsu:Id=&quot;AsymmetricSAML2Policy&quot;&gt;
+		&lt;wsp:ExactlyOne&gt;
+			&lt;wsp:All&gt;
+				&lt;wsam:Addressing wsp:Optional=&quot;false&quot;&gt;
+					&lt;wsp:Policy /&gt;
+				&lt;/wsam:Addressing&gt;
+				&lt;sp:AsymmetricBinding&gt;
+					&lt;wsp:Policy&gt;
+						&lt;sp:InitiatorToken&gt;
+							&lt;wsp:Policy&gt;
+								&lt;sp:IssuedToken
+									sp:IncludeToken=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/AlwaysToRecipient&quot;&gt;
+									&lt;sp:RequestSecurityTokenTemplate&gt;
+										&lt;t:TokenType&gt;http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0&lt;/t:TokenType&gt;
+										&lt;t:KeyType&gt;http://docs.oasis-open.org/ws-sx/ws-trust/200512/PublicKey&lt;/t:KeyType&gt;
+									&lt;/sp:RequestSecurityTokenTemplate&gt;
+									&lt;wsp:Policy&gt;
+										&lt;sp:RequireInternalReference /&gt;
+									&lt;/wsp:Policy&gt;
+									&lt;sp:Issuer&gt;
+										&lt;wsaws:Address&gt;http://localhost:8080/jaxws-samples-wsse-policy-trust-sts/SecurityTokenService&lt;/wsaws:Address&gt;
+										&lt;wsaws:Metadata xmlns:wsdli=&quot;http://www.w3.org/2006/01/wsdl-instance&quot;
+										                wsdli:wsdlLocation=&quot;http://localhost:8080/jaxws-samples-wsse-policy-trust-sts/SecurityTokenService?wsdl&quot;&gt;
+										    &lt;wsaw:ServiceName xmlns:wsaw=&quot;http://www.w3.org/2006/05/addressing/wsdl&quot;
+										                    xmlns:stsns=&quot;http://docs.oasis-open.org/ws-sx/ws-trust/200512/&quot;
+										                    EndpointName=&quot;UT_Port&quot;&gt;stsns:SecurityTokenService&lt;/wsaw:ServiceName&gt;
+										&lt;/wsaws:Metadata&gt;
+									&lt;/sp:Issuer&gt;
+								&lt;/sp:IssuedToken&gt;
+							&lt;/wsp:Policy&gt;
+						&lt;/sp:InitiatorToken&gt;
+						&lt;sp:RecipientToken&gt;
+							&lt;wsp:Policy&gt;
+								&lt;sp:X509Token
+									sp:IncludeToken=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never&quot;&gt;
+									&lt;wsp:Policy&gt;
+										&lt;sp:WssX509V3Token10 /&gt;
+										&lt;sp:RequireIssuerSerialReference /&gt;
+									&lt;/wsp:Policy&gt;
+								&lt;/sp:X509Token&gt;
+							&lt;/wsp:Policy&gt;
+						&lt;/sp:RecipientToken&gt;
+						&lt;sp:Layout&gt;
+							&lt;wsp:Policy&gt;
+								&lt;sp:Lax /&gt;
+							&lt;/wsp:Policy&gt;
+						&lt;/sp:Layout&gt;
+						&lt;sp:IncludeTimestamp /&gt;
+						&lt;sp:OnlySignEntireHeadersAndBody /&gt;
+						&lt;sp:AlgorithmSuite&gt;
+							&lt;wsp:Policy&gt;
+								&lt;sp:Basic256 /&gt;
+							&lt;/wsp:Policy&gt;
+						&lt;/sp:AlgorithmSuite&gt;
+					&lt;/wsp:Policy&gt;
+				&lt;/sp:AsymmetricBinding&gt;
+				&lt;sp:Wss11&gt;
+					&lt;wsp:Policy&gt;
+						&lt;sp:MustSupportRefIssuerSerial /&gt;
+						&lt;sp:MustSupportRefThumbprint /&gt;
+						&lt;sp:MustSupportRefEncryptedKey /&gt;
+					&lt;/wsp:Policy&gt;
+				&lt;/sp:Wss11&gt;
+				&lt;sp:Trust13&gt;
+					&lt;wsp:Policy&gt;
+						&lt;sp:MustSupportIssuedTokens /&gt;
+						&lt;sp:RequireClientEntropy /&gt;
+						&lt;sp:RequireServerEntropy /&gt;
+					&lt;/wsp:Policy&gt;
+				&lt;/sp:Trust13&gt;
+			&lt;/wsp:All&gt;
+		&lt;/wsp:ExactlyOne&gt;
+	&lt;/wsp:Policy&gt;
+
+	&lt;wsp:Policy wsu:Id=&quot;Input_Policy&quot;&gt;
+		&lt;wsp:ExactlyOne&gt;
+			&lt;wsp:All&gt;
+				&lt;sp:EncryptedParts&gt;
+					&lt;sp:Body /&gt;
+				&lt;/sp:EncryptedParts&gt;
+				&lt;sp:SignedParts&gt;
+					&lt;sp:Body /&gt;
+					&lt;sp:Header Name=&quot;To&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;From&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;FaultTo&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;ReplyTo&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;MessageID&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;RelatesTo&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;Action&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+				&lt;/sp:SignedParts&gt;
+			&lt;/wsp:All&gt;
+		&lt;/wsp:ExactlyOne&gt;
+	&lt;/wsp:Policy&gt;
+
+	&lt;wsp:Policy wsu:Id=&quot;Output_Policy&quot;&gt;
+		&lt;wsp:ExactlyOne&gt;
+			&lt;wsp:All&gt;
+				&lt;sp:EncryptedParts&gt;
+					&lt;sp:Body /&gt;
+				&lt;/sp:EncryptedParts&gt;
+				&lt;sp:SignedParts&gt;
+					&lt;sp:Body /&gt;
+					&lt;sp:Header Name=&quot;To&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;From&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;FaultTo&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;ReplyTo&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;MessageID&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;RelatesTo&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+					&lt;sp:Header Name=&quot;Action&quot; Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+				&lt;/sp:SignedParts&gt;
+			&lt;/wsp:All&gt;
+		&lt;/wsp:ExactlyOne&gt;
+	&lt;/wsp:Policy&gt;
+&lt;/definitions&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The endpoint implementation class is a POJO featuring Apache CXF <tt class=" ">@EndpointProperty</tt> annotations to provide <i class=" ">WSS4J</i> security properties:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package org.jboss.test.ws.jaxws.samples.wsse.policy.trust;
+
+import javax.jws.WebService;
+
+import org.apache.cxf.annotations.EndpointProperties;
+import org.apache.cxf.annotations.EndpointProperty;
+
+@WebService
+(
+   portName = &quot;SecurityServicePort&quot;,
+   serviceName = &quot;SecurityService&quot;,
+   wsdlLocation = &quot;WEB-INF/wsdl/SecurityService.wsdl&quot;,
+   targetNamespace = &quot;http://www.jboss.org/jbossws/ws-extensions/wssecuritypolicy&quot;,
+   endpointInterface = &quot;org.jboss.test.ws.jaxws.samples.wsse.policy.trust.ServiceIface&quot;
+)
+@EndpointProperties(value = {
+      @EndpointProperty(key = &quot;ws-security.signature.username&quot;, value = &quot;myservicekey&quot;),
+      @EndpointProperty(key = &quot;ws-security.signature.properties&quot;, value = &quot;serviceKeystore.properties&quot;),
+      @EndpointProperty(key = &quot;ws-security.encryption.properties&quot;, value = &quot;serviceKeystore.properties&quot;),
+      @EndpointProperty(key = &quot;ws-security.callback-handler&quot;, value = &quot;org.jboss.test.ws.jaxws.samples.wsse.policy.trust.ServerCallbackHandler&quot;)
+})
+public class ServiceImpl implements ServiceIface
+{
+   public String sayHello()
+   {
+      return &quot;WS-Trust Hello World!&quot;;
+   }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    ... the <i class=" ">serviceKeystore.properties</i> file references the keystore, aliases, etc.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>org.apache.ws.security.crypto.provider=org.apache.ws.security.components.crypto.Merlin
+org.apache.ws.security.crypto.merlin.keystore.type=jks
+org.apache.ws.security.crypto.merlin.keystore.password=sspass
+org.apache.ws.security.crypto.merlin.keystore.alias=myservicekey
+org.apache.ws.security.crypto.merlin.keystore.file=servicestore.jks</code></pre>
+        </div>
+    </div>
+            <p>
+    ... while <tt class=" ">ServerCallbackHandler</tt> is an usual implementation of <tt class=" ">CallbackHandler</tt> to allow Apache CXF access to the keystore:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package org.jboss.test.ws.jaxws.samples.wsse.policy.trust;
+
+import java.io.IOException;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import org.apache.ws.security.WSPasswordCallback;
+
+public class ServerCallbackHandler implements CallbackHandler {
+
+    public void handle(Callback[] callbacks) throws IOException,
+            UnsupportedCallbackException {
+        for (int i = 0; i &lt; callbacks.length; i++) {
+            if (callbacks[i] instanceof WSPasswordCallback) {
+                WSPasswordCallback pc = (WSPasswordCallback) callbacks[i];
+                if (&quot;myservicekey&quot;.equals(pc.getIdentifier())) {
+                    pc.setPassword(&quot;skpass&quot;);
+                    break;
+                }
+            }
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Assuming the&nbsp;<i class=" ">servicestore.jks</i>&nbsp;keystore has been properly generated and contains service provider (server) full key (private/certificate + public key) as well as the STS public key, we can proceed to packaging the endpoint. Here is the expected content (the endpoint is a&nbsp;<i class=" ">POJO</i>&nbsp;one in a&nbsp;<i class=" ">war</i>&nbsp;archive, but&nbsp;<i class=" ">EJB3</i>&nbsp;endpoints in&nbsp;<i class=" ">jar</i>&nbsp;archives are of course also supported):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>alessio@inuyasha /dati/jbossws/stack/cxf/trunk $ jar -tvf ./modules/testsuite/cxf-tests/target/test-libs/jaxws-samples-wsse-policy-trust.war
+     0 Thu Jun 21 14:03:24 CEST 2012 META-INF/
+   159 Thu Jun 21 14:03:22 CEST 2012 META-INF/MANIFEST.MF
+     0 Thu Jun 21 14:03:24 CEST 2012 WEB-INF/
+     0 Thu Jun 21 14:03:24 CEST 2012 WEB-INF/classes/
+     0 Thu Jun 21 14:03:20 CEST 2012 WEB-INF/classes/org/
+     0 Thu Jun 21 14:03:20 CEST 2012 WEB-INF/classes/org/jboss/
+     0 Thu Jun 21 14:03:20 CEST 2012 WEB-INF/classes/org/jboss/test/
+     0 Thu Jun 21 14:03:22 CEST 2012 WEB-INF/classes/org/jboss/test/ws/
+     0 Thu Jun 21 14:03:20 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/
+     0 Thu Jun 21 14:03:20 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/
+     0 Thu Jun 21 14:03:20 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/
+     0 Thu Jun 21 14:03:20 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/
+     0 Thu Jun 21 14:03:22 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/jaxws/
+   705 Thu Jun 21 14:03:22 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/jaxws/SayHello.class
+  1069 Thu Jun 21 14:03:22 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/jaxws/SayHelloResponse.class
+     0 Thu Jun 21 14:03:22 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/
+  1159 Thu Jun 21 14:03:22 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/ServerCallbackHandler.class
+   383 Thu Jun 21 14:03:20 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/ServiceIface.class
+  1365 Thu Jun 21 14:03:20 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/ServiceImpl.class
+     0 Thu Jun 21 14:03:18 CEST 2012 WEB-INF/wsdl/
+  6478 Thu Jun 21 14:03:18 CEST 2012 WEB-INF/wsdl/SecurityService.wsdl
+   653 Thu Jun 21 14:03:18 CEST 2012 WEB-INF/wsdl/SecurityService_schema1.xsd
+  1121 Thu Jun 21 14:03:18 CEST 2012 WEB-INF/classes/serviceKeystore.properties
+  3350 Thu Jun 21 14:03:18 CEST 2012 WEB-INF/classes/servicestore.jks</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see, the jaxws classes generated by the tools are of course also included. The manifest declares the JBoss Modules dependencies for allowing Apache CXF annotations and WSS4J usage:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.2
+Created-By: 1.6.0_26-b03 (Sun Microsystems Inc.)
+Dependencies: org.apache.ws.security,org.apache.cxf</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322823_WS-TrustandSTS-Client"  >
+        <h3>Client</h3>
+    
+            <p>
+    You start by consuming the published WSDL contract using the&nbsp;<i class=" ">wsconsume</i>&nbsp;tool on client side too. Then you simply invoke the the endpoint as a standard JAX-WS one:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>QName serviceName = new QName(&quot;http://www.jboss.org/jbossws/ws-extensions/wssecuritypolicy&quot;, &quot;SecurityService&quot;);
+URL wsdlURL = new URL(serviceURL + &quot;?wsdl&quot;);
+Service service = Service.create(wsdlURL, serviceName);
+ServiceIface proxy = (ServiceIface) service.getPort(ServiceIface.class);
+
+//setup WS-Security
+Map&lt;String, Object&gt; ctx = ((BindingProvider) proxy).getRequestContext();
+ctx.put(SecurityConstants.CALLBACK_HANDLER, new ClientCallbackHandler());
+ctx.put(SecurityConstants.SIGNATURE_PROPERTIES, Thread.currentThread().getContextClassLoader().getResource(&quot;META-INF/clientKeystore.properties&quot;));
+ctx.put(SecurityConstants.ENCRYPT_PROPERTIES, Thread.currentThread().getContextClassLoader().getResource(&quot;META-INF/clientKeystore.properties&quot;));
+ctx.put(SecurityConstants.SIGNATURE_USERNAME, &quot;myclientkey&quot;);
+ctx.put(SecurityConstants.ENCRYPT_USERNAME, &quot;myservicekey&quot;);
+ctx.put(SecurityConstants.USERNAME + &quot;.it&quot;, &quot;alice&quot;);
+ctx.put(SecurityConstants.CALLBACK_HANDLER + &quot;.it&quot;, new ClientCallbackHandler());
+ctx.put(SecurityConstants.ENCRYPT_PROPERTIES + &quot;.it&quot;, Thread.currentThread().getContextClassLoader().getResource(&quot;META-INF/clientKeystore.properties&quot;));
+ctx.put(SecurityConstants.ENCRYPT_USERNAME + &quot;.it&quot;, &quot;mystskey&quot;);
+ctx.put(SecurityConstants.STS_TOKEN_USERNAME + &quot;.it&quot;, &quot;myclientkey&quot;);
+ctx.put(SecurityConstants.STS_TOKEN_PROPERTIES + &quot;.it&quot;, Thread.currentThread().getContextClassLoader().getResource(&quot;META-INF/clientKeystore.properties&quot;));
+ctx.put(SecurityConstants.STS_TOKEN_USE_CERT_FOR_KEYINFO + &quot;.it&quot;, &quot;true&quot;);
+ctx.put(&quot;ws-security.sts.disable-wsmex-call-using-epr-address&quot;, &quot;true&quot;);
+
+proxy.sayHello();</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see, as usual the WS-Security properties are set in the request context. The <tt class=" ">&quot;.it&quot;</tt> suffix is used for properties related to communication with the Security Token Service (which is described below and also includes policies enforcing signed and encrypted messages). The <tt class=" ">ClientCallbackHandler</tt> is basically similar to the endpoint server one. The <i class=" ">clientKeystore.properties</i> file is the client side equivalent of the&nbsp;<i class=" ">serviceKeystore.properties</i> and references the <i class=" ">clientstore.jks</i> keystore file,&nbsp;which has been populated with the client full key (private/certificate + public key) as well as the server endpoint and STS public keys.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>org.apache.ws.security.crypto.provider=org.apache.ws.security.components.crypto.Merlin
+org.apache.ws.security.crypto.merlin.keystore.type=jks
+org.apache.ws.security.crypto.merlin.keystore.password=cspass
+org.apache.ws.security.crypto.merlin.keystore.alias=myclientkey
+org.apache.ws.security.crypto.merlin.keystore.file=META-INF/clientstore.jks</code></pre>
+        </div>
+    </div>
+            <p>
+    The Apache CXF WS-Policy engine will digest the security requirements in the endpoint contract and ensure a valid secure communication is in place for interacting with the server endpoint. More in details, here is what will be happening:            </p>
+    <ol class=" "><li class=" ">            <p>
+    the client get the service endpoint WSDL; the Apache CXF engine parses it, processes the included policy and decides to contact the STS            </p>
+    </li><li class=" ">            <p>
+    the STS client is automatically injected into the application client and gets the STS wsdl; the Apache CXF engine processes the policy in it            </p>
+    </li><li class=" ">            <p>
+    a WS-Security enabled communication (as per STS advertised policy) is established and the client issues a request for getting a SAML assertion token from the STS            </p>
+    </li><li class=" ">            <p>
+    the STS endpoint receives the request, extracts the client identify from it and authenticates the client            </p>
+    </li><li class=" ">            <p>
+    the SAML token is returned to the client, which uses it for establishing a new connection with the service endpoint; the Apache CXF engine again setups signature/encryption as per endpoint advertised policy            </p>
+    </li><li class=" ">            <p>
+    the service endpoint receives the token provided through the STS and performs the required operation            </p>
+    </li></ol>    </div>
+    
+    <div class="section-3"  id="66322823_WS-TrustandSTS-ApacheCXFSTS"  >
+        <h3>Apache CXF STS</h3>
+    
+            <p>
+    As mentioned above, Apache CXF comes with its own Security Token Service implementation. That is completely configurable and can be used as a JAX-WS <tt class=" ">WebServiceProvider</tt> endpoint running in payload service mode. An extension to the&nbsp;org.apache.cxf.ws.security.sts.provider.SecurityTokenServiceProvider is created, properly annotated and included in an usual webservice endpoint deployment.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package org.jboss.test.ws.jaxws.samples.wsse.policy.trust;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.xml.ws.WebServiceProvider;
+
+import org.apache.cxf.annotations.EndpointProperties;
+import org.apache.cxf.annotations.EndpointProperty;
+import org.apache.cxf.interceptor.InInterceptors;
+import org.apache.cxf.sts.StaticSTSProperties;
+import org.apache.cxf.sts.operation.TokenIssueOperation;
+import org.apache.cxf.sts.operation.TokenValidateOperation;
+import org.apache.cxf.sts.service.ServiceMBean;
+import org.apache.cxf.sts.service.StaticService;
+import org.apache.cxf.sts.token.provider.SAMLTokenProvider;
+import org.apache.cxf.sts.token.validator.SAMLTokenValidator;
+import org.apache.cxf.ws.security.sts.provider.SecurityTokenServiceProvider;
+
+@WebServiceProvider(serviceName = &quot;SecurityTokenService&quot;,
+      portName = &quot;UT_Port&quot;,
+      targetNamespace = &quot;http://docs.oasis-open.org/ws-sx/ws-trust/200512/&quot;,
+      wsdlLocation = &quot;WEB-INF/wsdl/ws-trust-1.4-service.wsdl&quot;)
+@EndpointProperties(value = {
+      @EndpointProperty(key = &quot;ws-security.signature.username&quot;, value = &quot;mystskey&quot;),
+      @EndpointProperty(key = &quot;ws-security.signature.properties&quot;, value = &quot;stsKeystore.properties&quot;),
+      @EndpointProperty(key = &quot;ws-security.callback-handler&quot;, value = &quot;org.jboss.test.ws.jaxws.samples.wsse.policy.trust.STSCallbackHandler&quot;),
+      @EndpointProperty(key = &quot;ws-security.validate.token&quot;, value = &quot;false&quot;) //to let the JAAS integration deal with validation through the interceptor below
+})
+@InInterceptors(interceptors = {&quot;org.jboss.wsf.stack.cxf.security.authentication.SubjectCreatingPolicyInterceptor&quot;})
+public class SampleSTS extends SecurityTokenServiceProvider
+{
+   public SampleSTS() throws Exception
+   {
+      super();
+
+      StaticSTSProperties props = new StaticSTSProperties();
+      props.setSignaturePropertiesFile(&quot;stsKeystore.properties&quot;);
+      props.setSignatureUsername(&quot;mystskey&quot;);
+      props.setCallbackHandlerClass(STSCallbackHandler.class.getName());
+      props.setIssuer(&quot;DoubleItSTSIssuer&quot;);
+
+      List&lt;ServiceMBean&gt; services = new LinkedList&lt;ServiceMBean&gt;();
+      StaticService service = new StaticService();
+      service.setEndpoints(Arrays.asList(&quot;http://localhost:(\\d)*/jaxws-samples-wsse-policy-trust/SecurityService&quot;, &quot;http://\\[::1\\]:(\\d)*/jaxws-samples-wsse-policy-trust/SecurityService&quot;));
+      services.add(service);
+
+      TokenIssueOperation issueOperation = new TokenIssueOperation();
+      issueOperation.setServices(services);
+      issueOperation.getTokenProviders().add(new SAMLTokenProvider());
+      issueOperation.setStsProperties(props);
+
+      TokenValidateOperation validateOperation = new TokenValidateOperation();
+      validateOperation.getTokenValidators().add(new SAMLTokenValidator());
+      validateOperation.setStsProperties(props);
+
+      this.setIssueOperation(issueOperation);
+      this.setValidateOperation(validateOperation);
+   }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">@WebServiceProvider</tt> annotation references a WS-SecurityPolicy enriched <a href="http://anonsvn.jboss.org/repos/jbossws/stack/cxf/tags/jbossws-cxf-4.1.0.Beta1/modules/testsuite/cxf-tests/src/test/resources/jaxws/samples/wsse/policy/trust/WEB-INF/wsdl/ws-trust-1.4-service.wsdl">version</a> of the WS-Trust 1.4 wsdl.            </p>
+                <p>
+    The <tt class=" ">@EndpointProperty</tt> annotations provides the usual WSS4J configuration elements.            </p>
+                <p>
+    The <tt class=" ">@InInterceptor</tt> annotation is used to specify a JBossWS integration interceptor to be used for authenticating incoming requests; JAAS integration is used here for authentication, so basically the username/passoword coming from the UsernameToken in the client message are used for authenticating the client against a security domain on the application server hosting the STS deployment.            </p>
+                <p>
+    The stsKeystore.properties file is as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>org.apache.ws.security.crypto.provider=org.apache.ws.security.components.crypto.Merlin
+org.apache.ws.security.crypto.merlin.keystore.type=jks
+org.apache.ws.security.crypto.merlin.keystore.password=stsspass
+org.apache.ws.security.crypto.merlin.keystore.file=stsstore.jks</code></pre>
+        </div>
+    </div>
+            <p>
+    ... while STSCallbackHandler grants access to the stsstore.jks, which has been populated with&nbsp;the STS full key (private/certificate + public key) as well as the server endpoint and client public keys.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package org.jboss.test.ws.jaxws.samples.wsse.policy.trust;
+
+import java.io.IOException;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import org.apache.ws.security.WSPasswordCallback;
+
+public class STSCallbackHandler implements CallbackHandler {
+
+    public void handle(Callback[] callbacks) throws IOException,
+            UnsupportedCallbackException {
+        for (int i = 0; i &lt; callbacks.length; i++) {
+            if (callbacks[i] instanceof WSPasswordCallback) {
+                WSPasswordCallback pc = (WSPasswordCallback) callbacks[i];
+                if (&quot;mystskey&quot;.equals(pc.getIdentifier())) {
+                    pc.setPassword(&quot;stskpass&quot;);
+                    break;
+                }
+            }
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Here is how the STS webservice provider is packaged:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>alessio@inuyasha /dati/jbossws/stack/cxf/trunk $ jar -tvf ./modules/testsuite/cxf-tests/target/test-libs/jaxws-samples-wsse-policy-trust-sts.war
+     0 Mon Jun 25 13:39:06 CEST 2012 META-INF/
+   164 Mon Jun 25 13:39:04 CEST 2012 META-INF/MANIFEST.MF
+     0 Mon Jun 25 13:39:06 CEST 2012 WEB-INF/
+     0 Mon Jun 25 13:39:06 CEST 2012 WEB-INF/classes/
+     0 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/
+     0 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/
+     0 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/test/
+     0 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/test/ws/
+     0 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/
+     0 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/
+     0 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/
+     0 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/
+     0 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/
+  1148 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/STSCallbackHandler.class
+  3456 Mon Jun 25 13:39:04 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/SampleSTS.class
+   251 Mon Jun 25 13:39:02 CEST 2012 WEB-INF/jboss-web.xml
+     0 Mon Jun 25 13:39:02 CEST 2012 WEB-INF/wsdl/
+ 13635 Mon Jun 25 13:39:02 CEST 2012 WEB-INF/wsdl/ws-trust-1.4-service.wsdl
+  1054 Mon Jun 25 13:39:02 CEST 2012 WEB-INF/classes/stsKeystore.properties
+  3978 Mon Jun 25 13:39:02 CEST 2012 WEB-INF/classes/stsstore.jks</code></pre>
+        </div>
+    </div>
+            <p>
+    The <i class=" ">jboss-web.xml</i> descriptor is used to set the security domain to be used for authentication (in this case the domain will need to be configured to allow <i class=" ">alice</i> / <i class=" ">clarinet</i> username/password couple):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;!DOCTYPE jboss-web PUBLIC &quot;-//JBoss//DTD Web Application 2.4//EN&quot; &quot;http://www.jboss.org/j2ee/dtd/jboss-web_4_0.dtd&quot;&gt;
+&lt;jboss-web&gt;
+   &lt;security-domain&gt;java:/jaas/JBossWS-trust-sts&lt;/security-domain&gt;
+&lt;/jboss-web&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    ... and the manifest contains the usual declaration of module dependencies (Apache CXF internals are needed here to build up the STS configuration in <tt class=" ">SampleSTS</tt> constructor as shown above):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.2
+Created-By: 1.6.0_26-b03 (Sun Microsystems Inc.)
+Dependencies: org.apache.ws.security,org.apache.cxf.impl</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-tip">
+            <div class="title">WS-MetadataExchange and interoperability</div>
+        
+            <p>
+    To achieve better interoperability, you might consider allowing the STS endpoint to reply to WS-MetadataExchange messages directed to the <tt class=" ">/mex</tt> URL sub-path (e.g. <tt class=" ">http://localhost:8080/jaxws-samples-wsse-policy-trust-sts/SecurityTokenService/mex</tt>). This can be done by tweaking the <i class=" ">url-pattern</i> for the underlying endpoint servlet, for instance by adding a <i class=" ">web.xml</i>&nbsp; descriptor as follows to the deployment:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app
+   version=&quot;2.5&quot; xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+   xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+   xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot;&gt;
+   &lt;servlet&gt;
+      &lt;servlet-name&gt;TestSecurityTokenService&lt;/servlet-name&gt;
+      &lt;servlet-class&gt;org.jboss.test.ws.jaxws.samples.wsse.policy.trust.SampleSTS&lt;/servlet-class&gt;
+   &lt;/servlet&gt;
+   &lt;servlet-mapping&gt;
+      &lt;servlet-name&gt;TestSecurityTokenService&lt;/servlet-name&gt;
+      &lt;url-pattern&gt;/SecurityTokenService/*&lt;/url-pattern&gt;
+   &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    As a matter of fact, at the time of writing some webservices implementations (including <i class=" ">Metro</i>) assume the <tt class=" ">/mex</tt> URL as the default choice for directing WS-MetadataExchange requests to and use that to retrieve STS wsdl contracts.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322823_WS-TrustandSTS-PicketLinkSTS"  >
+        <h3>PicketLink STS</h3>
+    
+            <p>
+    <a href="http://www.jboss.org/picketlink">PicketLink</a> provides facilities for building up an alternative to the Apache CXF Security Token Service implementation.            </p>
+                <p>
+    Similarly to the previous implementation, the STS is served through a <tt class=" ">WebServiceProvider</tt> annotated POJO:&nbsp;            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package org.jboss.test.ws.jaxws.samples.wsse.policy.trust;
+
+import javax.annotation.Resource;
+import javax.xml.ws.Service;
+import javax.xml.ws.ServiceMode;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.WebServiceProvider;
+
+import org.apache.cxf.annotations.EndpointProperties;
+import org.apache.cxf.annotations.EndpointProperty;
+import org.apache.cxf.interceptor.InInterceptors;
+import org.picketlink.identity.federation.core.wstrust.PicketLinkSTS;
+
+@WebServiceProvider(serviceName = &quot;PicketLinkSTS&quot;, portName = &quot;PicketLinkSTSPort&quot;, targetNamespace = &quot;urn:picketlink:identity-federation:sts&quot;, wsdlLocation = &quot;WEB-INF/wsdl/PicketLinkSTS.wsdl&quot;)
+@ServiceMode(value = Service.Mode.MESSAGE)
+//be sure to have dependency on org.apache.cxf module when on AS7, otherwise Apache CXF annotations are ignored
+@EndpointProperties(value = {
+      @EndpointProperty(key = &quot;ws-security.signature.username&quot;, value = &quot;mystskey&quot;),
+      @EndpointProperty(key = &quot;ws-security.signature.properties&quot;, value = &quot;stsKeystore.properties&quot;),
+      @EndpointProperty(key = &quot;ws-security.callback-handler&quot;, value = &quot;org.jboss.test.ws.jaxws.samples.wsse.policy.trust.STSCallbackHandler&quot;),
+      @EndpointProperty(key = &quot;ws-security.validate.token&quot;, value = &quot;false&quot;) //to let the JAAS integration deal with validation through the interceptor below
+})
+@InInterceptors(interceptors = {&quot;org.jboss.wsf.stack.cxf.security.authentication.SubjectCreatingPolicyInterceptor&quot;})
+public class PicketLinkSTService extends PicketLinkSTS {
+   @Resource
+   public void setWSC(WebServiceContext wctx) {
+       this.context = wctx;
+   }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">@WebServiceProvider</tt> annotation references the following WS-Policy enabled wsdl contract; please note the wsdl operations, messages and such must match the <tt class=" ">PicketLinkSTS</tt> implementation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;wsdl:definitions name=&quot;PicketLinkSTS&quot; targetNamespace=&quot;urn:picketlink:identity-federation:sts&quot;
+	xmlns:tns=&quot;urn:picketlink:identity-federation:sts&quot;
+	xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;
+	xmlns:wsdl=&quot;http://schemas.xmlsoap.org/wsdl/&quot;
+	xmlns:wsap10=&quot;http://www.w3.org/2006/05/addressing/wsdl&quot;
+	xmlns:wsp=&quot;http://www.w3.org/ns/ws-policy&quot;
+	xmlns:wsu=&quot;http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd&quot;
+	xmlns:wst=&quot;http://docs.oasis-open.org/ws-sx/ws-trust/200512&quot;
+	xmlns:soap12=&quot;http://schemas.xmlsoap.org/wsdl/soap12/&quot;&gt;
+  &lt;wsdl:types&gt;
+    &lt;xs:schema elementFormDefault=&quot;qualified&quot; targetNamespace='http://docs.oasis-open.org/ws-sx/ws-trust/200512' xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;&gt;
+      &lt;xs:element name='RequestSecurityToken' type='wst:AbstractRequestSecurityTokenType' /&gt;
+      &lt;xs:element name='RequestSecurityTokenResponse' type='wst:AbstractRequestSecurityTokenType' /&gt;
+      &lt;xs:complexType name='AbstractRequestSecurityTokenType' &gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:any namespace='##any' processContents='lax' minOccurs='0' maxOccurs='unbounded' /&gt;
+        &lt;/xs:sequence&gt;
+        &lt;xs:attribute name='Context' type='xs:anyURI' use='optional' /&gt;
+        &lt;xs:anyAttribute namespace='##other' processContents='lax' /&gt;
+      &lt;/xs:complexType&gt;
+      &lt;xs:element name='RequestSecurityTokenCollection' type='wst:RequestSecurityTokenCollectionType' /&gt;
+      &lt;xs:complexType name='RequestSecurityTokenCollectionType' &gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element name='RequestSecurityToken' type='wst:AbstractRequestSecurityTokenType' minOccurs='2' maxOccurs='unbounded'/&gt;
+        &lt;/xs:sequence&gt;
+      &lt;/xs:complexType&gt;
+      &lt;xs:element name='RequestSecurityTokenResponseCollection' type='wst:RequestSecurityTokenResponseCollectionType' /&gt;
+      &lt;xs:complexType name='RequestSecurityTokenResponseCollectionType' &gt;
+        &lt;xs:sequence&gt;
+          &lt;xs:element ref='wst:RequestSecurityTokenResponse' minOccurs='1' maxOccurs='unbounded' /&gt;
+        &lt;/xs:sequence&gt;
+        &lt;xs:anyAttribute namespace='##other' processContents='lax' /&gt;
+      &lt;/xs:complexType&gt;
+    &lt;/xs:schema&gt;
+  &lt;/wsdl:types&gt;
+
+  &lt;wsdl:message name=&quot;RequestSecurityTokenMsg&quot;&gt;
+    &lt;wsdl:part name=&quot;request&quot; element=&quot;wst:RequestSecurityToken&quot; /&gt;
+  &lt;/wsdl:message&gt;
+  &lt;wsdl:message name=&quot;RequestSecurityTokenResponseCollectionMsg&quot;&gt;
+    &lt;wsdl:part name=&quot;responseCollection&quot;
+            element=&quot;wst:RequestSecurityTokenResponseCollection&quot;/&gt;
+  &lt;/wsdl:message&gt;
+
+  &lt;wsdl:portType name=&quot;SecureTokenService&quot;&gt;
+    &lt;wsdl:operation name=&quot;IssueToken&quot;&gt;
+      &lt;wsdl:input wsap10:Action=&quot;http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue&quot; message=&quot;tns:RequestSecurityTokenMsg&quot;/&gt;
+      &lt;wsdl:output wsap10:Action=&quot;http://docs.oasis-open.org/ws-sx/ws-trust/200512/RSTRC/IssueFinal&quot; message=&quot;tns:RequestSecurityTokenResponseCollectionMsg&quot;/&gt;
+    &lt;/wsdl:operation&gt;
+  &lt;/wsdl:portType&gt;
+  &lt;wsdl:binding name=&quot;STSBinding&quot; type=&quot;tns:SecureTokenService&quot;&gt;
+    &lt;wsp:PolicyReference URI=&quot;#UT_policy&quot; /&gt;
+    &lt;soap12:binding transport=&quot;http://schemas.xmlsoap.org/soap/http&quot;/&gt;
+    &lt;wsdl:operation name=&quot;IssueToken&quot;&gt;
+      &lt;soap12:operation soapAction=&quot;http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue&quot; style=&quot;document&quot;/&gt;
+      &lt;wsdl:input&gt;
+        &lt;wsp:PolicyReference URI=&quot;#Input_policy&quot; /&gt;
+        &lt;soap12:body use=&quot;literal&quot;/&gt;
+      &lt;/wsdl:input&gt;
+      &lt;wsdl:output&gt;
+        &lt;wsp:PolicyReference URI=&quot;#Output_policy&quot; /&gt;
+        &lt;soap12:body use=&quot;literal&quot;/&gt;
+      &lt;/wsdl:output&gt;
+    &lt;/wsdl:operation&gt;
+  &lt;/wsdl:binding&gt;
+  &lt;wsdl:service name=&quot;PicketLinkSTS&quot;&gt;
+    &lt;wsdl:port name=&quot;PicketLinkSTSPort&quot; binding=&quot;tns:STSBinding&quot;&gt;
+      &lt;soap12:address location=&quot;http://localhost:8080/picketlink-sts/PicketLinkSTS&quot;/&gt;
+    &lt;/wsdl:port&gt;
+  &lt;/wsdl:service&gt;
+
+  &lt;wsp:Policy wsu:Id=&quot;UT_policy&quot;&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;wsap10:UsingAddressing/&gt;
+            &lt;sp:SymmetricBinding
+               xmlns:sp=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702&quot;&gt;
+               &lt;wsp:Policy&gt;
+                  &lt;sp:ProtectionToken&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:X509Token
+                           sp:IncludeToken=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/Never&quot;&gt;
+                           &lt;wsp:Policy&gt;
+                              &lt;sp:RequireDerivedKeys /&gt;
+                              &lt;sp:RequireThumbprintReference /&gt;
+                              &lt;sp:WssX509V3Token10 /&gt;
+                           &lt;/wsp:Policy&gt;
+                        &lt;/sp:X509Token&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:ProtectionToken&gt;
+                  &lt;sp:AlgorithmSuite&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:Basic256 /&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:AlgorithmSuite&gt;
+                  &lt;sp:Layout&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:Lax /&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:Layout&gt;
+                  &lt;sp:IncludeTimestamp /&gt;
+                  &lt;sp:EncryptSignature /&gt;
+                  &lt;sp:OnlySignEntireHeadersAndBody /&gt;
+               &lt;/wsp:Policy&gt;
+            &lt;/sp:SymmetricBinding&gt;
+            &lt;sp:SignedSupportingTokens
+               xmlns:sp=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702&quot;&gt;
+               &lt;wsp:Policy&gt;
+                  &lt;sp:UsernameToken
+                     sp:IncludeToken=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702/IncludeToken/AlwaysToRecipient&quot;&gt;
+                     &lt;wsp:Policy&gt;
+                        &lt;sp:WssUsernameToken10 /&gt;
+                     &lt;/wsp:Policy&gt;
+                  &lt;/sp:UsernameToken&gt;
+               &lt;/wsp:Policy&gt;
+            &lt;/sp:SignedSupportingTokens&gt;
+            &lt;sp:Wss11
+               xmlns:sp=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702&quot;&gt;
+               &lt;wsp:Policy&gt;
+                  &lt;sp:MustSupportRefKeyIdentifier /&gt;
+                  &lt;sp:MustSupportRefIssuerSerial /&gt;
+                  &lt;sp:MustSupportRefThumbprint /&gt;
+                  &lt;sp:MustSupportRefEncryptedKey /&gt;
+               &lt;/wsp:Policy&gt;
+            &lt;/sp:Wss11&gt;
+            &lt;sp:Trust13
+               xmlns:sp=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702&quot;&gt;
+               &lt;wsp:Policy&gt;
+                  &lt;sp:MustSupportIssuedTokens /&gt;
+                  &lt;sp:RequireClientEntropy /&gt;
+                  &lt;sp:RequireServerEntropy /&gt;
+               &lt;/wsp:Policy&gt;
+            &lt;/sp:Trust13&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+
+   &lt;wsp:Policy wsu:Id=&quot;Input_policy&quot;&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;sp:SignedParts
+               xmlns:sp=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702&quot;&gt;
+               &lt;sp:Body /&gt;
+               &lt;sp:Header Name=&quot;To&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;From&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;FaultTo&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;ReplyTo&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;MessageID&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;RelatesTo&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;Action&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+            &lt;/sp:SignedParts&gt;
+            &lt;sp:EncryptedParts
+               xmlns:sp=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702&quot;&gt;
+               &lt;sp:Body /&gt;
+            &lt;/sp:EncryptedParts&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+
+   &lt;wsp:Policy wsu:Id=&quot;Output_policy&quot;&gt;
+      &lt;wsp:ExactlyOne&gt;
+         &lt;wsp:All&gt;
+            &lt;sp:SignedParts
+               xmlns:sp=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702&quot;&gt;
+               &lt;sp:Body /&gt;
+               &lt;sp:Header Name=&quot;To&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;From&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;FaultTo&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;ReplyTo&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;MessageID&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;RelatesTo&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+               &lt;sp:Header Name=&quot;Action&quot;
+                  Namespace=&quot;http://www.w3.org/2005/08/addressing&quot; /&gt;
+            &lt;/sp:SignedParts&gt;
+            &lt;sp:EncryptedParts
+               xmlns:sp=&quot;http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702&quot;&gt;
+               &lt;sp:Body /&gt;
+            &lt;/sp:EncryptedParts&gt;
+         &lt;/wsp:All&gt;
+      &lt;/wsp:ExactlyOne&gt;
+   &lt;/wsp:Policy&gt;
+
+&lt;/wsdl:definitions&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Differently from the Apache CXF STS example described above, the PicketLink based STS gets its configuration from a picketlink-sts.xml descriptor which must be added in WEB-INF into the deployment; please refer to the PicketLink documentation for further information:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;PicketLinkSTS xmlns=&quot;urn:picketlink:identity-federation:config:1.0&quot;
+	STSName=&quot;PicketLinkSTS&quot; TokenTimeout=&quot;7200&quot; EncryptToken=&quot;false&quot;&gt;
+	&lt;KeyProvider ClassName=&quot;org.picketlink.identity.federation.core.impl.KeyStoreKeyManager&quot;&gt;
+		&lt;Auth Key=&quot;KeyStoreURL&quot; Value=&quot;stsstore.jks&quot;/&gt;
+  		&lt;Auth Key=&quot;KeyStorePass&quot; Value=&quot;stsspass&quot;/&gt;
+  		&lt;Auth Key=&quot;SigningKeyAlias&quot; Value=&quot;mystskey&quot;/&gt;
+   		&lt;Auth Key=&quot;SigningKeyPass&quot; Value=&quot;stskpass&quot;/&gt;
+  		&lt;ValidatingAlias Key=&quot;http://localhost:8080/jaxws-samples-wsse-policy-trust/SecurityService&quot; Value=&quot;myservicekey&quot;/&gt;
+	&lt;/KeyProvider&gt;
+	&lt;TokenProviders&gt;
+            &lt;TokenProvider ProviderClass=&quot;org.picketlink.identity.federation.core.wstrust.plugins.saml.SAML11TokenProvider&quot;
+                TokenType=&quot;http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1&quot;
+	        TokenElement=&quot;Assertion&quot;
+	        TokenElementNS=&quot;urn:oasis:names:tc:SAML:1.0:assertion&quot;/&gt;
+            &lt;TokenProvider ProviderClass=&quot;org.picketlink.identity.federation.core.wstrust.plugins.saml.SAML20TokenProvider&quot;
+                TokenType=&quot;http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0&quot;
+	        TokenElement=&quot;Assertion&quot;
+	        TokenElementNS=&quot;urn:oasis:names:tc:SAML:2.0:assertion&quot;/&gt;
+	&lt;/TokenProviders&gt;
+&lt;/PicketLinkSTS&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally, the PicketLink alternative approach of course requires different module dependencies to be declared in the MANIFEST.MF:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.2
+Created-By: 1.6.0_26-b03 (Sun Microsystems Inc.)
+Dependencies: org.apache.ws.security,org.apache.cxf,org.picketlink</code></pre>
+        </div>
+    </div>
+            <p>
+    Here is how the PicketLink STS endpoint is packaged:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>alessio@inuyasha /dati/jbossws/stack/cxf/trunk $ jar -tvf ./modules/testsuite/cxf-tests/target/test-libs/jaxws-samples-wsse-policy-trustPicketLink-sts.war
+     0 Mon Sep 03 17:38:38 CEST 2012 META-INF/
+   174 Mon Sep 03 17:38:36 CEST 2012 META-INF/MANIFEST.MF
+     0 Mon Sep 03 17:38:38 CEST 2012 WEB-INF/
+     0 Mon Sep 03 17:38:38 CEST 2012 WEB-INF/classes/
+     0 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/classes/org/
+     0 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/classes/org/jboss/
+     0 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/classes/org/jboss/test/
+     0 Mon Sep 03 16:35:52 CEST 2012 WEB-INF/classes/org/jboss/test/ws/
+     0 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/
+     0 Mon Sep 03 16:35:52 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/
+     0 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/
+     0 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/
+     0 Mon Sep 03 16:35:52 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/
+  1686 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/PicketLinkSTService.class
+  1148 Mon Sep 03 16:35:52 CEST 2012 WEB-INF/classes/org/jboss/test/ws/jaxws/samples/wsse/policy/trust/STSCallbackHandler.class
+   251 Mon Sep 03 17:38:34 CEST 2012 WEB-INF/jboss-web.xml
+     0 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/wsdl/
+  9070 Mon Sep 03 17:38:34 CEST 2012 WEB-INF/wsdl/PicketLinkSTS.wsdl
+  1267 Mon Sep 03 17:38:34 CEST 2012 WEB-INF/classes/picketlink-sts.xml
+  1054 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/classes/stsKeystore.properties
+  3978 Mon Sep 03 16:35:50 CEST 2012 WEB-INF/classes/stsstore.jks</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

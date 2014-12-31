@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Interfaces and ports</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Interfaces and ports</h1>
+        </div>
+        
+        <div id="66322697" class="content prepend-top">
+    <div class="section-2"  id="66322697_Interfacesandports-Interfacedeclarations"  >
+        <h2>Interface declarations</h2>
+    
+            <p>
+    WildFly 8 uses named interface references throughout the configuration. A network interface is declared by specifying a logical name and a selection criteria for the physical interface:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] :read-children-names(child-type=interface)
+{
+   &quot;outcome&quot; =&gt; &quot;success&quot;,
+   &quot;result&quot; =&gt; [
+       &quot;management&quot;,
+       &quot;public&quot;
+   ]
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    This means the server in question declares two interfaces: One is referred to as &quot;<i class=" ">management</i>&quot;; the other one &quot;<i class=" ">public</i>&quot;. The &quot;<i class=" ">management</i>&quot; interface is used for all components and services that are required by the management layer (i.e. the HTTP Management Endpoint). The &quot;<i class=" ">public</i>&quot; interface binding is used for any application related network communication (i.e. Web, Messaging, etc). There is nothing special about these names; interfaces can be declared with any name. Other sections of the configuration can then reference those interfaces   by their logical name, rather than having to include the full details  of  the interface (which, on servers in a management domain, may vary on different machines).            </p>
+                <p>
+    The <tt class=" ">domain.xml</tt>, <tt class=" ">host.xml</tt> and <tt class=" ">standalone.xml</tt> configuration files all include a section where interfaces can be declared.&nbsp; If we take a look at the XML declaration it reveals the selection criteria. The criteria is one of two types: either a single element indicating  that the interface should be bound to a wildcard address, or a set of  one or more characteristics that an interface or address must have in  order to be a valid match. The selection criteria in this example are specific IP addresses for each interface:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interfaces&gt;
+  &lt;interface name=&quot;management&quot;&gt;
+   &lt;inet-address value=&quot;127.0.0.1&quot;/&gt;
+  &lt;/interface&gt;
+  &lt;interface name=&quot;public&quot;&gt;
+   &lt;inet-address value=&quot;127.0.0.1&quot;/&gt;
+  &lt;/interface&gt;
+&lt;/interfaces&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Some other examples:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interface name=&quot;global&quot;&gt;
+  &nbsp;&lt;!-- Use the wildcard address --&gt;
+  &nbsp;&lt;any-address/&gt;
+&lt;/interface&gt;
+
+&lt;interface name=&quot;ipv4-global&quot;&gt;
+  &nbsp;&lt;!-- Use the IPv4 wildcard address --&gt;
+  &nbsp;&lt;any-ipv4-address/&gt;
+&lt;/interface&gt;
+
+&lt;interface name=&quot;ipv6-global&quot;&gt;
+  &nbsp;&lt;!-- Use the IPv6 wildcard address --&gt;
+  &nbsp;&lt;any-ipv6-address/&gt;
+&lt;/interface&gt;
+
+&lt;interface name=&quot;external&quot;&gt;
+  &nbsp;&lt;nic name=&quot;eth0&quot;/&gt;
+&lt;/interface&gt;
+
+&lt;interface name=&quot;default&quot;&gt;
+  &nbsp;&lt;!-- Match any interface/address on the right subnet if it's
+       &nbsp;up, supports multicast and isn't point-to-point --&gt;
+  &nbsp;&lt;subnet-match value=&quot;192.168.0.0/16&quot;/&gt;
+  &nbsp;&lt;up/&gt;
+  &nbsp;&lt;multicast/&gt;
+  &nbsp;&lt;not&gt;
+     &nbsp;&lt;point-to-point/&gt;
+  &nbsp;&lt;/not&gt;
+&lt;/interface&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322697_Interfacesandports-SocketBindingGroups"  >
+        <h2>Socket Binding Groups</h2>
+    
+            <p>
+    The socket configuration in WildFly 8 works similar to the interfaces declarations. Sockets are declared using a logical name, by which they will be referenced throughout the configuration. Socket declarations are grouped under a certain name. This allows you to easily reference a particular socket binding group when configuring server groups for instance (Managed Domain). Socket binding groups reference an interface by it's logical name:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;socket-binding-group name=&quot;standard-sockets&quot; default-interface=&quot;public&quot;&gt;
+   &lt;socket-binding name=&quot;jndi&quot; port=&quot;1099&quot;/&gt;
+   &lt;socket-binding name=&quot;jmx-connector-registry&quot; port=&quot;1090&quot;/&gt;
+   &lt;socket-binding name=&quot;jmx-connector-server&quot; port=&quot;1091&quot;/&gt;
+   &lt;socket-binding name=&quot;http&quot; port=&quot;8080&quot;/&gt;
+   &lt;socket-binding name=&quot;https&quot; port=&quot;8443&quot;/&gt;
+   &lt;socket-binding name=&quot;jacorb&quot; port=&quot;3528&quot;/&gt;
+   &lt;socket-binding name=&quot;jacorb-ssl&quot; port=&quot;3529&quot;/&gt;
+   &lt;socket-binding name=&quot;osgi-http&quot; port=&quot;8090&quot;/&gt;
+   &lt;socket-binding name=&quot;remoting&quot; port=&quot;4447&quot;/&gt;
+   &lt;socket-binding name=&quot;txn-recovery-environment&quot; port=&quot;4712&quot;/&gt;
+   &lt;socket-binding name=&quot;txn-status-manager&quot; port=&quot;4713&quot;/&gt;
+   &lt;socket-binding name=&quot;messaging&quot; port=&quot;5445&quot;/&gt;
+   &lt;socket-binding name=&quot;messaging-throughput&quot; port=&quot;5455&quot;/&gt;
+&lt;/socket-binding-group&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    A socket binding includes the following information:            </p>
+    <ul class=" "><li class=" ">            <p>
+    name -- logical name of the socket configuration that should be used elsewhere in the configuration            </p>
+    </li><li class=" ">            <p>
+    port  -- base port to which a socket based on this configuration should be  bound. (Note that servers can be configured to override this base value  by applying an increment or decrement to all port values.)            </p>
+    </li><li class=" ">            <p>
+    interface (optional) -- logical name (see &quot;Interfaces declarations&quot; above) of the interface to which a socket based on this configuration should be bound. If not defined, the value of the &quot;default-interface&quot; attribute from the enclosing socket binding group will be used.            </p>
+    </li><li class=" ">            <p>
+    multicast-address (optional) -- if the socket will be used for multicast, the multicast address to use            </p>
+    </li><li class=" ">            <p>
+    multicast-port (optional) -- if the socket will be used for multicast, the multicast port to use            </p>
+    </li><li class=" ">            <p>
+    fixed-port (optional, defaults to false) -- if true, declares that the value of port should always be used for the socket and should not be overridden by applying an increment or decrement            </p>
+    </li></ul>    </div>
+    
+    <div class="section-2"  id="66322697_Interfacesandports-IPv4versusIPv6"  >
+        <h2>IPv4 versus IPv6</h2>
+    
+            <p>
+    WildFly 8 supports the use of both IPv4 and IPv6 addresses. By default, WildFly is configured for use in an IPv4 network and so if you are running in an IPv4 network, no changes are required. If you need to run in an IPv6 network, the changes required are minimal and involve changing the JVM stack and address preferences, and adjusting any interface IP address values specified in the configuration (standalone.xml or domain.xml).            </p>
+        <div class="section-3"  id="66322697_Interfacesandports-Stackandaddresspreference"  >
+        <h3>Stack and address preference</h3>
+    
+            <p>
+    The system properties java.net.preferIPv4Stack and java.net.preferIPv6Addresses are used to configure the JVM for use with IPv4 or IPv6 addresses. With WildFly 8, in order to run using IPv4 addresses, we need to specify java.net.preferIPv4Stack=true; in order to run with IPv6 addresses, we need to specify java.net.preferIPv4Stack=false (the JVM default) and java.net.preferIPv6Addresses=true. The latter ensures that any hostname to IP address conversions always return IPv6 address variants.            </p>
+                <p>
+    These system properties are conveniently set by the JAVA_OPTS environment variable, defined in the standalone.conf (or domain.conf) file. For example, to change the IP stack preference from its default of IPv4 to IPv6, edit the standalone.conf (or domain.conf) file and change its default IPv4 setting:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>if [ &quot;x$JAVA_OPTS&quot; = &quot;x&quot; ]; then
+   JAVA_OPTS=&quot; ... -Djava.net.preferIPv4Stack=true ...&quot;
+...</code></pre>
+        </div>
+    </div>
+            <p>
+    to an IPv6 suitable setting:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>if [ &quot;x$JAVA_OPTS&quot; = &quot;x&quot; ]; then
+   JAVA_OPTS=&quot; ... -Djava.net.preferIPv4Stack=false -Djava.net.preferIPv6Addresses=true ...&quot;
+...</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322697_Interfacesandports-IPaddressliterals"  >
+        <h3>IP address literals</h3>
+    
+            <p>
+    To change the IP address literals referenced in standalone.xml (or domain.xml), first visit the interface declarations and ensure that valid IPv6 addresses are being used as interface values. For example, to change the default configuration in which the loopback interface is used as the primary interface, change from the IPv4 loopback address:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interfaces&gt;
+  &lt;interface name=&quot;management&quot;&gt;
+    &lt;inet-address value=&quot;${jboss.bind.address.management:127.0.0.1}&quot;/&gt;
+  &lt;/interface&gt;
+  &lt;interface name=&quot;public&quot;&gt;
+    &lt;inet-address value=&quot;${jboss.bind.address:127.0.0.1}&quot;/&gt;
+  &lt;/interface&gt;
+&lt;/interfaces&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    to the IPv6 loopback address:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interfaces&gt;
+  &lt;interface name=&quot;management&quot;&gt;
+    &lt;inet-address value=&quot;${jboss.bind.address.management:[::1]}&quot;/&gt;
+  &lt;/interface&gt;
+  &lt;interface name=&quot;public&quot;&gt;
+    &lt;inet-address value=&quot;${jboss.bind.address:[::1]}&quot;/&gt;
+  &lt;/interface&gt;
+&lt;/interfaces&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Note that when embedding IPv6 address literals in the substitution expression, square brackets surrounding the IP address literal are used to avoid ambiguity. This follows the convention for the use of IPv6 literals in URLs.            </p>
+                <p>
+    Over and above making such changes for the interface definitions, you should also check the rest of your configuration file and adjust IP address literals from IPv4 to IPv6 as required.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

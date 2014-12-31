@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Starting &amp; stopping Servers in a Managed Domain</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Starting &amp; stopping Servers in a Managed Domain</h1>
+        </div>
+        
+        <div id="66322731" class="content prepend-top">
+            <p>
+    Starting a standalone server is done through the <tt class=" ">bin/standalone.sh</tt> script. However in a managed domain server instances are managed by the domain controller and need to be started through the management layer:            </p>
+                <p>
+    First of all, get to know which <tt class=" ">servers</tt> are configured on a particular <tt class=" ">host</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9999 /] :read-children-names(child-type=host)
+{
+   &quot;outcome&quot; =&gt; &quot;success&quot;,
+   &quot;result&quot; =&gt; [&quot;local&quot;]
+}
+
+
+[domain@localhost:9999 /] /host=local:read-children-names(child-type=server-config)
+{
+   &quot;outcome&quot; =&gt; &quot;success&quot;,
+   &quot;result&quot; =&gt; [
+       &quot;my-server&quot;,
+       &quot;server-one&quot;,
+       &quot;server-three&quot;
+   ]
+}
+</code></pre>
+        </div>
+    </div>
+            <p>
+    Now that we know, that there are two <tt class=" ">servers</tt> configured on <tt class=" ">host</tt> &quot;<i class=" ">local</i>&quot;, we can go ahead and check their status:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9999 /] /host=local/server-config=server-one:read-resource(include-runtime=true)
+{
+   &quot;outcome&quot; =&gt; &quot;success&quot;,
+   &quot;result&quot; =&gt; {
+       &quot;auto-start&quot; =&gt; true,
+       &quot;group&quot; =&gt; &quot;main-server-group&quot;,
+       &quot;interface&quot; =&gt; undefined,
+       &quot;name&quot; =&gt; &quot;server-one&quot;,
+       &quot;path&quot; =&gt; undefined,
+       &quot;socket-binding-group&quot; =&gt; undefined,
+       &quot;socket-binding-port-offset&quot; =&gt; undefined,
+       &quot;status&quot; =&gt; &quot;STARTED&quot;,
+       &quot;system-property&quot; =&gt; undefined,
+       &quot;jvm&quot; =&gt; {&quot;default&quot; =&gt; undefined}
+   }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    You can change the server state through the &quot;<i class=" ">start</i>&quot; and &quot;<i class=" ">stop</i>&quot; operations            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9999 /] /host=local/server-config=server-one:stop
+{
+   &quot;outcome&quot; =&gt; &quot;success&quot;,
+   &quot;result&quot; =&gt; &quot;STOPPING&quot;
+}
+</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-tip">
+        
+            <p>
+    Navigating through the domain topology is much more simple when you use the web interface.            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

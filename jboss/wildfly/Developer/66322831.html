@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>CDI Reference</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>CDI Reference</h1>
+        </div>
+        
+        <div id="66322831" class="content prepend-top">
+            <p>
+    WildFly 8&nbsp;uses <a href="http://weld.cdi-spec.org/">Weld</a>, the CDI reference implementation as its CDI provider. To activate CDI for a deployment simply add a <tt class=" ">beans.xml</tt> file in any archive in the deployment.            </p>
+                <p>
+    This document is not intended to be a CDI tutorial, it only covers CDI usage that is specific to WildFly. For some general information on CDI see the below links:            </p>
+                <p>
+    <a href="http://docs.jboss.org/cdi/spec/1.0/html_single/">CDI Specification</a><br/><a href="http://docs.jboss.org/weld/reference/latest/en-US/html/">Weld Reference Guide</a><br/><a href="http://www.jboss.org/jdf/quickstarts/jboss-as-quickstart/">The AS7 Quickstarts</a>            </p>
+        <div class="section-2"  id="66322831_CDIReference-UsingCDIBeansfromoutsidethedeployment"  >
+        <h2>Using CDI Beans from outside the deployment</h2>
+    
+            <p>
+    For WildFly 8&nbsp;onwards, it is now possible have classes outside the deployment be picked up as CDI beans. In order for this to work you must add a dependency on the external deployment that your beans are coming from, and make sure the META-INF directory of this deployment is imported, so that your deployment has visibility to the <tt class=" ">beans.xml</tt> file (To import beans from outside the deployment they must be in an archive with a <tt class=" ">beans.xml</tt> file).            </p>
+                <p>
+    There are two ways to do this, either using the <tt class=" ">MANIFEST.MF</tt> or using <tt class=" ">jboss-deployment-structure.xml</tt>.            </p>
+                <p>
+    Using <tt class=" ">MANIFEST.MF</tt> you need to add a <tt class=" ">Dependencies</tt> entry, with meta-inf specified after the entry, e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Dependencies: com.my-cdi-module meta-inf, com.my-other-cdi-module meta-inf</code></pre>
+        </div>
+    </div>
+            <p>
+    Using <tt class=" ">jboss-deployment-structure.xml</tt> you need to add a dependency entry with <tt class=" ">meta-inf=&quot;import&quot;</tt>, e.g.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-deployment-structure xmlns=&quot;urn:jboss:deployment-structure:1.2&quot;&gt;
+    &lt;deployment&gt;
+        &lt;dependencies&gt;
+            &lt;module name=&quot;deployment.d1.jar&quot; meta-inf=&quot;import&quot;/&gt;
+        &lt;/dependencies&gt;
+    &lt;/deployment&gt;
+&lt;/jboss-deployment-structure&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Note that this can be used to create beans from both modules in the <tt class=" ">modules</tt> directory, and from other deployments.            </p>
+                <p>
+    For more information on class loading and adding dependencies to your deployment please see the <a href="66322749.html">Class Loading Guide</a>            </p>
+        </div>
+    
+    <div class="section-2"  id="66322831_CDIReference-Suppressingimplicitbeanarchives"  >
+        <h2>Suppressing implicit bean archives</h2>
+    
+            <p>
+    CDI&nbsp; 1.1 brings new options to packaging of CDI-enabled applications. In addition to well-known explicit bean archives (basically any archive containing the <strong class=" ">beans.xml</strong> file) the specification introduces <strong class=" ">implicit bean archives</strong>.            </p>
+                <p>
+    An implicit bean archive is any archive that contains one or more classes annotated with a bean defining annotation (scope annotation) or one or more session beans. As a result, the beans.xml file is no longer required for CDI to work in your application.            </p>
+                <p>
+    In an implicit bean archive <strong class=" ">only those classes</strong> that are either annotated with bean defining annotations or are session beans are recognized by CDI as beans (other classes cannot be injected).            </p>
+                <p>
+    This has a side-effect, though. Libraries exist that make use of scope annotation (bean defining annotations) for their own convenience but are not designed to run with CDI support. Guava would be an example of such library. If your application bundles such library it will be recognized as a CDI archive and may <a href="https://code.google.com/p/guava-libraries/issues/detail?id=1433">fail the deployment</a>.            </p>
+                <p>
+    Fortunately, WildFly makes it possible to suppress implicit bean archives and only enable CDI in archives that bundle the beans.xml file. There are two ways to achieve this:            </p>
+        <div class="section-3"  id="66322831_CDIReference-Perdeploymentconfiguration"  >
+        <h3>deployment configuration</h3>
+    
+            <p>
+    You can either set this up for your deployment only by adding the following content to the <strong class=" ">META-INF/jboss-all.xml</strong> file of your application:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss xmlns=&quot;urn:jboss:1.0&quot;&gt;
+    &lt;weld xmlns=&quot;urn:jboss:weld:1.0&quot; require-bean-descriptor=&quot;true&quot;/&gt;
+&lt;/jboss&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322831_CDIReference-Globalconfiguration"  >
+        <h3>Global configuration</h3>
+    
+            <p>
+    Alternatively, you may configure this for all deployments in your WildFly instance by executing the following command:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=weld:write-attribute(name=require-bean-descriptor,value=true)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322831_CDIReference-Nonportablemode"  >
+        <h2>portable mode</h2>
+    
+            <p>
+    CDI 1.1 clarifies some aspects of how CDI portable extensions work. As a result, some extensions that do not use the API properly (but were tolerated in CDI 1.0 environment) may stop working with CDI 1.1.If this is the case of your application you will see an exception like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>org.jboss.weld.exceptions.IllegalStateException: WELD-001332: BeanManager method getBeans() is not available during application initialization</code></pre>
+        </div>
+    </div>
+            <p>
+    Fortunately, there is a non-portable mode available in WildFly which skips some of the API usage checks and therefore allows the legacy extensions to work as before.            </p>
+                <p>
+    Again, there are two ways to enable the non-portable mode:            </p>
+        <div class="section-3"  id="66322831_CDIReference-Perdeploymentconfiguration2"  >
+        <h3>deployment configuration</h3>
+    
+            <p>
+    You can either set this up for your deployment only by adding the following content to the <strong class=" ">META-INF/jboss-all.xml</strong> file of your application:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss xmlns=&quot;urn:jboss:1.0&quot;&gt;
+&nbsp;&nbsp;&nbsp; &lt;weld xmlns=&quot;urn:jboss:weld:1.0&quot; non-portable-mode=&quot;true&quot; /&gt;
+&lt;/jboss&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322831_CDIReference-Globalconfiguration2"  >
+        <h3>Global configuration</h3>
+    
+            <p>
+    Alternatively, you may configure this for all deployments in your WildFly instance by executing the following command:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=weld:write-attribute(name=non-portable-mode,value=true)</code></pre>
+        </div>
+    </div>
+            <p>
+    <strong class=" ">Note that new portable extensions should always use the</strong> <strong class=" "><a href="http://docs.jboss.org/cdi/api/1.1/javax/enterprise/inject/spi/BeanManager.html">BeanManager API</a></strong> <strong class=" ">properly and thus never required the non-portable mode. The non-portable mode only exists to preserve compatibility with legacy extensions!</strong>            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

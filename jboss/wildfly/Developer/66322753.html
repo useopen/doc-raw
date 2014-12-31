@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>EJB 3 Reference Guide</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>EJB 3 Reference Guide</h1>
+        </div>
+        
+        <div id="66322753" class="content prepend-top">
+            <p>
+    This chapter details the extensions that are available when developing Enterprise Java Beans <sup class=" ">tm</sup> on WildFly 8.            </p>
+                <p>
+    Currently there is no support for configuring the extensions using an implementation specific descriptor file.            </p>
+        <div class="section-2"  id="66322753_EJB3ReferenceGuide-ResourceAdapterforMessageDrivenBeans"  >
+        <h2>Resource Adapter for Message Driven Beans</h2>
+    
+            <p>
+    Each Message Driven Bean must be connected to a resource adapter.            </p>
+        <div class="section-3"  id="66322753_EJB3ReferenceGuide-SpecificationofResourceAdapterusingMetadataAnnotations"  >
+        <h3>Specification of Resource Adapter using Metadata Annotations</h3>
+    
+            <p>
+    The <tt class=" ">ResourceAdapter</tt> annotation is used to specify the resource adapter with which the MDB should connect.            </p>
+                <p>
+    The <tt class=" ">value</tt> of the annotation is the name of the deployment unit containing the resource adapter. For example <tt class=" ">jms-ra.rar</tt>.            </p>
+                <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@MessageDriven(messageListenerInterface = PostmanPat.class)
+@ResourceAdapter(&quot;ejb3-rar.rar&quot;)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322753_EJB3ReferenceGuide-RunasPrincipal"  >
+        <h2>as Principal</h2>
+    
+            <p>
+    Whenever a run-as role is specified for a given method invocation the default anonymous principal is used as the caller principal. This principal can be overridden by specifying a run-as principal.            </p>
+        <div class="section-3"  id="66322753_EJB3ReferenceGuide-SpecificationofRunasPrincipalusingMetadataAnnotations"  >
+        <h3>Specification of Run-as Principal using Metadata Annotations</h3>
+    
+            <p>
+    The <tt class=" ">RunAsPrincipal</tt> annotation is used to specify the run-as principal to use for a given method invocation.            </p>
+                <p>
+    The <tt class=" ">value</tt> of the annotation specifies the name of the principal to use. The actual type of the principal is undefined and should not be relied upon.            </p>
+                <p>
+    Using this annotation without specifying a run-as role is considered an error.            </p>
+                <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@RunAs(&quot;admin&quot;)
+@RunAsPrincipal(&quot;MyBean&quot;)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322753_EJB3ReferenceGuide-SecurityDomain"  >
+        <h2>Security Domain</h2>
+    
+            <p>
+    Each Enterprise Java Bean <sup class=" ">tm</sup> can be associated with a security domain. Only when an EJB is associated with a security domain will authentication and authorization be enforced.            </p>
+        <div class="section-3"  id="66322753_EJB3ReferenceGuide-SpecificationofSecurityDomainusingMetadataAnnotations"  >
+        <h3>Specification of Security Domain using Metadata Annotations</h3>
+    
+            <p>
+    The <tt class=" ">SecurityDomain</tt> annotation is used to specify the security domain to associate with the EJB.            </p>
+                <p>
+    The <tt class=" ">value</tt> of the annotation is the name of the security domain to be used.            </p>
+                <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@SecurityDomain(&quot;other&quot;)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322753_EJB3ReferenceGuide-TransactionTimeout"  >
+        <h2>Transaction Timeout</h2>
+    
+            <p>
+    For any newly started transaction a transaction timeout can be specified in seconds.            </p>
+                <p>
+    When a transaction timeout of <tt class=" ">0</tt> is used, then the actual transaction timeout will default to the domain configured default.<br/><i class=" ">TODO: add link to tx subsystem</i>            </p>
+                <p>
+    Although this is only applicable when using transaction attribute <tt class=" ">REQUIRED</tt> or <tt class=" ">REQUIRES_NEW</tt> the application server will not detect invalid setups.            </p>
+        <div class="confbox admonition admonition-note">
+            <div class="title">New Transactions</div>
+        
+            <p>
+    Take care that even when transaction attribute <tt class=" ">REQUIRED</tt> is specified, the timeout will only be applicable if a <strong class=" ">new</strong> transaction is started.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322753_EJB3ReferenceGuide-SpecificationofTransactionTimeoutwithMetadataAnnotations"  >
+        <h3>Specification of Transaction Timeout with Metadata Annotations</h3>
+    
+            <p>
+    The <tt class=" ">TransactionTimeout</tt> annotation is used to specify the transaction timeout for a given method.            </p>
+                <p>
+    The <tt class=" ">value</tt> of the annotation is the timeout used in the given <tt class=" ">unit</tt> granularity. It must be a positive integer or 0. Whenever 0 is specified the default domain configured timeout is used.            </p>
+                <p>
+    The <tt class=" ">unit</tt> specifies the granularity of the <tt class=" ">value</tt>. The actual value used is converted to seconds. Specifying a granularity lower than <tt class=" ">SECONDS</tt> is considered an error, even when the computed value will result in an even amount of seconds.            </p>
+                <p>
+    For example:@TransactionTimeout(value = 10, unit = TimeUnit.SECONDS)            </p>
+        </div>
+    
+    <div class="section-3"  id="66322753_EJB3ReferenceGuide-SpecificationofTransactionTimeoutintheDeploymentDescriptor"  >
+        <h3>Specification of Transaction Timeout in the Deployment Descriptor</h3>
+    
+            <p>
+    The <tt class=" ">trans-timeout</tt> element is used to define the transaction  timeout for business, home, component, and message-listener interface  methods; no-interface view methods; web service endpoint methods; and  timeout callback methods.            </p>
+                <p>
+    The <tt class=" ">trans-timeout</tt> element resides in the <tt class=" ">urn:trans-timeout</tt> namespace and is part of the standard <tt class=" ">container-transaction</tt> element as defined in the jboss namespace.            </p>
+                <p>
+    For the rules when a <tt class=" ">container-transaction</tt> is applicable please refer to EJB 3.1 FR 13.3.7.2.1.            </p>
+        <div class="section-4"  id="66322753_EJB3ReferenceGuide-Exampleof%7B%7Btranstimeout%7D%7D"  >
+        <h4>Example of  trans-timeout</h4>
+    
+    <div class="confbox programlisting">
+                    <div class="title">jboss-ejb3.xml</div>
+                <div class="content">
+        <pre><code>&lt;jboss:ejb-jar xmlns:jboss=&quot;http://www.jboss.com/xml/ns/javaee&quot;
+               xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+               xmlns:tx=&quot;urn:trans-timeout&quot;
+               xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+               xsi:schemaLocation=&quot;http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-ejb3-2_0.xsd
+http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_1.xsd
+urn:trans-timeout http://www.jboss.org/j2ee/schema/trans-timeout-1_0.xsd&quot;
+               version=&quot;3.1&quot;
+               impl-version=&quot;2.0&quot;&gt;
+    &lt;assembly-descriptor&gt;
+        &lt;container-transaction&gt;
+            &lt;method&gt;
+                &lt;ejb-name&gt;BeanWithTimeoutValue&lt;/ejb-name&gt;
+                &lt;method-name&gt;*&lt;/method-name&gt;
+                &lt;method-intf&gt;Local&lt;/method-intf&gt;
+            &lt;/method&gt;
+            &lt;tx:trans-timeout&gt;
+                &lt;tx:timeout&gt;10&lt;/tx:timeout&gt;
+                &lt;tx:unit&gt;Seconds&lt;/tx:unit&gt;
+            &lt;/tx:trans-timeout&gt;
+        &lt;/container-transaction&gt;
+    &lt;/assembly-descriptor&gt;
+&lt;/jboss:ejb-jar&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322753_EJB3ReferenceGuide-Timerservice"  >
+        <h2>Timer service</h2>
+    
+            <p>
+    The service is responsible to call the registered timeout methods of the different session beans.            </p>
+        <div class="confbox admonition admonition-info">
+        
+            <p>
+    A persistent timer will be identified by the name of the EAR, the name of the sub-deployment JAR and the Bean's name.<br/>If one of those names are changed (e.g. EAR name contain a version) the timer entry became orphaned and the timer event will not longer be fired.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322753_EJB3ReferenceGuide-Singleeventtimer"  >
+        <h3>Single event timer</h3>
+    
+            <p>
+    The timer is will be started once at the specified time.            </p>
+                <p>
+    In case of a server restart the timeout method of a persistent timer will only be called directly if the specified time is elapsed.<br/>If the timer is not persistent (since EJB3.1 see 18.2.3) it will be not longer available if JBoss is restarted or the application is redeployed.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322753_EJB3ReferenceGuide-Recurringtimer"  >
+        <h3>Recurring timer</h3>
+    
+            <p>
+    The timer will be started at the specified first occurrence and after that point at each time if the interval is elapsed.<br/>If the timer will be started during the last execution is not finished the execution will be suppressed with a warning to avoid concurrent execution.            </p>
+                <p>
+    In case of server downtime for a persistent timer, the timeout method will be called only once if one, or more than one, interval is elapsed.<br/>If the timer is not persistent (since EJB3.1 see 18.2.3) it will not longer be active after the server is restarted or the application is redeployed.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322753_EJB3ReferenceGuide-Calendartimer"  >
+        <h3>Calendar timer</h3>
+    
+            <p>
+    The timer will be started if the schedule expression match. It will be automatically deactivated and removed if there will be no next expiration possible, i.e. If you set a specific year.            </p>
+                <p>
+    For example:            </p>
+        <blockquote>
+            <p>
+    @Schedule( ... dayOfMonth=&quot;1&quot;, month=&quot;1&quot;, year=&quot;2012&quot;)<br/>// start once at 01-01-2012 00:00:00            </p>
+            </blockquote>
+    <div class="section-4"  id="66322753_EJB3ReferenceGuide-Programmaticcalendartimer"  >
+        <h4>Programmatic calendar timer</h4>
+    
+            <p>
+    If the timer is persistent it will be fetched at server start and the missed timeouts are called concurrent.<br/>If a persistent timer contains an end date it will be executed once nevertheless how many times the execution was missed. Also a retry will be suppressed if the timeout method throw an Exception.<br/>In case of such expired timer access to the given Timer object might throw a NoMoreTimeoutExcption or NoSuchObjectException.            </p>
+                <p>
+    If the timer is non persistent it will not longer be active after the server is restarted or the application is redeployed.            </p>
+                <p>
+    <strong class=" ">TODO</strong>: clarify whether this should happen concurrently/blocked or even fired only once like a recurring timer!            </p>
+        </div>
+    
+    <div class="section-4"  id="66322753_EJB3ReferenceGuide-Annotatedcalendartimer"  >
+        <h4>Annotated calendar timer</h4>
+    
+            <p>
+    If the timer is non persistent it will not activated for missed events during the server is down. In case of server start the timer is scheduled based on the @Schedule annotation.            </p>
+                <p>
+    If the timer is persistent (default if not deactivated by annotation) all missed events are fetched at server start and the annotated timeout method is called concurrent.            </p>
+                <p>
+    <strong class=" ">TODO</strong>: clarify whether this should happen concurrently/blocked or even fired only once like a recurring timer!            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

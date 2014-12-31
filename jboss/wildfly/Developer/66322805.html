@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Deployment Descriptors used In WildFly</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Deployment Descriptors used In WildFly</h1>
+        </div>
+        
+        <div id="66322805" class="content prepend-top">
+            <p>
+    This page gives a list and a description of all the valid deployment descriptors that a WildFly&nbsp;deployment can use. This document is a work in progress.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Descriptor            </td>
+                <td rowspan="1" colspan="1">
+    Location            </td>
+                <td rowspan="1" colspan="1">
+    Specification            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+                <td rowspan="1" colspan="1">
+    Info            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss-deployment-structure.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> or <tt class=" ">WEB-INF</tt> of the top level deployment            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    This file can be used to control class loading for the deployment            </td>
+                <td rowspan="1" colspan="1">
+    <a href="66322749.html">Class Loading in WildFly </a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">beans.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">WEB-INF</tt> or <tt class=" ">META-INF</tt>            </td>
+                <td rowspan="1" colspan="1">
+    CDI            </td>
+                <td rowspan="1" colspan="1">
+    The presence of this descriptor (even if empty) activates CDI            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://docs.jboss.org/weld/reference/1.0.0/en-US/html_single/">Weld Reference Guide </a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">web.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">WEB-INF</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Servlet            </td>
+                <td rowspan="1" colspan="1">
+    Web deployment descriptor            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss-web.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">WEB-INF</tt>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    JBoss Web deployment descriptor. This can be use to override settings from web.xml, and to set WildFly&nbsp;specific options            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">ejb-jar.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">WEB-INF</tt> of a war, or <tt class=" ">META-INF</tt> of an EJB jar            </td>
+                <td rowspan="1" colspan="1">
+    EJB            </td>
+                <td rowspan="1" colspan="1">
+    The EJB spec deployment descriptor            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://java.sun.com/xml/ns/javaee/ejb-jar_3_1.xsd">ejb-jar.xml schema</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss-ejb3.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">WEB-INF</tt> of a war, or <tt class=" ">META-INF</tt> of an EJB jar            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    The JBoss EJB deployment descriptor, this can be used to override settings from <tt class=" ">ejb-jar.xml</tt>, and to set WildFly&nbsp;specific settings            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">application.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> of an EAR            </td>
+                <td rowspan="1" colspan="1">
+    Java EE Platform Specification            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://java.sun.com/xml/ns/javaee/application_6.xsd">application.xml schema</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss-app.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> of an EAR            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    JBoss application deployment descriptor, can be used to override settings application.xml, and to set WildFly&nbsp;specific settings            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">persistence.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt>            </td>
+                <td rowspan="1" colspan="1">
+    JPA            </td>
+                <td rowspan="1" colspan="1">
+    JPA descriptor used for defining persistence units            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://docs.jboss.org/hibernate/entitymanager/3.5/reference/en/html/configuration.html">Hibernate Reference Guide</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss-ejb-client.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">WEB-INF</tt> of a war, or <tt class=" ">META-INF</tt> of an EJB jar            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    Remote EJB settings. This file is used to setup the EJB client context for a deployment that is used for remote EJB invocations            </td>
+                <td rowspan="1" colspan="1">
+    <a href="https://docs.jboss.org/author/display/AS71/EJB+invocations+from+a+remote+server+instance">EJB invocations from a remote server instance</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jbosscmp-jdbc.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> of an EJB jar            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    CMP deployment descriptor. Used to map CMP entity beans to a database. The format is largely unchanged from previous versions.            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">ra.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> of a rar archive            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    Spec deployment descriptor for resource adaptor deployments            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://docs.jboss.org/ironjacamar/userguide/1.0/en-US/html_single/">IronJacamar Reference Guide</a> <a href="http://java.sun.com/xml/ns/javaee/connector_1_6.xsd">Schema</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">ironjacamar.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> of a rar archive            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    JBoss deployment descriptor for resource adaptor deployments            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://docs.jboss.org/ironjacamar/userguide/1.0/en-US/html_single/">IronJacamar Reference Guide</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">*-jms.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> or <tt class=" ">WEB-INF</tt>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    JMS message destination deployment descriptor, used to deploy message destinations with a deployment            </td>
+                <td rowspan="1" colspan="1">
+                </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">*-ds.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> or <tt class=" ">WEB-INF</tt>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    Datasource deployment descriptor, use to bundle datasources with a deployment            </td>
+                <td rowspan="1" colspan="1">
+    <a href="https://docs.jboss.org/author/display/WFLY8/DataSource+configuration">DataSource Configuration</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">application-client.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> of an application client jar            </td>
+                <td rowspan="1" colspan="1">
+    Java EE6 Platform Specification            </td>
+                <td rowspan="1" colspan="1">
+    The spec deployment descriptor for application client deployments            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://java.sun.com/xml/ns/javaee/application-client_6.xsd">application-client.xml schema</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss-client.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> of an application client jar            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    The WildFly&nbsp;specific deployment descriptor for application client deployments            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss-webservices.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">META-INF</tt> for EJB webservice deployments or <tt class=" ">WEB-INF</tt> for POJO webservice deployments/EJB webservice endpoints bundled in .war            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    The JBossWS 4.0.x specific deployment descriptor for webservice endpoints            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

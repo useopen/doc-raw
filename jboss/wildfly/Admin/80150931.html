@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Naming Subsystem Configuration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Naming Subsystem Configuration</h1>
+        </div>
+        
+        <div id="80150931" class="content prepend-top">
+    <div class="section-2"  id="80150931_NamingSubsystemConfiguration-Overview"  >
+        <h2>Overview</h2>
+    
+            <p>
+    The Naming subsystem provides the JNDI implementation on WildFly, and its configuration allows to:            </p>
+    <ul class=" "><li class=" ">            <p>
+    bind entries in global JNDI namespaces            </p>
+    </li><li class=" ">            <p>
+    turn off/on the remote JNDI interface            </p>
+    </li></ul>            <p>
+    The subsystem name is naming and this document covers Naming subsystem version <tt class=" ">2.0</tt>, which XML namespace within WildFly XML configurations is&nbsp;<tt class=" ">urn:jboss:domain:naming:2.0</tt>. The path for the subsystem's XML schema, within WildFly's distribution, is <tt class=" ">docs/schema/jboss-as-naming_2_0.xsd</tt>.            </p>
+                <p>
+    Subsystem XML configuration example with all elements and attributes specified:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:naming:2.0&quot;&gt;
+    &lt;bindings&gt;
+        &lt;simple name=&quot;java:global/a&quot; value=&quot;100&quot; type=&quot;int&quot; /&gt;
+        &lt;simple name=&quot;java:global/jboss.org/docs/url&quot; value=&quot;https://docs.jboss.org&quot; type=&quot;java.net.URL&quot; /&gt;
+        &lt;object-factory name=&quot;java:global/foo/bar/factory&quot; module=&quot;org.foo.bar&quot; class=&quot;org.foo.bar.ObjectFactory&quot; /&gt;
+        &lt;external-context name=&quot;java:global/federation/ldap/example&quot; class=&quot;javax.naming.directory.InitialDirContext&quot; cache=&quot;true&quot;&gt;
+            &lt;environment&gt;
+                &lt;property name=&quot;java.naming.factory.initial&quot; value=&quot;com.sun.jndi.ldap.LdapCtxFactory&quot; /&gt;
+                &lt;property name=&quot;java.naming.provider.url&quot; value=&quot;ldap://ldap.example.com:389&quot; /&gt;
+                &lt;property name=&quot;java.naming.security.authentication&quot; value=&quot;simple&quot; /&gt;
+                &lt;property name=&quot;java.naming.security.principal&quot; value=&quot;uid=admin,ou=system&quot; /&gt;
+                &lt;property name=&quot;java.naming.security.credentials&quot; value=&quot;secret&quot; /&gt;
+            &lt;/environment&gt;
+        &lt;/external-context&gt;
+        &lt;lookup name=&quot;java:global/c&quot; lookup=&quot;java:global/b&quot; /&gt;
+    &lt;/bindings&gt;
+    &lt;remote-naming/&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="80150931_NamingSubsystemConfiguration-GlobalBindingsConfiguration"  >
+        <h2>Global Bindings Configuration</h2>
+    
+            <p>
+    The Naming subsystem configuration allows binding entries into the following global JNDI namespaces:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">java:global</tt>            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">java:jboss</tt>            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">java:</tt>            </p>
+    </li></ul>    <div class="confbox admonition admonition-note">
+        
+            <p>
+    If WildFly is to be used as a Java EE application server, then it's recommended to opt for <tt class=" ">java:global</tt>, since it is a standard (i.e. portable) namespace.            </p>
+        </div>
+    
+            <p>
+    Four different types of bindings are supported:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Simple            </p>
+    </li><li class=" ">            <p>
+    Object Factory            </p>
+    </li><li class=" ">            <p>
+    External Context            </p>
+    </li><li class=" ">            <p>
+    Lookup            </p>
+    </li></ul>            <p>
+    In the subsystem's XML configuration, global bindings are configured through the <tt class=" ">&lt;bindings /&gt;</tt> XML element, as an example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;bindings&gt;
+    &lt;simple name=&quot;java:global/a&quot; value=&quot;100&quot; type=&quot;int&quot; /&gt;
+    &lt;object-factory name=&quot;java:global/foo/bar/factory&quot; module=&quot;org.foo.bar&quot; class=&quot;org.foo.bar.ObjectFactory&quot; /&gt;
+    &lt;external-context name=&quot;java:global/federation/ldap/example&quot; class=&quot;javax.naming.directory.InitialDirContext&quot; cache=&quot;true&quot;&gt;
+        &lt;environment&gt;
+            &lt;property name=&quot;java.naming.factory.initial&quot; value=&quot;com.sun.jndi.ldap.LdapCtxFactory&quot; /&gt;
+            &lt;property name=&quot;java.naming.provider.url&quot; value=&quot;ldap://ldap.example.com:389&quot; /&gt;
+            &lt;property name=&quot;java.naming.security.authentication&quot; value=&quot;simple&quot; /&gt;
+            &lt;property name=&quot;java.naming.security.principal&quot; value=&quot;uid=admin,ou=system&quot; /&gt;
+            &lt;property name=&quot;java.naming.security.credentials&quot; value=&quot;secret&quot; /&gt;
+        &lt;/environment&gt;
+    &lt;/external-context&gt;
+    &lt;lookup name=&quot;java:global/c&quot; lookup=&quot;java:global/b&quot; /&gt;
+&lt;/bindings&gt;</code></pre>
+        </div>
+    </div>
+    <div class="section-3"  id="80150931_NamingSubsystemConfiguration-SimpleBindings"  >
+        <h3>Simple Bindings</h3>
+    
+            <p>
+    A simple binding is a primitive or java.net.URL entry, and it is defined through the <tt class=" ">simple</tt> XML element. An example of its XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;simple name=&quot;java:global/a&quot; value=&quot;100&quot; type=&quot;int&quot; /&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">name</tt> attribute is mandatory and specifies the target JNDI name for the entry.            </p>
+                <p>
+    The <tt class=" ">value</tt> attribute is mandatory and defines the entry's value.            </p>
+                <p>
+    The optional <tt class=" ">type</tt> attribute, which defaults to <tt class=" ">java.lang.String</tt>, specifies the type of the entry's value. Besides java.lang.String, allowed types are all the primitive types and their corresponding object wrapper classes, such as int or java.lang.Integer, and java.net.URL.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may be used to configure simple bindings. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> the one in the XML example above:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=naming/binding=java\:global\/a:add(binding-type=simple, type=int, value=100)
+/subsystem=naming/binding=java\:global\/a:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="80150931_NamingSubsystemConfiguration-ObjectFactories"  >
+        <h3>Object Factories</h3>
+    
+            <p>
+    The Naming subsystem configuration allows the binding of <tt class=" ">javax.naming.spi.ObjectFactory</tt> entries, through the <tt class=" ">object-factory</tt> XML element, for instance:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;object-factory name=&quot;java:global/foo/bar/factory&quot; module=&quot;org.foo.bar&quot; class=&quot;org.foo.bar.ObjectFactory&quot;&gt;
+    &lt;environment&gt;
+        &lt;property name=&quot;p1&quot; value=&quot;v1&quot; /&gt;
+        &lt;property name=&quot;p2&quot; value=&quot;v2&quot; /&gt;
+    &lt;/environment&gt;
+&lt;/object-factory&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">name</tt> attribute is mandatory and specifies the target JNDI name for the entry.            </p>
+                <p>
+    The <tt class=" ">class</tt> attribute is mandatory and defines the object factory's Java type.            </p>
+                <p>
+    The <tt class=" ">module</tt> attribute is mandatory and specifies the JBoss Module ID where the object factory Java class may be loaded from.            </p>
+                <p>
+    The optional <tt class=" ">environment</tt> child element may be used to provide a custom environment to the object factory.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may be used to configure object factory bindings. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> the one in the XML example above:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=naming/binding=java\:global\/foo\/bar\/factory:add(binding-type=object-factory, module=org.foo.bar, class=org.foo.bar.ObjectFactory, environment=[p1=v1, p2=v2])
+/subsystem=naming/binding=java\:global\/foo\/bar\/factory:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="80150931_NamingSubsystemConfiguration-ExternalContextFederation"  >
+        <h3>External Context Federation</h3>
+    
+            <p>
+    Federation of external JNDI contexts, such as a LDAP context, are achieved by adding External Context bindings to the global bindings configuration, through the <tt class=" ">external-context</tt> XML element. An example of its XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;external-context name=&quot;java:global/federation/ldap/example&quot; class=&quot;javax.naming.directory.InitialDirContext&quot; cache=&quot;true&quot;&gt;
+    &lt;environment&gt;
+        &lt;property name=&quot;java.naming.factory.initial&quot; value=&quot;com.sun.jndi.ldap.LdapCtxFactory&quot; /&gt;
+        &lt;property name=&quot;java.naming.provider.url&quot; value=&quot;ldap://ldap.example.com:389&quot; /&gt;
+        &lt;property name=&quot;java.naming.security.authentication&quot; value=&quot;simple&quot; /&gt;
+        &lt;property name=&quot;java.naming.security.principal&quot; value=&quot;uid=admin,ou=system&quot; /&gt;
+        &lt;property name=&quot;java.naming.security.credentials&quot; value=&quot;secret&quot; /&gt;
+    &lt;/environment&gt;
+&lt;/external-context&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">name</tt> attribute is mandatory and specifies the target JNDI name for the entry.            </p>
+                <p>
+    The <tt class=" ">class</tt> attribute is mandatory and indicates the expected Java naming context type.            </p>
+                <p>
+    The optional <tt class=" ">cache</tt> attribute, which value defaults to <tt class=" ">false</tt>, indicates if the external context instance should be cached.            </p>
+                <p>
+    The optional <tt class=" ">environment</tt> child element may be used to provide the custom environment needed to lookup the external context.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may be used to configure external context bindings. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> the one in the XML example above:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=naming/binding=java\:global\/federation\/ldap\/example:add(binding-type=external-context, cache=true, class=javax.naming.directory.InitialDirContext, environment=[java.naming.factory.initial=com.sun.jndi.ldap.LdapCtxFactory, java.naming.provider.url=ldap\:\/\/ldap.example.com\:389, java.naming.security.authentication=simple, java.naming.security.principal=uid\=admin\,ou\=system, java.naming.security.credentials= secret])
+
+/subsystem=naming/binding=java\:global\/federation\/ldap\/example:remove</code></pre>
+        </div>
+    </div>
+            <p>
+    Some JNDI providers may not be fail when their resources are looked up if they do not implement property the lookup(Name) method. Their errors would look like:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>11:31:49,047 ERROR org.jboss.resource.adapter.jms.inflow.JmsActivation (default-threads - 1) javax.naming.InvalidNameException: Only support CompoundName names
+    at com.tibco.tibjms.naming.TibjmsContext.lookup(TibjmsContext.java:504)
+    at javax.naming.InitialContext.lookup(InitialContext.java:421)</code></pre>
+        </div>
+    </div>
+            <p>
+    To work around their shortcomings, the&nbsp;<tt class=" ">org.jboss.as.naming.lookup.by.string</tt> property can be specified in the external-context's environment to use instead the lookup(String) method (with a performance degradation):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;property name=&quot;org.jboss.as.naming.lookup.by.string&quot; value=&quot;true&quot;/&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="80150931_NamingSubsystemConfiguration-BindingAliases"  >
+        <h3>Binding Aliases</h3>
+    
+            <p>
+    The Naming subsystem configuration allows the binding of existent entries into additional names, i.e. aliases. Binding aliases are specified through the <tt class=" ">lookup</tt> XML element. An example of its XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;lookup name=&quot;java:global/c&quot; lookup=&quot;java:global/b&quot; /&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">name</tt> attribute is mandatory and specifies the target JNDI name for the entry.            </p>
+                <p>
+    The <tt class=" ">lookup</tt> attribute is mandatory and indicates the source JNDI name.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may be used to configure binding aliases. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> the one in the XML example above:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=naming/binding=java\:global\/c:add(binding-type=lookup, lookup=java\:global\/b)
+/subsystem=naming/binding=java\:global\/c:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="80150931_NamingSubsystemConfiguration-RemoteJNDIConfiguration"  >
+        <h2>Remote JNDI Configuration</h2>
+    
+            <p>
+    The Naming subsystem configuration may be used to (de)activate the remote JNDI interface, which allows clients to lookup entries present in a remote WildFly instance.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Only entries within the <tt class=" ">java:jboss/exported</tt> context are accessible over remote JNDI.            </p>
+        </div>
+    
+            <p>
+    In the subsystem's XML configuration, remote JNDI access bindings are configured through the <tt class=" ">&lt;remote-naming /&gt;</tt> XML element:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;remote-naming /&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Management clients, such as the WildFly CLI, may be used to add/remove the remote JNDI interface. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> the one in the XML example above:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=naming/service=remote-naming:add
+/subsystem=naming/service=remote-naming:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

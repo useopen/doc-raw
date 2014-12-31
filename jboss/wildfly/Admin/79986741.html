@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>EE Subsystem Configuration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>EE Subsystem Configuration</h1>
+        </div>
+        
+        <div id="79986741" class="content prepend-top">
+    <div class="section-2"  id="79986741_EESubsystemConfiguration-Overview"  >
+        <h2>Overview</h2>
+    
+            <p>
+    The EE subsystem provides common functionality in the Java EE platform, such as the EE Concurrency Utilities (JSR 236) and <tt class=" ">@Resource</tt> injection. The subsystem is also responsible for managing the lifecycle of Java EE application's deployments, that is, <tt class=" ">.ear</tt> files.            </p>
+                <p>
+    The EE subsystem configuration may be used to:            </p>
+    <ul class=" "><li class=" ">            <p>
+    customise the deployment of Java EE applications            </p>
+    </li><li class=" ">            <p>
+    create EE Concurrency Utilities instances            </p>
+    </li><li class=" ">            <p>
+    define the default bindings            </p>
+    </li></ul>            <p>
+    The subsystem name is ee and this document covers EE subsystem version <tt class=" ">2.0</tt>, which XML namespace within WildFly XML configurations is&nbsp;<tt class=" ">urn:jboss:domain:ee:2.0</tt>. The path for the subsystem's XML schema, within WildFly's distribution, is <tt class=" ">docs/schema/jboss-as-ee_2_0.xsd</tt>.            </p>
+                <p>
+    Subsystem XML configuration example with all elements and attributes specified:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:ee:2.0&quot; &gt;
+    &lt;global-modules&gt;
+        &lt;module name=&quot;org.jboss.logging&quot;
+                slot=&quot;main&quot;/&gt;
+        &lt;module name=&quot;org.apache.log4j&quot;
+                annotations=&quot;true&quot;
+                meta-inf=&quot;true&quot;
+                services=&quot;false&quot; /&gt;
+    &lt;/global-modules&gt;
+    &lt;ear-subdeployments-isolated&gt;true&lt;/ear-subdeployments-isolated&gt;
+    &lt;spec-descriptor-property-replacement&gt;false&lt;/spec-descriptor-property-replacement&gt;
+    &lt;jboss-descriptor-property-replacement&gt;false&lt;/jboss-descriptor-property-replacement&gt;
+    &lt;annotation-property-replacement&gt;false&lt;/annotation-property-replacement&gt;
+    &lt;concurrent&gt;
+        &lt;context-services&gt;
+            &lt;context-service
+                    name=&quot;default&quot;
+                    jndi-name=&quot;java:jboss/ee/concurrency/context/default&quot;
+                    use-transaction-setup-provider=&quot;true&quot; /&gt;
+        &lt;/context-services&gt;
+        &lt;managed-thread-factories&gt;
+            &lt;managed-thread-factory
+                    name=&quot;default&quot;
+                    jndi-name=&quot;java:jboss/ee/concurrency/factory/default&quot;
+                    context-service=&quot;default&quot;
+                    priority=&quot;1&quot; /&gt;
+        &lt;/managed-thread-factories&gt;
+        &lt;managed-executor-services&gt;
+            &lt;managed-executor-service
+                    name=&quot;default&quot;
+                    jndi-name=&quot;java:jboss/ee/concurrency/executor/default&quot;
+                    context-service=&quot;default&quot;
+                    thread-factory=&quot;default&quot;
+                    hung-task-threshold=&quot;60000&quot;
+                    core-threads=&quot;5&quot;
+                    max-threads=&quot;25&quot;
+                    keepalive-time=&quot;5000&quot;
+                    queue-length=&quot;1000000&quot;
+                    reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+        &lt;/managed-executor-services&gt;
+        &lt;managed-scheduled-executor-services&gt;
+            &lt;managed-scheduled-executor-service
+                    name=&quot;default&quot;
+                    jndi-name=&quot;java:jboss/ee/concurrency/scheduler/default&quot;
+                    context-service=&quot;default&quot;
+                    thread-factory=&quot;default&quot;
+                    hung-task-threshold=&quot;60000&quot;
+                    core-threads=&quot;5&quot;
+                    keepalive-time=&quot;5000&quot;
+                    reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+        &lt;/managed-scheduled-executor-services&gt;
+    &lt;/concurrent&gt;
+    &lt;default-bindings
+            context-service=&quot;java:jboss/ee/concurrency/context/default&quot;
+            datasource=&quot;java:jboss/datasources/ExampleDS&quot;
+            jms-connection-factory=&quot;java:jboss/DefaultJMSConnectionFactory&quot;
+            managed-executor-service=&quot;java:jboss/ee/concurrency/executor/default&quot;
+            managed-scheduled-executor-service=&quot;java:jboss/ee/concurrency/scheduler/default&quot;
+            managed-thread-factory=&quot;java:jboss/ee/concurrency/factory/default&quot; /&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="79986741_EESubsystemConfiguration-JavaEEApplicationDeployment"  >
+        <h2>Java EE Application Deployment</h2>
+    
+            <p>
+    The EE subsystem configuration allows the customisation of the deployment behaviour for Java EE Applications.            </p>
+        <div class="section-3"  id="79986741_EESubsystemConfiguration-GlobalModules"  >
+        <h3>Global Modules</h3>
+    
+            <p>
+    Global modules is a set of JBoss Modules that will be added as dependencies to the JBoss Module of every Java EE deployment. Such dependencies allows Java EE deployments to see the classes exported by the global modules.            </p>
+                <p>
+    Each global module is defined through the <tt class=" ">module</tt> resource, an example of its XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;global-modules&gt;
+    &lt;module name=&quot;org.jboss.logging&quot; slot=&quot;main&quot;/&gt;
+    &lt;module name=&quot;org.apache.log4j&quot; annotations=&quot;true&quot; meta-inf=&quot;true&quot; services=&quot;false&quot; /&gt;
+  &lt;/global-modules&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The only mandatory attribute is the JBoss Module <tt class=" ">name</tt>, the <tt class=" ">slot</tt> attribute defaults to <tt class=" ">main</tt>, and both define the JBoss Module ID to reference.            </p>
+                <p>
+    The optional <tt class=" ">annotations</tt> attribute, which defaults to <tt class=" ">false</tt>, indicates if a pre-computed annotation index should be imported from META-INF/jandex.idx            </p>
+                <p>
+    The optional <tt class=" ">services</tt> attribute indicates if any services exposed in META-INF/services should be made available to the deployments class loader, and defaults to <tt class=" ">false</tt>.            </p>
+                <p>
+    The optional <tt class=" ">meta-inf</tt> attribute, which defaults to <tt class=" ">true</tt>, indicates if the Module's <tt class=" ">META-INF</tt> path should be available to the deployment's class loader.            </p>
+        </div>
+    
+    <div class="section-3"  id="79986741_EESubsystemConfiguration-EARSubdeploymentsIsolation"  >
+        <h3>EAR Subdeployments Isolation</h3>
+    
+            <p>
+    A flag indicating whether each of the subdeployments within a <tt class=" ">.ear</tt> can access classes belonging to another subdeployment within the same <tt class=" ">.ear</tt>. The default value is <tt class=" ">false</tt>, which allows the subdeployments to see classes belonging to other subdeployments within the <tt class=" ">.ear</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;ear-subdeployments-isolated&gt;true&lt;/ear-subdeployments-isolated&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>myapp.ear
+|
+|--- web.war
+|
+|--- ejb1.jar
+|
+|--- ejb2.jar
+</code></pre>
+        </div>
+    </div>
+            <p>
+    If the <tt class=" ">ear-subdeployments-isolated</tt> is set to false, then the classes in <tt class=" ">web.war</tt> can access classes belonging to <tt class=" ">ejb1.jar</tt> and <tt class=" ">ejb2.jar</tt>. Similarly, classes from <tt class=" ">ejb1.jar</tt> can access classes from <tt class=" ">ejb2.jar</tt> (and vice-versa).            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    This flag has no effect on the isolated classloader of the <tt class=" ">.war</tt> file(s), i.e. irrespective of whether this flag is set to <tt class=" ">true</tt> or <tt class=" ">false</tt>, the <tt class=" ">.war</tt> within a <tt class=" ">.ear</tt> will have a isolated classloader, and other subdeployments within that <tt class=" ">.ear</tt> will not be able to access classes from that <tt class=" ">.war</tt>. This is as per spec.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="79986741_EESubsystemConfiguration-PropertyReplacement"  >
+        <h3>Property Replacement</h3>
+    
+            <p>
+    The EE subsystem configuration includes flags to configure whether system property replacement will be done on XML descriptors and Java Annotations, included in Java EE deployments.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    System properties etc are resolved in the security context of the application server itself, not the deployment that contains the file. This means that if you are running with a security manager and enable this property, a deployment can potentially access system properties or environment entries that the security manager would have otherwise prevented.            </p>
+        </div>
+    
+    <div class="section-4"  id="79986741_EESubsystemConfiguration-SpecDescriptorPropertyReplacement"  >
+        <h4>Spec Descriptor Property Replacement</h4>
+    
+            <p>
+    Flag indicating whether system property replacement will be performed on standard Java EE XML descriptors. This defaults to <tt class=" ">true</tt>, however it is disabled in the default configurations.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;spec-descriptor-property-replacement&gt;false&lt;/spec-descriptor-property-replacement&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="79986741_EESubsystemConfiguration-JBossDescriptorPropertyReplacement"  >
+        <h4>JBoss Descriptor Property Replacement</h4>
+    
+            <p>
+    Flag indicating whether system property replacement will be performed on WildFly proprietary XML descriptors, such as <tt class=" ">jboss-app.xml</tt>. This defaults to <tt class=" ">true</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;jboss-descriptor-property-replacement&gt;false&lt;/jboss-descriptor-property-replacement&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="79986741_EESubsystemConfiguration-AnnotationPropertyReplacement"  >
+        <h4>Annotation Property Replacement</h4>
+    
+            <p>
+    Flag indicating whether system property replacement will be performed on Java annotations. The default value is&nbsp;<tt class=" ">false</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;annotation-property-replacement&gt;false&lt;/annotation-property-replacement&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="79986741_EESubsystemConfiguration-EEConcurrencyUtilities"  >
+        <h2>EE Concurrency Utilities</h2>
+    
+            <p>
+    EE Concurrency Utilities (JSR 236) were introduced with Java EE 7, to ease the task of writing multithreaded Java EE applications. Instances of these utilities are managed by WildFly, and the related configuration provided by the EE subsystem.            </p>
+        <div class="section-3"  id="79986741_EESubsystemConfiguration-ContextServices"  >
+        <h3>Context Services</h3>
+    
+            <p>
+    The Context Service is a concurrency utility which creates contextual proxies from existent objects. WildFly Context Services are also used to propagate the context from a Java EE application invocation thread, to the threads internally used by the other EE Concurrency Utilities. Context Service instances may be created using the subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;context-services&gt;
+    &lt;context-service
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/context/default&quot;
+	use-transaction-setup-provider=&quot;true&quot; /&gt;
+  &lt;/context-services&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">name</tt> attribute is mandatory, and it's value should be a unique name within all Context Services.            </p>
+                <p>
+    The <tt class=" ">jndi-name</tt> attribute is also mandatory, and defines where in the JNDI the Context Service should be placed.            </p>
+                <p>
+    The optional <tt class=" ">use-trasaction-setup-provider</tt> attribute indicates if the contextual proxies built by the Context Service should suspend transactions in context, when invoking the proxy objects, and its value defaults to true.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Context Service instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/context-service=other:add(jndi-name=java\:jboss\/ee\/concurrency\/other)
+/subsystem=ee/context-service=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="79986741_EESubsystemConfiguration-ManagedThreadFactories"  >
+        <h3>Managed Thread Factories</h3>
+    
+            <p>
+    The Managed Thread Factory allows Java EE applications to create new threads. WildFly Managed Thread Factory instances may also, optionally, use a Context Service instance to propagate the Java EE application thread&rsquo;s context to the new threads. Instance creation is done through the EE subsystem, by editing the subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;managed-thread-factories&gt;
+    &lt;managed-thread-factory
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/factory/default&quot;
+	context-service=&quot;default&quot;
+	priority=&quot;1&quot; /&gt;
+  &lt;/managed-thread-factories&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The&nbsp;<tt class=" ">name</tt>&nbsp;attribute is mandatory, and it's value should be a unique name within all Managed Thread Factories.            </p>
+                <p>
+    The&nbsp;<tt class=" ">jndi-name</tt>&nbsp;attribute is also mandatory, and defines where in the JNDI the Managed Thread Factory should be placed.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">context-service</tt>&nbsp;references an existent Context Service by its <tt class=" ">name</tt>. If specified then thread created by the factory will propagate the invocation context, present when creating the thread.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">priority</tt>&nbsp;indicates the priority for new threads created by the factory, and defaults to <tt class=" ">5</tt>.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Managed Thread Factory instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/managed-thread-factory=other:add(jndi-name=java\:jboss\/ee\/factory\/other)
+/subsystem=ee/managed-thread-factory=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="79986741_EESubsystemConfiguration-ManagedExecutorServices"  >
+        <h3>Managed Executor Services</h3>
+    
+            <p>
+    The Managed Executor Service is the Java EE adaptation of Java SE Executor Service, providing to Java EE applications the functionality of asynchronous task execution. WildFly is responsible to manage the lifecycle of Managed Executor Service instances, which are specified through the EE subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;managed-executor-services&gt;
+    &lt;managed-executor-service
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/executor/default&quot;
+	context-service=&quot;default&quot;
+	thread-factory=&quot;default&quot;
+	hung-task-threshold=&quot;60000&quot;
+	core-threads=&quot;5&quot;
+	max-threads=&quot;25&quot;
+	keepalive-time=&quot;5000&quot;
+	queue-length=&quot;1000000&quot;
+	reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+  &lt;/managed-executor-services&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The&nbsp;<tt class=" ">name</tt>&nbsp;attribute is mandatory, and it's value should be a unique name within all Managed Executor Services.            </p>
+                <p>
+    The&nbsp;<tt class=" ">jndi-name</tt>&nbsp;attribute is also mandatory, and defines where in the JNDI the Managed Executor Service should be placed.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">context-service</tt>&nbsp;references an existent Context Service by its&nbsp;<tt class=" ">name</tt>. If specified then the referenced Context Service will capture the invocation context present when submitting a task to the executor, which will then be used when executing the task.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">thread-factory</tt>&nbsp;references an existent Managed Thread Factory by its&nbsp;<tt class=" ">name</tt>, to handle the creation of internal threads. If not specified then a Managed Thread Factory with default configuration will be created and used internally.            </p>
+                <p>
+    The mandatory&nbsp;<tt class=" ">core-threads</tt>&nbsp;provides the number of threads to keep in the executor's pool, even if they are idle. A value of&nbsp;<tt class=" ">0</tt>&nbsp;means there is no limit.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">queue-length</tt>&nbsp;indicates the number of tasks that can be stored in the input queue. The default value is <tt class=" ">0</tt>, which means the queue capacity is unlimited.            </p>
+                <p>
+    The executor&rsquo;s task queue is based on the values of the attributes&nbsp;<tt class=" ">core-threads</tt> and <tt class=" ">queue-length</tt>:            </p>
+    <ul class=" "><li class=" ">            <p>
+    If <tt class=" ">queue-length</tt> is <tt class=" ">0</tt>, or <tt class=" ">queue-length</tt> is <tt class=" ">Integer.MAX_VALUE (2147483647)</tt> and <tt class=" ">core-threads</tt> is <tt class=" ">0</tt>, direct handoff queuing strategy will be used and a synchronous queue will be created.            </p>
+    </li><li class=" ">            <p>
+    If <tt class=" ">queue-length</tt> is <tt class=" ">Integer.MAX_VALUE</tt> but <tt class=" ">core-threads</tt> is not <tt class=" ">0</tt>, an unbounded queue will be used.            </p>
+    </li><li class=" ">            <p>
+    For any other valid value for <tt class=" ">queue-length</tt>, a bounded queue wil be created.            </p>
+    </li></ul>            <p>
+    The optional&nbsp;<tt class=" ">hung-task-threshold</tt>&nbsp;defines a threshold value, in milliseconds, to hung a possibly blocked task. A value of&nbsp;<tt class=" ">0</tt>&nbsp;will never hung a task, and is the default.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">long-running-tasks</tt>&nbsp;is a hint to optimize the execution of long running tasks, and defaults to <tt class=" ">false</tt>.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">max-threads</tt>&nbsp;defines the the maximum number of threads used by the executor, which defaults to Integer.MAX_VALUE&nbsp;(2147483647).            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">keepalive-time</tt>&nbsp;defines the time, in milliseconds, that an internal thread may be idle. The attribute default value is <tt class=" ">60000</tt>.            </p>
+                <p>
+    The optional&nbsp;reject-policy defines the policy to use when a task is rejected by the executor. The attribute value may be the default <tt class=" ">ABORT</tt>, which means an exception should be thrown, or <tt class=" ">RETRY_ABORT</tt>, which means the executor will try to submit it once more, before throwing an exception.&nbsp;            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Managed Executor Service instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/managed-executor-service=other:add(jndi-name=java\:jboss\/ee\/executor\/other, core-threads=2)
+/subsystem=ee/managed-executor-service=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="79986741_EESubsystemConfiguration-ManagedScheduledExecutorServices"  >
+        <h3>Managed Scheduled Executor Services</h3>
+    
+            <p>
+    The Managed Scheduled  Executor Service is the Java EE adaptation of Java SE Scheduled Executor Service, providing to Java EE applications the functionality of scheduling task execution. WildFly is responsible to manage the lifecycle of Managed Scheduled  Executor Service instances, which are specified through the EE subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;managed-scheduled-executor-services&gt;
+    &lt;managed-scheduled-executor-service
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/scheduler/default&quot;
+	context-service=&quot;default&quot;
+	thread-factory=&quot;default&quot;
+	hung-task-threshold=&quot;60000&quot;
+	core-threads=&quot;5&quot;
+	keepalive-time=&quot;5000&quot;
+	reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+  &lt;/managed-scheduled-executor-services&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The&nbsp;<tt class=" ">name</tt>&nbsp;attribute is mandatory, and it's value should be a unique name within all Managed Scheduled Executor Services.            </p>
+                <p>
+    The&nbsp;<tt class=" ">jndi-name</tt>&nbsp;attribute is also mandatory, and defines where in the JNDI the Managed Scheduled Executor Service should be placed.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">context-service</tt>&nbsp;references an existent Context Service by its&nbsp;<tt class=" ">name</tt>. If specified then the referenced Context Service will capture the invocation context present when submitting a task to the executor, which will then be used when executing the task.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">thread-factory</tt>&nbsp;references an existent Managed Thread Factory by its&nbsp;<tt class=" ">name</tt>, to handle the creation of internal threads. If not specified then a Managed Thread Factory with default configuration will be created and used internally.            </p>
+                <p>
+    The mandatory&nbsp;<tt class=" ">core-threads</tt>&nbsp;provides the number of threads to keep in the executor's pool, even if they are idle. A value of&nbsp;<tt class=" ">0</tt>&nbsp;means there is no limit.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">hung-task-threshold</tt>&nbsp;defines a threshold value, in milliseconds, to hung a possibly blocked task. A value of&nbsp;<tt class=" ">0</tt>&nbsp;will never hung a task, and is the default.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">long-running-tasks</tt>&nbsp;is a hint to optimize the execution of long running tasks, and defaults to&nbsp;<tt class=" ">false</tt>.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">keepalive-time</tt>&nbsp;defines the time, in milliseconds, that an internal thread may be idle. The attribute default value is&nbsp;<tt class=" ">60000</tt>.            </p>
+                <p>
+    The optional&nbsp;reject-policy defines the policy to use when a task is rejected by the executor. The attribute value may be the default&nbsp;<tt class=" ">ABORT</tt>, which means an exception should be thrown, or<tt class=" ">RETRY_ABORT</tt>, which means the executor will try to submit it once more, before throwing an exception.&nbsp;            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Managed Scheduled Executor Service instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/managed-scheduled-executor-service=other:add(jndi-name=java\:jboss\/ee\/scheduler\/other, core-threads=2)
+/subsystem=ee/managed-scheduled-executor-service=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="79986741_EESubsystemConfiguration-DefaultEEBindings"  >
+        <h2>Default EE Bindings</h2>
+    
+            <p>
+    The Java EE Specification mandates the existence of a default instance for each of the following resources:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Context Service            </p>
+    </li><li class=" ">            <p>
+    Datasource            </p>
+    </li><li class=" ">            <p>
+    JMS Connection Factory            </p>
+    </li><li class=" ">            <p>
+    Managed Executor Service            </p>
+    </li><li class=" ">            <p>
+    Managed Scheduled Executor Service            </p>
+    </li><li class=" ">            <p>
+    Managed Thread Factory            </p>
+    </li></ul>            <p>
+    The EE subsystem looks up the default instances from JNDI, using the names in the default bindings configuration, before placing those in the standard JNDI names, such as <tt class=" ">java:comp/DefaultManagedExecutorService</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;default-bindings
+	context-service=&quot;java:jboss/ee/concurrency/context/default&quot;
+	datasource=&quot;java:jboss/datasources/ExampleDS&quot;
+	jms-connection-factory=&quot;java:jboss/DefaultJMSConnectionFactory&quot;
+	managed-executor-service=&quot;java:jboss/ee/concurrency/executor/default&quot;
+	managed-scheduled-executor-service=&quot;java:jboss/ee/concurrency/scheduler/default&quot;
+	managed-thread-factory=&quot;java:jboss/ee/concurrency/factory/default&quot; /&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    The default bindings are optional, if the jndi name for a default binding is not configured then the related resource will not be available to Java EE applications.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

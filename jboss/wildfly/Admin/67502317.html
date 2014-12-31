@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Threads subsystem configuration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Threads subsystem configuration</h1>
+        </div>
+        
+        <div id="67502317" class="content prepend-top">
+    <div class="section-2"  id="67502317_Threadssubsystemconfiguration-Definingthreadpools"  >
+        <h2>Defining thread pools</h2>
+    
+            <p>
+    Subsystems can reference thread  pools defined by the threading subsystem. Externalizing thread pool in  this way has the additional advantage of being able to manage the thread  pools via native WildFly management mechanisms, and allows you to  share thread pools across subsystems. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:threads:1.0&quot;&gt;
+    &lt;thread-factory name=&quot;infinispan-factory&quot; priority=&quot;1&quot;/&gt;
+    &lt;bounded-queue-thread-pool name=&quot;infinispan-transport&quot;&gt;
+        &lt;core-threads count=&quot;1&quot;/&gt;
+        &lt;queue-length count=&quot;100000&quot;/&gt;
+        &lt;max-threads count=&quot;25&quot;/&gt;
+        &lt;thread-factory name=&quot;infinispan-factory&quot;/&gt;
+    &lt;/bounded-queue-thread-pool&gt;
+    &lt;bounded-queue-thread-pool name=&quot;infinispan-listener&quot;&gt;
+        &lt;core-threads count=&quot;1&quot;/&gt;
+        &lt;queue-length count=&quot;100000&quot;/&gt;
+        &lt;max-threads count=&quot;1&quot;/&gt;
+        &lt;thread-factory name=&quot;infinispan-factory&quot;/&gt;
+    &lt;/bounded-queue-thread-pool&gt;
+    &lt;scheduled-thread-pool name=&quot;infinispan-eviction&quot;&gt;
+        &lt;max-threads count=&quot;1&quot;/&gt;
+        &lt;thread-factory name=&quot;infinispan-factory&quot;/&gt;
+    &lt;/scheduled-thread-pool&gt;
+    &lt;scheduled-thread-pool name=&quot;infinispan-repl-queue&quot;&gt;
+        &lt;max-threads count=&quot;1&quot;/&gt;
+        &lt;thread-factory name=&quot;infinispan-factory&quot;/&gt;
+    &lt;/scheduled-thread-pool&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Infinispan configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;cache-container name=&quot;web&quot; default-cache=&quot;repl&quot; listener-executor=&quot;infinispan-listener&quot; eviction-executor=&quot;infinispan-eviction&quot; replication-queue-executor=&quot;infinispan-repl-queue&quot;&gt;
+    &lt;transport executor=&quot;infinispan-transport&quot;/&gt;
+    &lt;replicated-cache name=&quot;repl&quot; mode=&quot;ASYNC&quot; batching=&quot;true&quot;&gt;
+        &lt;locking isolation=&quot;REPEATABLE_READ&quot;/&gt;
+        &lt;file-store/&gt;
+    &lt;/replicated-cache&gt;
+&lt;/cache-container&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="67502317_Threadssubsystemconfiguration-Operationrequestexamples"  >
+        <h2>Operation request examples</h2>
+    
+            <p>
+    &#65279;            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/profile=production/subsystem=threads/bounded-queue-thread-pool=pool1:write-core-threads (count=0, per-cpu=20)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

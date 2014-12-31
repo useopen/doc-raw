@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Remote JNDI Configuration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Remote JNDI Configuration</h1>
+        </div>
+        
+        <div id="80150952" class="content prepend-top">
+            <p>
+    The Naming subsystem configuration may be used to (de)activate the remote JNDI interface, which allows clients to lookup entries present in a remote WildFly instance.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Only entries within the <tt class=" ">java:jboss/exported</tt> context are accessible over remote JNDI.            </p>
+        </div>
+    
+            <p>
+    In the subsystem's XML configuration, remote JNDI access bindings are configured through the <tt class=" ">&lt;remote-naming /&gt;</tt> XML element:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;remote-naming /&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Management clients, such as the WildFly CLI, may be used to add/remove the remote JNDI interface. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> the one in the XML example above:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=naming/service=remote-naming:add
+/subsystem=naming/service=remote-naming:remove</code></pre>
+        </div>
+    </div>
+        </div>
+    </div>
+</body>
+</html>

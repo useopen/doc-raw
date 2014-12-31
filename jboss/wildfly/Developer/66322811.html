@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>WS Tools</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>WS Tools</h1>
+        </div>
+        
+        <div id="66322811" class="content prepend-top">
+            <p>
+    The JAX-WS tools provided by JBossWS can be used in a variety of ways.  First we will look at server-side development strategies, and then  proceed to the client.            </p>
+        <div class="section-2"  id="66322811_JAX-WSTools-Serverside"  >
+        <h2>Server side</h2>
+    
+            <p>
+    When developing a Web Service  Endpoint (the server-side) you have the option of starting from Java  (<i class=" ">bottom-up development</i>), or from the abstact contract (WSDL) that  defines your service (<i class=" ">top-down development</i>). If this is a new service  (no existing contract), the bottom-up approach is the fastest route; you  only need to add a few annotations to your classes to get a service up  and running. However, if you are developing a service with an already  defined contract, it is far simpler to use the top-down approach, since  the provided tool will generate the annotated code for you.            </p>
+                <p>
+    Bottom-up use cases:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Exposing an already existing EJB3 bean as a Web Service            </p>
+    </li><li class=" ">            <p>
+    Providing a new service, and you want the contract to be generated for you            </p>
+    </li></ul>            <p>
+    Top-down use cases:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Replacing the implementation of an existing Web Service, and you can't break compatibility with older clients            </p>
+    </li><li class=" ">            <p>
+    Exposing a service that conforms to a contract specified by a third  party (e.g. a vender that calls you back using an already defined  protocol).            </p>
+    </li><li class=" ">            <p>
+    Creating a service that adheres to the XML Schema and WSDL you developed by hand up front            </p>
+    </li></ul>            <p>
+    The following JAX-WS command line tools are included in JBossWS:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Command            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    wsprovide            </td>
+                <td rowspan="1" colspan="1">
+    Generates JAX-WS portable artifacts, and provides the abstract contract. Used for bottom-up development.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    wsconsume            </td>
+                <td rowspan="1" colspan="1">
+    Consumes  the abstract contract (WSDL and Schema files), and produces artifacts  for both a server and client. Used for top-down and client development            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    <div class="section-3"  id="66322811_JAX-WSTools-BottomUp%28Usingwsprovide%29"  >
+        <h3>Bottom-Up (Using wsprovide)</h3>
+    
+            <p>
+    The  bottom-up strategy involves developing the Java code for your service,  and then annotating it using JAX-WS annotations. These annotations can  be used to customize the contract that is generated for your service.  For example, you can change the operation name to map to anything you  like. However, all of the annotations have sensible defaults, so only  the @WebService annotation is required.            </p>
+                <p>
+    This can be as simple as creating a single class:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package echo;
+
+@javax.jws.WebService
+public class Echo
+{
+   public String echo(String input)
+   {
+      return input;
+   }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A  JSE or EJB3 deployment can be built using this class, and it is the  only Java code needed to deploy on JBossWS. The WSDL, and all other Java  artifacts called &quot;wrapper classes&quot; will be generated for you at deploy  time. This actually goes beyond the JAX-WS specification, which requires  that wrapper classes be generated using an offline tool. The reason for  this requirement is purely a vender implementation problem, and since  we do not believe in burdening a developer with a bunch of additional  steps, we generate these as well. However, if you want your deployment  to be portable to other application servers, you will unfortunately need  to use a tool and add the generated classes to your deployment.            </p>
+                <p>
+    This is the primary purpose of the <i class=" ">wsprovide</i> tool,  to generate portable JAX-WS artifacts. Additionally, it can be used to  &quot;provide&quot; the abstract contract (WSDL file) for your service. This can  be obtained by invoking <i class=" ">wsprovide</i> using the &quot;-w&quot; option:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ javac -d . -classpath jboss-jaxws.jar Echo.java
+$ wsprovide -w echo.Echo
+Generating WSDL:
+EchoService.wsdl
+Writing Classes:
+echo/jaxws/Echo.class
+echo/jaxws/EchoResponse.class</code></pre>
+        </div>
+    </div>
+            <p>
+    Inspecting the WSDL reveals a service called <i class=" ">EchoService</i>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;service name='EchoService'&gt;
+ &lt;port binding='tns:EchoBinding' name='EchoPort'&gt;
+  &lt;soap:address location='REPLACE_WITH_ACTUAL_URL'/&gt;
+ &lt;/port&gt;
+&lt;/service&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    As expected, this service defines one operation, &quot;<i class=" ">echo</i>&quot;:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;portType name='Echo'&gt;
+ &lt;operation name='echo' parameterOrder='echo'&gt;
+  &lt;input message='tns:Echo_echo'/&gt;
+  &lt;output message='tns:Echo_echoResponse'/&gt;
+ &lt;/operation&gt;
+&lt;/portType&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    Remember that when deploying on JBossWS you do not need to run this tool. You only need it for generating portable artifacts and/or the abstract contract for your service.            </p>
+        </div>
+    
+            <p>
+    Let's create a POJO endpoint for deployment on WildFly. A simple <i class=" ">web.xml</i> needs to be created:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;web-app xmlns=&quot;http://java.sun.com/xml/ns/j2ee&quot;
+  xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+  xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd&quot;
+  version=&quot;2.4&quot;&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;Echo&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;echo.Echo&lt;/servlet-class&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;Echo&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;/Echo&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <i class=" ">web.xml</i> and the single class can now be used to create a war:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ mkdir -p WEB-INF/classes
+$ cp -rp echo WEB-INF/classes/
+$ cp web.xml WEB-INF
+$ jar cvf echo.war WEB-INF
+added manifest
+adding: WEB-INF/(in = 0) (out= 0)(stored 0%)
+adding: WEB-INF/classes/(in = 0) (out= 0)(stored 0%)
+adding: WEB-INF/classes/echo/(in = 0) (out= 0)(stored 0%)
+adding: WEB-INF/classes/echo/Echo.class(in = 340) (out= 247)(deflated 27%)
+adding: WEB-INF/web.xml(in = 576) (out= 271)(deflated 52%)</code></pre>
+        </div>
+    </div>
+            <p>
+    The war can then be deployed to the JBoss Application Server.The war can then be deployed to the JBoss Application Server; this will internally invoke wsprovide,  which will generate the WSDL. If deployment was successful, and you are  using the default settings, it should be available in the server management console.            </p>
+                <p>
+    For a portable JAX-WS deployment, the wrapper classes generated earlier could be added to the deployment.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322811_JAX-WSTools-TopDown%28Usingwsconsume%29"  >
+        <h3>Down (Using wsconsume)</h3>
+    
+            <p>
+    The  top-down development strategy begins with the abstract contract for the  service, which includes the WSDL file and zero or more schema files.  The <i class=" ">wsconsume</i> tool is then used to consume this contract, and produce annotated Java classes (and optionally sources) that define it.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    wsconsume may have problems with symlinks on Unix systems            </p>
+        </div>
+    
+            <p>
+    Using  the WSDL file from the bottom-up example, a new Java implementation  that adheres to this service can be generated. The &quot;-k&quot; option is passed  to <i class=" ">wsconsume</i> to preserve the Java source files that are generated, instead of providing just classes:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ wsconsume -k EchoService.wsdl
+echo/Echo.java
+echo/EchoResponse.java
+echo/EchoService.java
+echo/Echo_Type.java
+echo/ObjectFactory.java
+echo/package-info.java
+echo/Echo.java
+echo/EchoResponse.java
+echo/EchoService.java
+echo/Echo_Type.java
+echo/ObjectFactory.java
+echo/package-info.java</code></pre>
+        </div>
+    </div>
+            <p>
+    The following table shows the purpose of each generated file:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    File            </td>
+                <td rowspan="1" colspan="1">
+    Purpose            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Echo.java            </td>
+                <td rowspan="1" colspan="1">
+    Service Endpoint Interface            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Echo_Type.java            </td>
+                <td rowspan="1" colspan="1">
+    Wrapper bean for request message            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    EchoResponse.java            </td>
+                <td rowspan="1" colspan="1">
+    Wrapper bean for response message            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    ObjectFactory.java            </td>
+                <td rowspan="1" colspan="1">
+    JAXB XML Registry            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    package-info.java            </td>
+                <td rowspan="1" colspan="1">
+    Holder for JAXB package annotations            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    EchoService.java            </td>
+                <td rowspan="1" colspan="1">
+    Used only by JAX-WS clients            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    Examining  the Service Endpoint Interface reveals annotations that are more  explicit than in the class written by hand in the bottom-up example,  however, these evaluate to the same contract:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@WebService(name = &quot;Echo&quot;, targetNamespace = &quot;http://echo/&quot;)
+public interface Echo {
+    @WebMethod
+    @WebResult(targetNamespace = &quot;&quot;)
+    @RequestWrapper(localName = &quot;echo&quot;, targetNamespace = &quot;http://echo/&quot;, className = &quot;echo.Echo_Type&quot;)
+    @ResponseWrapper(localName = &quot;echoResponse&quot;, targetNamespace = &quot;http://echo/&quot;, className = &quot;echo.EchoResponse&quot;)
+    public String echo(
+        @WebParam(name = &quot;arg0&quot;, targetNamespace = &quot;&quot;)
+        String arg0);
+
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The only missing piece (besides for packaging) is the implementation class, which can now be written, using the above interface.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package echo;
+
+@javax.jws.WebService(endpointInterface=&quot;echo.Echo&quot;)
+public class EchoImpl implements Echo
+{
+   public String echo(String arg0)
+   {
+      return arg0;
+  &nbsp;}
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322811_JAX-WSTools-ClientSide"  >
+        <h2>Client Side</h2>
+    
+            <p>
+    Before  going to detail on the client-side it is important to understand the  decoupling concept that is central to Web Services. Web Services are not  the best fit for internal RPC, even though they can be used in this  way. There are much better technologies for this (CORBA, and RMI for  example). Web Services were designed specifically for interoperable  coarse-grained correspondence. There is no expectation or guarantee that  any party participating in a Web Service interaction will be at any  particular location, running on any particular OS, or written in any  particular programming language. So because of this, it is important to  clearly separate client and server implementations. The only thing they  should have in common is the abstract contract definition. If, for  whatever reason, your software does not adhere to this principal, then  you should not be using Web Services. For the above reasons, the <strong class=" "><i class=" ">recommended methodology for developing a client is</i></strong> to follow <strong class=" "><i class=" ">the top-down approach</i></strong>, even if the client is running on the same server.            </p>
+                <p>
+    Let's repeat the process of the top-down section, although using the deployed WSDL, instead of the one generated offline by <i class=" ">wsprovide</i>.  The reason why we do this is just to get the right value for  soap:address. This value must be computed at deploy time, since it is  based on container configuration specifics. You could of course edit the  WSDL file yourself, although you need to ensure that the path is  correct.            </p>
+                <p>
+    Offline version:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;service name='EchoService'&gt;
+  &lt;port binding='tns:EchoBinding' name='EchoPort'&gt;
+   &lt;soap:address location='REPLACE_WITH_ACTUAL_URL'/&gt;
+  &lt;/port&gt;
+&lt;/service&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Online version:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;service name=&quot;EchoService&quot;&gt;
+  &lt;port binding=&quot;tns:EchoBinding&quot; name=&quot;EchoPort&quot;&gt;
+    &lt;soap:address location=&quot;http://localhost.localdomain:8080/echo/Echo&quot;/&gt;
+  &lt;/port&gt;
+&lt;/service&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Using the online deployed version with <i class=" ">wsconsume</i>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ wsconsume -k http://localhost:8080/echo/Echo?wsdl
+echo/Echo.java
+echo/EchoResponse.java
+echo/EchoService.java
+echo/Echo_Type.java
+echo/ObjectFactory.java
+echo/package-info.java
+echo/Echo.java
+echo/EchoResponse.java
+echo/EchoService.java
+echo/Echo_Type.java
+echo/ObjectFactory.java
+echo/package-info.java</code></pre>
+        </div>
+    </div>
+            <p>
+    The  one class that was not examined in the top-down section, was <tt class=" ">EchoService.java</tt>. Notice how it stores the location the WSDL was  obtained from.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@WebServiceClient(name = &quot;EchoService&quot;, targetNamespace = &quot;http://echo/&quot;, wsdlLocation = &quot;http://localhost:8080/echo/Echo?wsdl&quot;)
+public class EchoService extends Service
+{
+    private final static URL ECHOSERVICE_WSDL_LOCATION;
+
+    static {
+        URL url = null;
+        try
+        {
+          &nbsp;url = new URL(&quot;http://localhost:8080/echo/Echo?wsdl&quot;);
+       &nbsp;}
+        catch (MalformedURLException e)
+        {
+          &nbsp;e.printStackTrace();
+        }
+        ECHOSERVICE_WSDL_LOCATION = url;
+    }
+
+    public EchoService(URL wsdlLocation, QName serviceName)
+    {
+        &nbsp;super(wsdlLocation, serviceName);
+    }
+
+    public EchoService()
+    {
+         super(ECHOSERVICE_WSDL_LOCATION, new QName(&quot;http://echo/&quot;, &quot;EchoService&quot;));
+    }
+
+    @WebEndpoint(name = &quot;EchoPort&quot;)
+    public Echo getEchoPort()
+    {
+        &nbsp;return (Echo)super.getPort(new QName(&quot;http://echo/&quot;, &quot;EchoPort&quot;), Echo.class);
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    As  you can see, this generated class extends the main client entry point  in JAX-WS, <tt class=" ">javax.xml.ws.Service</tt>. While you can use <tt class=" ">Service</tt> directly,  this is far simpler since it provides the configuration info for you.  The only method we really care about is the <tt class=" ">getEchoPort()</tt> method, which  returns an instance of our Service Endpoint Interface. Any WS operation  can then be called by just invoking a method on the returned interface.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    It's not recommended to refer to a remote WSDL URL in a production application. This causes network I/O every time you instantiate the Service Object. Instead, use the tool on a saved local copy, or use the URL version of the constructor to provide a new WSDL location.            </p>
+        </div>
+    
+            <p>
+    All that is left to do, is write and compile the client:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import echo.*;
+
+public class EchoClient
+{
+   public static void main(String args[])
+   {
+      if (args.length != 1)
+      {
+         &nbsp;System.err.println(&quot;usage: EchoClient &lt;message&gt;&quot;);
+         &nbsp;System.exit(1);
+     &nbsp;}
+
+      EchoService service = new EchoService();
+      Echo echo = service.getEchoPort();
+      System.out.println(&quot;Server said: &quot; + echo.echo(args0));
+   }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    It is easy to change the endpoint address of your operation at runtime, setting the <i class=" ">ENDPOINT_ADDRESS_PROPERTY</i> as shown below:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>EchoService service = new EchoService();
+      Echo echo = service.getEchoPort();
+
+      /* Set NEW Endpoint Location */
+      String endpointURL = &quot;http://NEW_ENDPOINT_URL&quot;;
+      BindingProvider bp = (BindingProvider)echo;
+      bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpointURL);
+
+      System.out.println(&quot;Server said: &quot; + echo.echo(args0));</code></pre>
+        </div>
+    </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Design and define the model structure</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Design and define the model structure</h1>
+        </div>
+        
+        <div id="66322989" class="content prepend-top">
+            <p>
+    The following example xml contains a valid subsystem configuration, we will see how to plug this in to WildFly 8 later in this tutorial.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:com.acme.corp.tracker:1.0&quot;&gt;
+   &lt;deployment-types&gt;
+      &lt;deployment-type suffix=&quot;sar&quot; tick=&quot;10000&quot;/&gt;
+      &lt;deployment-type suffix=&quot;war&quot; tick=&quot;10000&quot;/&gt;
+   &lt;/deployment-types&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Now when designing our model, we can either do a one to one mapping between the schema and the model or come up with something slightly or very different. To keep things simple, let us stay pretty true to the schema so that when executing a <tt class=" ">:read-resource(recursive=true)</tt> against our subsystem we'll see something like:<br/>    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;type&quot; =&gt; {
+        &quot;sar&quot; =&gt; {&quot;tick&quot; =&gt; &quot;10000&quot;},
+        &quot;war&quot; =&gt; {&quot;tick&quot; =&gt; &quot;10000&quot;}
+    }}
+}</code></pre>
+        </div>
+    </div>
+Each <tt class=" ">deployment-type</tt> in the xml becomes in the model a child resource of the subsystem's root resource. The child resource's child-type is <tt class=" ">type</tt>, and it is indexed by its <tt class=" ">suffix</tt>. Each <tt class=" ">type</tt> resource then contains the <tt class=" ">tick</tt> attribute.            </p>
+                <p>
+    We also need a name for our subsystem, to do that change&nbsp;<tt class=" ">com.acme.corp.tracker.extension.SubsystemExtension</tt>:<br/>    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class SubsystemExtension implements Extension {
+    ...
+    /** The name of our subsystem within the model. */
+    public static final String SUBSYSTEM_NAME = &quot;tracker&quot;;
+    ...</code></pre>
+        </div>
+    </div>
+Once we are finished our subsystem will be available under <tt class=" ">/subsystem=tracker</tt>.            </p>
+                <p>
+    The SubsystemExtension.initialize() method defines the model, currently it sets up the basics to add our subsystem to the model:<br/>    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Override
+    public void initialize(ExtensionContext context) {
+        //register subsystem with its model version
+&nbsp;       final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, 1, 0);
+        //register subsystem model with subsystem definition that defines all attributes and operations
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(SubsystemDefinition.INSTANCE);
+        //register describe operation, note that this can be also registered in SubsystemDefinition
+        registration.registerOperationHandler(DESCRIBE, GenericSubsystemDescribeHandler.INSTANCE, GenericSubsystemDescribeHandler.INSTANCE, false, OperationEntry.EntryType.PRIVATE);
+&nbsp;       //we can register additional submodels here
+        //
+        subsystem.registerXMLElementWriter(parser);
+    }</code></pre>
+        </div>
+    </div>
+The <tt class=" ">registerSubsystem()</tt> call registers our subsystem with the extension context. At the end of the method we register our parser with the returned <tt class=" ">SubsystemRegistration</tt> to be able to marshal our subsystem's model back to the main configuration file when it is modified. We will add more functionality to this method later.            </p>
+        <div class="section-2"  id="66322989_Designanddefinethemodelstructure-Registeringthecoresubsystemmodel"  >
+        <h2>Registering the core subsystem model</h2>
+    
+            <p>
+    Next we obtain a <tt class=" ">ManagementResourceRegistration</tt> by registering the subsystem model. This is a <strong class=" ">compulsory</strong> step for every new subsystem.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(SubsystemDefinition.INSTANCE);</code></pre>
+        </div>
+    </div>
+            <p>
+    It's parameter is an implementation of the ResourceDefinition interface, which means that when you call <tt class=" ">/subsystem=tracker:read-resource-description</tt> the information you see comes from model that is defined by SubsystemDefinition.INSTANCE.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class SubsystemDefinition extends SimpleResourceDefinition {
+&nbsp;&nbsp;&nbsp; public static final SubsystemDefinition INSTANCE = new SubsystemDefinition();
+
+&nbsp;&nbsp;&nbsp; private SubsystemDefinition() {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; super(SubsystemExtension.SUBSYSTEM_PATH,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SubsystemExtension.getResourceDescriptionResolver(null),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //We always need to add an 'add' operation
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SubsystemAdd.INSTANCE,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //Every resource that is added, normally needs a remove operation
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SubsystemRemove.INSTANCE);
+&nbsp;&nbsp;&nbsp; }
+
+&nbsp;&nbsp;&nbsp; @Override
+&nbsp;&nbsp;&nbsp; public void registerOperations(ManagementResourceRegistration resourceRegistration) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; super.registerOperations(resourceRegistration);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //you can register aditional operations here
+&nbsp;&nbsp;&nbsp; }
+
+&nbsp;&nbsp;&nbsp; @Override
+&nbsp;&nbsp;&nbsp; public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //you can register attributes here
+&nbsp;&nbsp;&nbsp; }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Since we need child resource <tt class=" ">type</tt> we need to add new ResourceDefinition,            </p>
+                <p>
+    The ManagementResourceRegistration obtained in <tt class=" ">SubsystemExtension.initialize()</tt> is then used to add additional operations or to register submodels to the <tt class=" ">/subsystem=tracker</tt> address. Every subsystem and resource <strong class=" ">must</strong>&nbsp;have an <tt class=" ">ADD</tt> method which can be achieved by the following line inside registerOperations in your ResourceDefinition or by providing it in constructor of your SimpleResourceDefinition just as we did in example above.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//We always need to add an 'add' operation
+        resourceRegistration.registerOperationHandler(ADD, SubsystemAdd.INSTANCE, new DefaultResourceAddDescriptionProvider(resourceRegistration,descriptionResolver), false);</code></pre>
+        </div>
+    </div>
+            <p>
+    The parameters when registering an operation handler are:            </p>
+    <ol class=" "><li class=" ">            <p>
+    <strong class=" ">The name</strong> - i.e. <tt class=" ">ADD</tt>.            </p>
+    </li><li class=" ">            <p>
+    The handler instance - we will talk more about this below            </p>
+    </li><li class=" ">            <p>
+    The handler description provider - we will talk more about this below.            </p>
+    </li><li class=" ">            <p>
+    Whether this operation handler is inherited - <tt class=" ">false</tt> means that this operation is not inherited, and will only apply to <tt class=" ">/subsystem=tracker</tt>. The content for this operation handler will be provided by <tt class=" ">3</tt>.            </p>
+    </li></ol>            <p>
+    Let us first look at the description provider which is quite simple since this operation takes no parameters. The addition of <tt class=" ">type</tt> children will be handled by another operation handler, as we will see later on.            </p>
+                <p>
+    There are two way to define DescriptionProvider, one is by defining it by hand using ModelNode, but as this has show to be very error prone there are lots of helper methods to help you automatically describe the model. Flowing example is done by manually defining Description provider for ADD operation handler            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/**
+     * Used to create the description of the subsystem add method
+     */
+    public static DescriptionProvider SUBSYSTEM_ADD = new DescriptionProvider() {
+        public ModelNode getModelDescription(Locale locale) {
+            //The locale is passed in so you can internationalize the strings used in the descriptions
+
+            final ModelNode subsystem = new ModelNode();
+            subsystem.get(OPERATION_NAME).set(ADD);
+            subsystem.get(DESCRIPTION).set(&quot;Adds the tracker subsystem&quot;);
+
+            return subsystem;
+        }
+    };</code></pre>
+        </div>
+    </div>
+            <p>
+    Or you can use API that helps you do that for you. For Add and Remove methods there are classes DefaultResourceAddDescriptionProvider and DefaultResourceRemoveDescriptionProvider that do work for you. In case you use SimpleResourceDefinition even that part is hidden from you.            </p>
+                <p>
+    resourceRegistration.registerOperationHandler(ADD, SubsystemAdd.INSTANCE, new DefaultResourceAddDescriptionProvider(resourceRegistration,descriptionResolver), false);<br/>resourceRegistration.registerOperationHandler(REMOVE, SubsystemRemove.INSTANCE, new DefaultResourceRemoveDescriptionProvider(resourceRegistration,descriptionResolver), false);            </p>
+                <p>
+    For other operation handlers that are not add/remove you can use DefaultOperationDescriptionProvider that takes additional parameter of what is the name of operation and optional array of parameters/attributes operation takes. This is an example to register operation &quot;add-mime&quot; with two parameters:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>container.registerOperationHandler(&quot;add-mime&quot;,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MimeMappingAdd.INSTANCE,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; new DefaultOperationDescriptionProvider(&quot;add-mime&quot;, Extension.getResourceDescriptionResolver(&quot;container.mime-mapping&quot;), MIME_NAME, MIME_VALUE));</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    When descriping an operation its description provider's <tt class=" ">OPERATION_NAME</tt> must match the name used when calling <tt class=" ">ManagementResourceRegistration.registerOperationHandler()</tt>            </p>
+        </div>
+    
+            <p>
+    Next we have the actual operation handler instance, note that we have changed its <tt class=" ">populateModel()</tt> method to initialize the <tt class=" ">type</tt> child of the model.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>class SubsystemAdd extends AbstractBoottimeAddStepHandler {
+
+    static final SubsystemAdd INSTANCE = new SubsystemAdd();
+
+    private SubsystemAdd() {
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+        log.info(&quot;Populating the model&quot;);
+        //Initialize the 'type' child node
+        model.get(&quot;type&quot;).setEmptyObject();
+    }
+    ....</code></pre>
+        </div>
+    </div>
+            <p>
+    <tt class=" ">SubsystemAdd</tt> also has a <tt class=" ">performBoottime()</tt> method which is used for initializing the deployer chain associated with this subsystem. We will talk about the deployers later on. However, the basic idea for all operation handlers is that we do any model updates before changing the actual runtime state.            </p>
+                <p>
+    The rule of thumb is that every thing that can be added, can also be removed so we have a remove handler for the subsystem registered<br/>in <tt class=" ">SubsystemDefinition.registerOperations</tt> or just provide the operation handler in constructor.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Every resource that is added, normally needs a remove operation
+        registration.registerOperationHandler(REMOVE, SubsystemRemove.INSTANCE, DefaultResourceRemoveDescriptionProvider(resourceRegistration,descriptionResolver) , false);</code></pre>
+        </div>
+    </div>
+            <p>
+    <tt class=" ">SubsystemRemove</tt> extends <tt class=" ">AbstractRemoveStepHandler</tt> which takes care of removing the resource from the model so we don't need to override its <tt class=" ">performRemove()</tt> operation, also the add handler did not install any services (services will be discussed later) so we can delete the <tt class=" ">performRuntime()</tt> method generated by the archetype.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>class SubsystemRemove extends AbstractRemoveStepHandler {
+
+    static final SubsystemRemove INSTANCE = new SubsystemRemove();
+
+    private final Logger log = Logger.getLogger(SubsystemRemove.class);
+
+    private SubsystemRemove() {
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The description provider for the remove operation is simple and quite similar to that of the add handler where just name of the method changes.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322989_Designanddefinethemodelstructure-Registeringthesubsystemchild"  >
+        <h2>Registering the subsystem child</h2>
+    
+            <p>
+    The <tt class=" ">type</tt> child does not exist in our skeleton project so we need to implement the operations to add and remove them from the model.            </p>
+                <p>
+    First we need an add operation to add the <tt class=" ">type</tt> child, create a class called <tt class=" ">com.acme.corp.tracker.extension.TypeAddHandler</tt>. In this case we extend the <tt class=" ">org.jboss.as.controller.AbstractAddStepHandler</tt> class and implement the <tt class=" ">org.jboss.as.controller.descriptions.DescriptionProvider</tt> interface. <tt class=" ">org.jboss.as.controller.OperationStepHandler</tt> is the main interface for the operation handlers, and <tt class=" ">AbstractAddStepHandler</tt> is an implementation of that which does the plumbing work for adding a resource to the model.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>class TypeAddHandler extends AbstractAddStepHandler implements DescriptionProvider {
+
+    public static final TypeAddHandler INSTANCE = new TypeAddHandler();
+
+    private TypeAddHandler() {
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    Then we define subsystem model. Lets call it TypeDefinition and for ease of use let it extend  SimpleResourceDefinition instead just implement ResourceDefinition.<br/>    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class TypeDefinition extends SimpleResourceDefinition {
+
+&nbsp;public static final TypeDefinition INSTANCE = new TypeDefinition();
+
+&nbsp;//we define attribute named tick
+protected static final SimpleAttributeDefinition TICK =
+new SimpleAttributeDefinitionBuilder(TrackerExtension.TICK, ModelType.LONG)
+  .setAllowExpression(true)
+  .setXmlName(TrackerExtension.TICK)
+  .setFlags(AttributeAccess.Flag.RESTART_ALL_SERVICES)
+  .setDefaultValue(new ModelNode(1000))
+  .setAllowNull(false)
+  .build();
+
+private TypeDefinition(){
+&nbsp;  super(TYPE_PATH, TrackerExtension.getResourceDescriptionResolver(TYPE),TypeAdd.INSTANCE,TypeRemove.INSTANCE);
+}
+
+@Override
+public void registerAttributes(ManagementResourceRegistration resourceRegistration){
+   resourceRegistration.registerReadWriteAttribute(TICK, null, TrackerTickHandler.INSTANCE);
+}
+
+}</code></pre>
+        </div>
+    </div>
+Which will take care of describing the model for us. As you can see in example above we define SimpleAttributeDefinition named TICK, this is a mechanism to define Attributes in more type safe way and to add more common API to manipulate attributes. As you can see here we define default value of 1000 as also other constraints and capabilities. There could be other properties set such as validators, alternate names, xml name, flags for marking it attribute allows expressions and more.            </p>
+                <p>
+    Then we do the work of updating the model by implementing the <tt class=" ">populateModel()</tt> method from the <tt class=" ">AbstractAddStepHandler</tt>, which populates the model's attribute from the operation parameters. First we get hold of the model relative to the address of this operation (we will see later that we will register it against <tt class=" ">/subsystem=tracker/type=*</tt>), so we just specify an empty relative address, and we then populate our model with the parameters from the operation. There is operation validateAndSet on AttributeDefinition that helps us validate and set the model based on definition of the attribute.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Override
+    protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+         TICK.validateAndSet(operation,model);
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    We then override the <tt class=" ">performRuntime()</tt> method to perform our runtime changes, which in this case involves installing a service into the controller at the heart of WildFly 8. (<tt class=" ">AbstractAddStepHandler.performRuntime()</tt> is similar to <tt class=" ">AbstractBoottimeAddStepHandler.performBoottime()</tt> in that the model is updated before runtime changes are made.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Override
+    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
+            ServiceVerificationHandler verificationHandler, List&lt;ServiceController&lt;?&gt;&gt; newControllers)
+            throws OperationFailedException {
+        String suffix = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        long tick = TICK.resolveModelAttribute(context,model).asLong();
+        TrackerService service = new TrackerService(suffix, tick);
+        ServiceName name = TrackerService.createServiceName(suffix);
+        ServiceController&lt;TrackerService&gt; controller = context.getServiceTarget()
+                .addService(name, service)
+                .addListener(verificationHandler)
+                .setInitialMode(Mode.ACTIVE)
+                .install();
+        newControllers.add(controller);
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Since the add methods will be of the format <tt class=" ">/subsystem=tracker/suffix=war:add(tick=1234)</tt>, we look for the last element of the operation address, which is <tt class=" ">war</tt> in the example just given and use that as our suffix. We then create an instance of TrackerService and install that into the <tt class=" ">service target</tt> of the context and add the created <tt class=" ">service controller</tt> to the <tt class=" ">newControllers</tt> list.            </p>
+                <p>
+    The tracker service is quite simple. All services installed into WildFly 8 must implement the <tt class=" ">org.jboss.msc.service.Service</tt> interface.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class TrackerService implements Service&lt;TrackerService&gt;{</code></pre>
+        </div>
+    </div>
+            <p>
+    We then have some fields to keep the tick count and a thread which when run outputs all the deployments registered with our service.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>private AtomicLong tick = new AtomicLong(10000);
+
+    private Set&lt;String&gt; deployments = Collections.synchronizedSet(new HashSet&lt;String&gt;());
+    private Set&lt;String&gt; coolDeployments = Collections.synchronizedSet(new HashSet&lt;String&gt;());
+    private final String suffix;
+
+    private Thread OUTPUT = new Thread() {
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    Thread.sleep(tick.get());
+                    System.out.println(&quot;Current deployments deployed while &quot; + suffix + &quot; tracking active:\n&quot; + deployments
+                       + &quot;\nCool: &quot; + coolDeployments.size());
+                } catch (InterruptedException e) {
+                    interrupted();
+                    break;
+                }
+            }
+        }
+    };
+
+    public TrackerService(String suffix, long tick) {
+        this.suffix = suffix;
+        this.tick.set(tick);
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    Next we have three methods which come from the <tt class=" ">Service</tt> interface. <tt class=" ">getValue()</tt> returns this service, <tt class=" ">start()</tt> is called when the service is started by the controller, <tt class=" ">stop</tt> is called when the service is stopped by the controller, and they start and stop the thread outputting the deployments.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Override
+    public TrackerService getValue() throws IllegalStateException, IllegalArgumentException {
+        return this;
+    }
+
+    @Override
+    public void start(StartContext context) throws StartException {
+        OUTPUT.start();
+    }
+
+    @Override
+    public void stop(StopContext context) {
+        OUTPUT.interrupt();
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    Next we have a utility method to create the <tt class=" ">ServiceName</tt> which is used to register the service in the controller.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public static ServiceName createServiceName(String suffix) {
+        return ServiceName.JBOSS.append(&quot;tracker&quot;, suffix);
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally we have some methods to add and remove deployments, and to set and read the <tt class=" ">tick</tt>. The 'cool' deployments will be explained later.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public void addDeployment(String name) {
+        deployments.add(name);
+    }
+
+    public void addCoolDeployment(String name) {
+        coolDeployments.add(name);
+    }
+
+    public void removeDeployment(String name) {
+        deployments.remove(name);
+        coolDeployments.remove(name);
+    }
+
+    void setTick(long tick) {
+        this.tick.set(tick);
+    }
+
+    public long getTick() {
+        return this.tick.get();
+    }
+}//TrackerService - end</code></pre>
+        </div>
+    </div>
+            <p>
+    Since we are able to add <tt class=" ">type</tt> children, we need a way to be able to remove them, so we create a <tt class=" ">com.acme.corp.tracker.extension.TypeRemoveHandler</tt>. In this case we extend <tt class=" ">AbstractRemoveStepHandler</tt> which takes care of removing the resource from the model so we don't need to override its <tt class=" ">performRemove()</tt> operationa. But we need to implement the <tt class=" ">DescriptionProvider</tt> method to provide the model description, and since the add handler installs the TrackerService, we need to remove that in the <tt class=" ">performRuntime()</tt> method.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class TypeRemoveHandler extends AbstractRemoveStepHandler {
+
+    public static final TypeRemoveHandler INSTANCE = new TypeRemoveHandler();
+
+    private TypeRemoveHandler() {
+    }
+
+
+    @Override
+    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
+        String suffix = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        ServiceName name = TrackerService.createServiceName(suffix);
+        context.removeService(name);
+    }
+
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    We then need a description provider for the <tt class=" ">type</tt> part of the model itself, so we modify TypeDefinitnion to registerAttribute            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>class TypeDefinition{
+...
+@Override
+public void registerAttributes(ManagementResourceRegistration resourceRegistration){
+    resourceRegistration.registerReadWriteAttribute(TICK, null, TrackerTickHandler.INSTANCE);
+}
+
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Then finally we need to specify that our new <tt class=" ">type</tt> child and associated handlers go under <tt class=" ">/subsystem=tracker/type=*</tt> in the model by adding registering it with the model in <tt class=" ">SubsystemExtension.initialize()</tt>. So we add the following just before the end of the method.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Override
+public void initialize(ExtensionContext context)
+{
+ final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, 1, 0);
+ final ManagementResourceRegistration registration = subsystem.registerSubsystemModel(TrackerSubsystemDefinition.INSTANCE);
+ //Add the type child
+ ManagementResourceRegistration typeChild = registration.registerSubModel(TypeDefinition.INSTANCE);
+ subsystem.registerXMLElementWriter(parser);
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The above first creates a child of our main subsystem registration for the relative address <tt class=" ">type=*</tt>, and gets the <tt class=" ">typeChild</tt> registration.<br/>To this we add the <tt class=" ">TypeAddHandler</tt> and <tt class=" ">TypeRemoveHandler</tt>.<br/>The add variety is added under the name <tt class=" ">add</tt> and the remove handler under the name <tt class=" ">remove</tt>, and for each registered operation handler we use the handler singleton instance as both the handler parameter and as the <tt class=" ">DescriptionProvider</tt>.            </p>
+                <p>
+    Finally, we register <tt class=" ">tick</tt> as a read/write attribute, the null parameter means we don't do anything special with regards to reading it, for the write handler we supply it with an operation handler called <tt class=" ">TrackerTickHandler</tt>.<br/>Registering it as a read/write attribute means we can use the <tt class=" ">:write-attribute</tt> operation to modify the value of the parameter, and it will be handled by <tt class=" ">TrackerTickHandler</tt>.            </p>
+                <p>
+    Not registering a write attribute handler makes the attribute read only.            </p>
+                <p>
+    <tt class=" ">TrackerTickHandler</tt> extends <tt class=" ">AbstractWriteAttributeHandler</tt><br/>directly, and so must implement its <tt class=" ">applyUpdateToRuntime</tt> and <tt class=" ">revertUpdateToRuntime</tt> method.<br/>This takes care of model manipulation (validation, setting) but leaves us to do just to deal with what we need to do.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>class TrackerTickHandler extends AbstractWriteAttributeHandler&lt;Void&gt; {
+
+    public static final TrackerTickHandler INSTANCE = new TrackerTickHandler();
+
+    private TrackerTickHandler() {
+        super(TypeDefinition.TICK);
+    }
+
+    protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
+              ModelNode resolvedValue, ModelNode currentValue, HandbackHolder&lt;Void&gt; handbackHolder) throws OperationFailedException {
+
+        modifyTick(context, operation, resolvedValue.asLong());
+
+        return false;
+    }
+
+    protected void revertUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName, ModelNode valueToRestore, ModelNode valueToRevert, Void handback){
+        modifyTick(context, operation, valueToRestore.asLong());
+    }
+
+    private void modifyTick(OperationContext context, ModelNode operation, long value) throws OperationFailedException {
+
+        final String suffix = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
+        TrackerService service = (TrackerService) context.getServiceRegistry(true).getRequiredService(TrackerService.createServiceName(suffix)).getValue();
+        service.setTick(value);
+    }
+
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The operation used to execute this will be of the form <tt class=" ">/subsystem=tracker/type=war:write-attribute(name=tick,value=12345</tt>) so we first get the <tt class=" ">suffix</tt> from the operation address, and the <tt class=" ">tick</tt> value from the operation parameter's <tt class=" ">resolvedValue</tt> parameter, and use that to update the model.            </p>
+                <p>
+    We then add a new step associated with the <tt class=" ">RUNTIME</tt> stage to update the tick of the TrackerService for our suffix. This is essential since the call to <tt class=" ">context.getServiceRegistry()</tt> will fail unless the step accessing it belongs to the <tt class=" ">RUNTIME</tt> stage.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    When implementing <tt class=" ">execute()</tt>, you <strong class=" ">must</strong> call <tt class=" ">context.completeStep()</tt> when you are done.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

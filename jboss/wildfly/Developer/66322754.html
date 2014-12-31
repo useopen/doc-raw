@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>EJB3 subsystem configuration guide</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>EJB3 subsystem configuration guide</h1>
+        </div>
+        
+        <div id="66322754" class="content prepend-top">
+            <p>
+    This page lists the options that are available for configuring the EJB subsystem.            </p>
+                <p>
+    A complete example of the config is shown below, with a full explanation of each            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:ejb3:1.2&quot;&gt;
+  &lt;session-bean&gt;
+    &lt;stateless&gt;
+      &lt;bean-instance-pool-ref pool-name=&quot;slsb-strict-max-pool&quot;/&gt;
+    &lt;/stateless&gt;
+    &lt;stateful default-access-timeout=&quot;5000&quot; cache-ref=&quot;simple&quot; clustered-cache-ref=&quot;clustered&quot;/&gt;
+    &lt;singleton default-access-timeout=&quot;5000&quot;/&gt;
+  &lt;/session-bean&gt;
+  &lt;mdb&gt;
+    &lt;resource-adapter-ref resource-adapter-name=&quot;hornetq-ra&quot;/&gt;
+    &lt;bean-instance-pool-ref pool-name=&quot;mdb-strict-max-pool&quot;/&gt;
+  &lt;/mdb&gt;
+  &lt;entity-bean&gt;
+    &lt;bean-instance-pool-ref pool-name=&quot;entity-strict-max-pool&quot;/&gt;
+  &lt;/entity-bean&gt;
+&nbsp; &lt;pools&gt;
+    &lt;bean-instance-pools&gt;
+      &lt;strict-max-pool name=&quot;slsb-strict-max-pool&quot; max-pool-size=&quot;20&quot; instance-acquisition-timeout=&quot;5&quot; instance-acquisition-timeout-unit=&quot;MINUTES&quot;/&gt;
+      &lt;strict-max-pool name=&quot;mdb-strict-max-pool&quot; max-pool-size=&quot;20&quot; instance-acquisition-timeout=&quot;5&quot; instance-acquisition-timeout-unit=&quot;MINUTES&quot;/&gt;
+      &lt;strict-max-pool name=&quot;entity-strict-max-pool&quot; max-pool-size=&quot;100&quot; instance-acquisition-timeout=&quot;5&quot; instance-acquisition-timeout-unit=&quot;MINUTES&quot;/&gt;
+ &nbsp;&lt;/bean-instance-pools&gt;
+  &lt;/pools&gt;
+  &lt;caches&gt;
+    &lt;cache name=&quot;simple&quot; aliases=&quot;NoPassivationCache&quot;/&gt;
+    &lt;cache name=&quot;passivating&quot; passivation-store-ref=&quot;file&quot; aliases=&quot;SimpleStatefulCache&quot;/&gt;
+    &lt;cache name=&quot;clustered&quot; passivation-store-ref=&quot;infinispan&quot; aliases=&quot;StatefulTreeCache&quot;/&gt;
+  &lt;/caches&gt;
+  &lt;passivation-stores&gt;
+    &lt;file-passivation-store name=&quot;file&quot;/&gt;
+    &lt;cluster-passivation-store name=&quot;infinispan&quot; cache-container=&quot;ejb&quot;/&gt;
+  &lt;/passivation-stores&gt;
+  &lt;async thread-pool-name=&quot;default&quot;/&gt;
+  &lt;timer-service thread-pool-name=&quot;default&quot;&gt;
+    &lt;data-store path=&quot;timer-service-data&quot; relative-to=&quot;jboss.server.data.dir&quot;/&gt;
+  &lt;/timer-service&gt;
+  &lt;remote connector-ref=&quot;remoting-connector&quot; thread-pool-name=&quot;default&quot;/&gt;
+  &lt;thread-pools&gt;
+    &lt;thread-pool name=&quot;default&quot;&gt;
+      &lt;max-threads count=&quot;10&quot;/&gt;
+      &lt;keepalive-time time=&quot;100&quot; unit=&quot;milliseconds&quot;/&gt;
+      &lt;/thread-pool&gt;
+  &lt;/thread-pools&gt;
+  &lt;iiop enable-by-default=&quot;false&quot; use-qualified-name=&quot;false&quot;/&gt;
+  &lt;in-vm-remote-interface-invocation pass-by-value=&quot;false&quot;/&gt; &lt;!-- Warning see notes below about possible issues --&gt;
+&lt;/subsystem&gt;
+</code></pre>
+        </div>
+    </div>
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Csessionbean%3E"  >
+        <h2>&lt;session-bean&gt;</h2>
+    
+    <div class="section-3"  id="66322754_EJB3subsystemconfigurationguide-%3Cstateless%3E"  >
+        <h3>&lt;stateless&gt;</h3>
+    
+            <p>
+    This element is used to configure the instance pool that is used by default for stateless session beans. If it is not present stateless session beans are not pooled, but are instead created on demand for every invocation. The instance pool can be overridden on a per deployment or per bean level using <tt class=" ">jboss-ejb3.xml</tt> or the <tt class=" ">org.jboss.ejb3.annotation.Pool</tt> annotation. The instance pools themselves are configured in the <tt class=" ">&lt;pools&gt;</tt> element.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322754_EJB3subsystemconfigurationguide-%3Cstateful%3E"  >
+        <h3>&lt;stateful&gt;</h3>
+    
+            <p>
+    This element is used to configure Stateful Session Beans.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">default-access-timeout</tt> This attribute specifies the default time concurrent invocations on the same bean instance will wait to acquire the instance lock. It can be overridden via the deployment descriptor or via the <tt class=" ">javax.ejb.AccessTimeout</tt> annotation.            </p>
+    </li></ul><ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">cache-ref</tt> This attribute is used to set the default cache for non-clustered beans. It can be overridden by <tt class=" ">jboss-ejb3.xml</tt>, or via the <tt class=" ">org.jboss.ejb3.annotation.Cache</tt> annotation.            </p>
+    </li></ul><ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">clustered-cache-ref</tt> This attribute is used to set the default cache for clustered beans.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322754_EJB3subsystemconfigurationguide-%3Csingleton%3E"  >
+        <h3>&lt;singleton&gt;</h3>
+    
+            <p>
+    This element is used to configure Singleton Session Beans.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">default-access-timeout</tt> This attribute specifies the default time concurrent invocations will wait to acquire the instance lock. It can be overridden via the deployment descriptor or via the <tt class=" ">javax.ejb.AccessTimeout</tt> annotation.            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Cmdb%3E"  >
+        <h2>&lt;mdb&gt;</h2>
+    
+    <div class="section-3"  id="66322754_EJB3subsystemconfigurationguide-%3Cresourceadaptorref%3E"  >
+        <h3>&lt;resource-adaptor-ref&gt;</h3>
+    
+            <p>
+    This element sets the default resource adaptor for Message Driven Beans.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322754_EJB3subsystemconfigurationguide-%3Cbeaninstancepoolref%3E"  >
+        <h3>&lt;bean-instance-pool-ref&gt;</h3>
+    
+            <p>
+    This element is used to configure the instance pool that is used by default for Message Driven Beans. If it is not present they are not pooled, but are instead created on demand for every invocation. The instance pool can be overridden on a per deployment or per bean level using <tt class=" ">jboss-ejb3.xml</tt> or the <tt class=" ">org.jboss.ejb3.annotation.Pool</tt> annotation. The instance pools themselves are configured in the <tt class=" ">&lt;pools&gt;</tt> element.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Centitybean%3E"  >
+        <h2>&lt;entity-bean&gt;</h2>
+    
+            <p>
+    This element is used to configure the behavior for EJB2 EntityBeans.            </p>
+        <div class="section-3"  id="66322754_EJB3subsystemconfigurationguide-%3Cbeaninstancepoolref%3E2"  >
+        <h3>&lt;bean-instance-pool-ref&gt;</h3>
+    
+            <p>
+    This element is used to configure the instance pool that is used by  default for Entity Beans. If it is not present they are not  pooled, but are instead created on demand for every invocation. The  instance pool can be overridden on a per deployment or per bean level  using <tt class=" ">jboss-ejb3.xml</tt> or the <tt class=" ">org.jboss.ejb3.annotation.Pool</tt> annotation. The instance pools themselves are configured in the <tt class=" ">&lt;pools&gt;</tt> element.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-"  >
+        <h2></h2>
+    
+    </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Cpools%3E"  >
+        <h2>&lt;pools&gt;</h2>
+    
+    </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Ccaches%3E"  >
+        <h2>&lt;caches&gt;</h2>
+    
+    </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Cpassivationstores%3E"  >
+        <h2>&lt;passivation-stores&gt;</h2>
+    
+    </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Casync%3E"  >
+        <h2>&lt;async&gt;</h2>
+    
+            <p>
+    This element enables async EJB invocations. It is also used to specify the thread pool that these invocations will use.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Ctimerservice%3E"  >
+        <h2>&lt;timer-service&gt;</h2>
+    
+            <p>
+    This element enables the EJB timer service.  It is also used to specify the thread pool that these invocations will use.            </p>
+        <div class="section-3"  id="66322754_EJB3subsystemconfigurationguide-%3Cdatastore%3E"  >
+        <h3>&lt;data-store&gt;</h3>
+    
+            <p>
+    This is used to configure the directory that persistent timer information is saved to.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Cremote%3E"  >
+        <h2>&lt;remote&gt;</h2>
+    
+            <p>
+    This is used to enable remote EJB invocations. It specifies the remoting connector to use (as defined in the remoting subsystem configuration), and the thread pool to use for remote invocations.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Cthreadpools%3E"  >
+        <h2>&lt;thread-pools&gt;</h2>
+    
+            <p>
+    This is used to configure the thread pools used by async, timer and remote invocations.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Ciiop%3E"  >
+        <h2>&lt;iiop&gt;</h2>
+    
+            <p>
+    This is used to enable IIOP (i.e. CORBA) invocation of EJB's. If this element is present then the JacORB subsystem must also be installed. It supports the following two attributes:            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">enable-by-default</tt> If this is true then all EJB's with EJB2.x home interfaces are exposed via IIOP, otherwise they must be explicitly enabled via <tt class=" ">jboss-ejb3.xml</tt>.            </p>
+    </li></ul><ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">use-qualified-name</tt> If this is true then EJB's are bound to the corba naming context with a binding name that contains the application and modules name of the deployment (e.g. myear/myejbjar/MyBean), if this is false the default binding name is simply the bean name.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-2"  id="66322754_EJB3subsystemconfigurationguide-%3Cinvmremoteinterfaceinvocation%3E"  >
+        <h2>&lt;in-vm-remote-interface-invocation&gt;</h2>
+    
+            <p>
+    By default remote interface invocations use pass by value, as  required by the EJB spec. This element can use used to enable pass by  reference, which can give you a performance boost. Note WildFly&nbsp;will do a  shallow check to see if the caller and the EJB have access to the same  class definitions, which means if you are passing something such as a  List&lt;MyObject&gt;, WildFly&nbsp;only checks the List to see if it is the  same class definition on the call &amp; EJB side.&nbsp; If the top level  class definition is the same, JBoss will make the call using pass by  reference, which means that if MyObject or any objects beneath it are  loaded from different classloaders, you would get a ClassCastException.&nbsp;  If the top level class definitions are loaded from different  classloaders, JBoss will use pass by value.&nbsp; JBoss cannot do a deep  check of all of the classes to ensure no ClassCastExceptions will occur  because doing a deep check would eliminate any performance boost you  would have received by using call by reference.&nbsp; It is recommended that  you configure pass by reference only on callers that you are sure will  use the same class definitions and not globally.&nbsp; This can be done via a  configuration in the jboss-ejb-client.xml as shown below.            </p>
+                <p>
+    To configure a caller/client use pass by reference, you configure  your top level deployment with a META-INF/jboss-ejb-client.xml  containing:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-ejb-client xmlns=&quot;urn:jboss:ejb-client:1.0&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;client-context&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;ejb-receivers local-receiver-pass-by-value=&quot;false&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/client-context&gt;
+&lt;/jboss-ejb-client&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

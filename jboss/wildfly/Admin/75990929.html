@@ -1,0 +1,876 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Handlers</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Handlers</h1>
+        </div>
+        
+        <div id="75990929" class="content prepend-top">
+    <div class="confbox admonition admonition-info">
+            <div class="title">WIP</div>
+        
+            <p>
+    This is still a work in progress. Please feel free to edit any mistakes you find     <img src="images/author/images/icons/emoticons/109556488.gif" alt="images/author/images/icons/emoticons/109556488.gif" />
+.            </p>
+        </div>
+    
+    <div class="section-2"  id="75990929_Handlers-Overview"  >
+        <h2>Overview</h2>
+    
+            <p>
+    Handlers are used to determine what happens with a log message if the <a href="75990873.html#75990873_Loggers-Logger">logger</a> determines the message is loggable.            </p>
+                <p>
+    There are 6 main handlers provided with WildFly and 1 generic handler;            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-asynchandler">async-handler</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-consolehandler">console-handler</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-filehandler">file-handler</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-periodicrotatingfilehandler">periodic-rotating-file-handler</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-sizerotatingfilehandler">size-rotating-file-handler</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-sysloghandler">syslog-handler</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-customhandler">custom-handler</a>            </p>
+    </li></ul>    <div class="section-3"  id="75990929_Handlers-asynchandler"  >
+        <h3>async-handler</h3>
+    
+            <p>
+    An <tt class=" ">async-handler</tt> is a handler that asynchronously writes log messages to it's child handlers. This type of handler is generally used for other handlers that take a substantial time to write logged messages.            </p>
+        <div class="section-4"  id="75990929_Handlers-Attributes"  >
+        <h4>Attributes</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-enabled">enabled</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-filterspec">filter-spec</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-level">level</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-overflowaction">overflow-action</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-queuelength">queue-length</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-subhandlers">subhandlers</a>            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="75990929_Handlers-consolehandler"  >
+        <h3>console-handler</h3>
+    
+            <p>
+    A <tt class=" ">console-handler</tt> is a handler that writes log messages to the console. Generally this writes to <tt class=" ">stdout</tt>, but can be set to write to <tt class=" ">stderr</tt>.            </p>
+        <div class="section-4"  id="75990929_Handlers-Attributes2"  >
+        <h4>Attributes</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-autoflush">autoflush</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-enabled">enabled</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-encoding">encoding</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-filterspec">filter-spec</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-formatter">formatter</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-level">level</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-namedformatter">named-formatter</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-target">target</a>            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="75990929_Handlers-filehandler"  >
+        <h3>file-handler</h3>
+    
+            <p>
+    A <tt class=" ">file-handler</tt> is a handler that writes log messages to the specified file.            </p>
+        <div class="section-4"  id="75990929_Handlers-Attributes3"  >
+        <h4>Attributes</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-autoflush">autoflush</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-enabled">enabled</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-encoding">encoding</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-filterspec">filter-spec</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-formatter">formatter</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-level">level</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-namedformatter">named-formatter</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-file">file</a>            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="75990929_Handlers-periodicrotatingfilehandler"  >
+        <h3>periodic-rotating-file-handler</h3>
+    
+            <p>
+    A <tt class=" ">periodic-rotating-file-handler</tt> is a handler that writes log messages to the specified file. The file rotates on the date pattern specified in the <a href="75990929.html#75990929_Handlers-suffix">suffix</a> attribute. The suffix must be a valid pattern recognized by the <a href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html"><tt class=" ">java.text.SimpleDateFormat</tt></a> and must not rotate on seconds or milliseconds.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    The rotate happens before the next message is written by the handler.            </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-Attributes4"  >
+        <h4>Attributes</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-autoflush">autoflush</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-enabled">enabled</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-encoding">encoding</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-filterspec">filter-spec</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-formatter">formatter</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-level">level</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-namedformatter">named-formatter</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-file">file</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-suffix">suffix</a>            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="75990929_Handlers-sizerotatingfilehandler"  >
+        <h3>size-rotating-file-handler</h3>
+    
+            <p>
+    A <tt class=" ">size-rotating-file-handler</tt> is a handler that writes log messages to the specified file. The file rotates when the file size is greater than the <a href="75990929.html#75990929_Handlers-rotatesize">rotate-size</a> attribute. The rotated file will be kept and the index appended to the name moving previously rotated file indexes up by 1 until the <a href="75990929.html#75990929_Handlers-maxbackupindex">max-backup-index</a> is reached. Once the <a href="75990929.html#75990929_Handlers-maxbackupindex">max-backup-index</a> is reached, the indexed files will be overwritten.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    The rotate happens before the next message is written by the handler.            </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-Attributes5"  >
+        <h4>Attributes</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-autoflush">autoflush</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-enabled">enabled</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-encoding">encoding</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-filterspec">filter-spec</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-formatter">formatter</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-level">level</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-namedformatter">named-formatter</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-file">file</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-maxbackupindex">max-backup-index</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-rotatesize">rotate-size</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-rotateonboot">rotate-on-boot</a>            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="75990929_Handlers-sysloghandler"  >
+        <h3>syslog-handler</h3>
+    
+            <p>
+    A <tt class=" ">syslog-handler</tt> is a handler that writes to a syslog server. The handler support <a href="http://www.ietf.org/rfc/rfc3164.txt">RFC3164</a> or <a href="http://www.ietf.org/rfc/rfc5424.txt">RFC5424</a> formats.            </p>
+        <div class="section-4"  id="75990929_Handlers-Attributes6"  >
+        <h4>Attributes</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-port">port</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-appname">app-name</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-enabled">enabled</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-level">level</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-facility">facility</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-serveraddress">server-address</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-hostname">hostname</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990929.html#75990929_Handlers-syslogformat">syslog-format</a>            </p>
+    </li></ul>    <div class="confbox admonition admonition-tip">
+        
+            <p>
+    The syslog-handler is missing some configuration properties that may be useful in some scenarios like setting a formatter. Use the <tt class=" ">org.jboss.logmanager.handlers.SyslogHandler</tt> in module <tt class=" ">org.jboss.logmanager</tt> as a <a href="75990929.html#75990929_Handlers-customhandler">custom-handler</a> to exploit these benefits. Additional attributes will be added at some point so this will no longer be necessary.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="75990929_Handlers-customhandler"  >
+        <h3>custom-handler</h3>
+    
+    </div>
+    
+    <div class="section-3"  id="75990929_Handlers-Attributes7"  >
+        <h3>Attributes</h3>
+    
+    <div class="section-4"  id="75990929_Handlers-autoflush"  >
+        <h4>autoflush</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    Indicates whether a flush should happen after each write.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    boolean            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    true            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    true or false            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-enabled"  >
+        <h4>enabled</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    If set to true the handler is enabled and functioning as normal, if set to false the handler is ignored when processing log messages.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    boolean            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    true            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    true or false            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-encoding"  >
+        <h4>encoding</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    The character encoding used by this Handler.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    Any valid encoding            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-file"  >
+        <h4>file</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    An object describing the file the handler should write to.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    object            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    An object optionally containing a relative-to property and a path. The path is a required property of the object.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-namedformatter"  >
+        <h4>named-formatter</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    The name of a defined formatter to be used on the handler.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    <strong class=" ">TODO</strong> add link            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-formatter"  >
+        <h4>formatter</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    Defines a pattern for a pattern formatter.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    %d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%E%n            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    <strong class=" ">TODO</strong> add link            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-filterspec"  >
+        <h4>filter-spec</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    A filter expression value to define a filter.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    <a href="66322712.html#66322712_LoggingConfiguration-FilterExpressions">See Filter Expression </a>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-level"  >
+        <h4>level</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description :            </td>
+                <td rowspan="1" colspan="1">
+    The log level specifying which message levels will be logged by this logger. Message levels lower than this value will be discarded.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    ALL            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    ALL            </p>
+    </li><li class=" ">            <p>
+    FINEST            </p>
+    </li><li class=" ">            <p>
+    FINER            </p>
+    </li><li class=" ">            <p>
+    TRACE            </p>
+    </li><li class=" ">            <p>
+    DEBUG            </p>
+    </li><li class=" ">            <p>
+    FINE            </p>
+    </li><li class=" ">            <p>
+    CONFIG            </p>
+    </li><li class=" ">            <p>
+    INFO            </p>
+    </li><li class=" ">            <p>
+    WARN            </p>
+    </li><li class=" ">            <p>
+    WARNING            </p>
+    </li><li class=" ">            <p>
+    ERROR            </p>
+    </li><li class=" ">            <p>
+    SEVERE            </p>
+    </li><li class=" ">            <p>
+    FATAL            </p>
+    </li><li class=" ">            <p>
+    OFF            </p>
+    </li></ul>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-maxbackupindex"  >
+        <h4>backup-index</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    The maximum number of rotated files to keep.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    integer            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    1            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    any integer greater than 0            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-overflowaction"  >
+        <h4>overflow-action</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    Specify what action to take when the overflowing.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    BLOCK            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    BLOCK or DISCARD            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-queuelength"  >
+        <h4>queue-length</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    The queue length to use before flushing writing            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    integer            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    0            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    any positive integer            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-rotateonboot"  >
+        <h4>rotate-on-boot</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    Indicates whether or not the file should be rotated each time the <a href="75990929.html#75990929_Handlers-file">file</a> attribute is changed.    <div class="confbox admonition admonition-note">
+        
+            <p>
+    If set to <tt class=" ">true</tt> will rotate on each boot of the server.            </p>
+        </div>
+    
+            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    boolean            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    false            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    true or false            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-rotatesize"  >
+        <h4>rotate-size</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    The size at which the file should be rotated.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    2m            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    Any positive integer with a size type appended to the end. Valid types are b for bytes, k for kilobytes, m for megabytes, g for gigabytes or t for terabytes. Type character is not case sensitive.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-subhandlers"  >
+        <h4>subhandlers</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    The handlers to associate with the async handler            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    list of strings            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    An array of valid handler names            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-suffix"  >
+        <h4>suffix</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    The pattern used to determine when the file should be rotated.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    Any valid <a href="http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html"><tt class=" ">java.text.SimpleDateFormat</tt></a> pattern.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-4"  id="75990929_Handlers-target"  >
+        <h4>target</h4>
+    
+    <div class="confbox panel">
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Description:            </td>
+                <td rowspan="1" colspan="1">
+    Defines the target of the console handler.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Type:            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Default Value:            </td>
+                <td rowspan="1" colspan="1">
+    System.out            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Allowed Values:            </td>
+                <td rowspan="1" colspan="1">
+    System.out or System.err            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

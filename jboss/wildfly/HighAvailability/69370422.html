@@ -1,0 +1,583 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Infinispan Subsystem</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Infinispan Subsystem</h1>
+        </div>
+        
+        <div id="69370422" class="content prepend-top">
+    <div class="section-2"  id="69370422_InfinispanSubsystem-Purpose"  >
+        <h2>Purpose</h2>
+    
+            <p>
+    The Infinispan subsystem provides caching support for HA services in the form of Infinispan caches: &nbsp;high-performance, transactional caches which can operate in both non-distributed and distributed scenarios.&nbsp;Distributed caching support is used in the provision of many key HA services. For example, the failover of a session-oriented client HTTP request from a failing node to a new (failover) node depends on session data for the client being available on the new node. In other words, the client session data needs to be replicated across nodes in the cluster. This is effectively achieved via a distributed Infinispan cache. This approach to providing fail-over also applies to EJB SFSB sessions. Over and above providing support for fail-over, an underlying cache is also required when providing second-level caching for entity beans using Hibernate, and this case is also handled through the use of an Infinispan cache.            </p>
+                <p>
+    The Infinispan subsystem provides the following features:            </p>
+    <ul class=" "><li class=" ">            <p>
+    allows definition and configuration of named cache containers and caches            </p>
+    </li><li class=" ">            <p>
+    view run-time metrics associated with cache container and cache instances            </p>
+    </li></ul>            <p>
+    In the following sections, we describe the Infinispan subsystem.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Infinispan cache containers and caches are created transparently as part of the clustering functionality (e.g. on clustered application deployment, cache containers and their associated caches will be created behind the scenes to support clustered features such as session replication or caching of entities around the cluster).            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="69370422_InfinispanSubsystem-ConfigurationExample"  >
+        <h2>Configuration Example</h2>
+    
+            <p>
+    In this section, we provide an example XML configuration of the infinispan subsystem and review the configuration elements and attributes.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    The schema for the subsystem, describing all valid elements and attributes, can be found in the Wildfly distribution, in the docs/schema directory.            </p>
+        </div>
+    
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:infinispan:2.0&quot;&gt;
+  &lt;cache-container name=&quot;server&quot; aliases=&quot;singleton cluster&quot; default-cache=&quot;default&quot; module=&quot;org.wildfly.clustering.server&quot;&gt;
+      &lt;transport lock-timeout=&quot;60000&quot;/&gt;
+      &lt;replicated-cache name=&quot;default&quot; mode=&quot;SYNC&quot; batching=&quot;true&quot;&gt;
+          &lt;locking isolation=&quot;REPEATABLE_READ&quot;/&gt;
+      &lt;/replicated-cache&gt;
+  &lt;/cache-container&gt;
+  &lt;cache-container name=&quot;web&quot; aliases=&quot;standard-session-cache&quot; default-cache=&quot;repl&quot; module=&quot;org.wildfly.clustering.web.infinispan&quot;&gt;
+      &lt;transport lock-timeout=&quot;60000&quot;/&gt;
+      &lt;replicated-cache name=&quot;repl&quot; mode=&quot;ASYNC&quot; batching=&quot;true&quot;&gt;
+          &lt;file-store/&gt;
+      &lt;/replicated-cache&gt;
+      &lt;replicated-cache name=&quot;sso&quot; mode=&quot;SYNC&quot; batching=&quot;true&quot;/&gt;
+      &lt;distributed-cache name=&quot;dist&quot; mode=&quot;ASYNC&quot; batching=&quot;true&quot; l1-lifespan=&quot;0&quot;&gt;
+          &lt;file-store/&gt;
+      &lt;/distributed-cache&gt;
+  &lt;/cache-container&gt;
+  &lt;cache-container name=&quot;ejb&quot; aliases=&quot;sfsb sfsb-cache&quot; default-cache=&quot;repl&quot; module=&quot;org.jboss.as.clustering.ejb3.infinispan&quot;&gt;
+      &lt;transport lock-timeout=&quot;60000&quot;/&gt;
+      &lt;replicated-cache name=&quot;repl&quot; mode=&quot;ASYNC&quot; batching=&quot;true&quot;&gt;
+          &lt;eviction strategy=&quot;LRU&quot; max-entries=&quot;10000&quot;/&gt;
+          &lt;file-store/&gt;
+      &lt;/replicated-cache&gt;
+      &lt;!--
+        ~  Clustered cache used internally by EJB subsytem for managing the client-mapping(s) of
+        ~                 the socketbinding referenced by the EJB remoting connector
+        --&gt;
+      &lt;replicated-cache name=&quot;remote-connector-client-mappings&quot; mode=&quot;SYNC&quot; batching=&quot;true&quot;/&gt;
+      &lt;distributed-cache name=&quot;dist&quot; mode=&quot;ASYNC&quot; batching=&quot;true&quot; l1-lifespan=&quot;0&quot;&gt;
+          &lt;eviction strategy=&quot;LRU&quot; max-entries=&quot;10000&quot;/&gt;
+          &lt;file-store/&gt;
+      &lt;/distributed-cache&gt;
+  &lt;/cache-container&gt;
+  &lt;cache-container name=&quot;hibernate&quot; default-cache=&quot;local-query&quot; module=&quot;org.hibernate&quot;&gt;
+      &lt;transport lock-timeout=&quot;60000&quot;/&gt;
+      &lt;local-cache name=&quot;local-query&quot;&gt;
+          &lt;transaction mode=&quot;NONE&quot;/&gt;
+          &lt;eviction strategy=&quot;LRU&quot; max-entries=&quot;10000&quot;/&gt;
+          &lt;expiration max-idle=&quot;100000&quot;/&gt;
+      &lt;/local-cache&gt;
+      &lt;invalidation-cache name=&quot;entity&quot; mode=&quot;SYNC&quot;&gt;
+          &lt;transaction mode=&quot;NON_XA&quot;/&gt;
+          &lt;eviction strategy=&quot;LRU&quot; max-entries=&quot;10000&quot;/&gt;
+          &lt;expiration max-idle=&quot;100000&quot;/&gt;
+      &lt;/invalidation-cache&gt;
+      &lt;replicated-cache name=&quot;timestamps&quot; mode=&quot;ASYNC&quot;&gt;
+          &lt;transaction mode=&quot;NONE&quot;/&gt;
+          &lt;eviction strategy=&quot;NONE&quot;/&gt;
+       &lt;/replicated-cache&gt;
+  &lt;/cache-container&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+<ul class=" "><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-Purpose">Purpose</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-ConfigurationExample">Configuration Example</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Ccachecontainer%3E">&lt;cache-container&gt;</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Ctransport%3E">&lt;transport&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cabstractcache%3E">&lt;abstract cache&gt;</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cindexingproperties%3E">&lt;indexing-properties&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Clocking%3E">&lt;locking&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Ctransaction%3E">&lt;transaction&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Ceviction%3E">&lt;eviction&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cexpiration%3E">&lt;expiration&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cabstractbasestore%3E">&lt;abstract base-store&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cwritebehind%3E">&lt;write-behind&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cabstractbasejdbcstore%3Eextends%3Cabstractbasestore%3E">&lt;abstract base-jdbc-store&gt; extends &lt;abstract base-store&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cfilestore%3Eextends%3Cabstractbasestore%3E">&lt;file-store&gt; extends &lt;abstract base-store&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cremotestore%3Eextends%3Cabstractbasestore%3E">&lt;remote-store&gt; extends &lt;abstract base-store&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cremoteservers%3E">&lt;remote-servers&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cremoteserver%3E">&lt;remote-server&gt;</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-"></a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Clocalcache%3Eextends%3Cabstractcache%3E">&lt;local-cache&gt; extends &lt;abstract cache&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cabstractclusteredcache%3Eextends%3Cabstractcache%3E">&lt;abstract clustered-cache&gt; extends &lt;abstract cache&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-"></a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cinvalidationcache%3Eextends%3Cabstractclusteredcache%3E">&lt;invalidation-cache&gt; extends &lt;abstract clustered-cache&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cabstractsharedcache%3Eextends%3Cabstractclusteredcache%3E">&lt;abstract shared-cache&gt; extends &lt;abstract clustered-cache&gt;</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cstatetransfer%3E">&lt;state-transfer&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cbackups%3E">&lt;backups&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cbackup%3E">&lt;backup&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cbackupfor%3E">&lt;backup-for&gt;</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Creplicatedcache%3Eextends%3Cabstractsharedcache%3E">&lt;replicated-cache&gt; extends &lt;abstract shared-cache&gt;</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-%3Cdistributedcache%3Eextends%3Cabstractsharedcache%3E">&lt;distributed-cache&gt; extends &lt;abstract shared-cache&gt;</a>            </p>
+    </li></ul></li></ul></li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-UseCases">Use Cases</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-Addacachecontainer">Add a cache container</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-Addacache">Add a cache</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="69370422.html#69370422_InfinispanSubsystem-Configurethetransactioncomponentofacache">Configure the transaction component of a cache</a>            </p>
+    </li></ul></li></ul>    <div class="section-3"  id="69370422_InfinispanSubsystem-%3Ccachecontainer%3E"  >
+        <h3>&lt;cache-container&gt;</h3>
+    
+            <p>
+    This element is used to configure a cache container.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">name</tt> This attribute is used to specify the name of the cache container.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">default-cache</tt> This attribute configures the default cache to be used, when no cache is otherwise specified.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">listener-executor</tt> This attribute references a defined thread pool executor in the threads subsystem. It governs the allocation and execution of runnable tasks in the replication queue.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">eviction-executor</tt> This attribute references a defined thread pool executor in the threads subsystem. It governs the allocation and execution of runnable tasks to handle evictions.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">replication-queue-executor</tt> This attribute references a defined thread pool executor in the threads subsystem. It governs the allocation and execution of runnable tasks to handle asynchronous cache operations.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jndi-name</tt> This attribute is used to assign a name for the cache container in the JNDI name service.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">module</tt> This attribute configures the module whose class loader should be used when building this cache container's configuration.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">start</tt> This attribute configures the cache container start mode, which can be EAGER (immediate start) or LAZY (on-demand start).            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">aliases</tt> This attribute is used to define aliases for the cache container name.            </p>
+    </li></ul>            <p>
+    This element has the following child elements: <strong class=" ">&lt;transport&gt;</strong>, <strong class=" ">&lt;local-cache&gt;</strong>, <strong class=" ">&lt;invalidation-cache&gt;</strong>, <strong class=" ">&lt;replicated-cache&gt;</strong>, and <strong class=" ">&lt;distributed-cache&gt;</strong>.            </p>
+        <div class="section-4"  id="69370422_InfinispanSubsystem-%3Ctransport%3E"  >
+        <h4>&lt;transport&gt;</h4>
+    
+            <p>
+    This element is used to configure the JGroups transport used by the cache container, when required.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">stack</tt> This attribute configures the JGroups stack to be used for the transport. If none is specified, the default-stack for the JGroups subsystem is used.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">cluster</tt> This attribute configures the name of the group communication cluster. This is the name which will be seen in debugging logs.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">executor</tt> This attribute references a defined thread pool executor in the threads subsystem. It governs the allocation and execution of runnable tasks to handle ?    <cite>
+&lt;fill me in    </cite>
+&gt;?.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">lock-timeout</tt> This attribute configures the time-out to be used when obtaining locks for the transport.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">site</tt> This attribute configures the site id of the cache container.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">rack</tt> This attribute configures the rack id of the cache container.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">machine</tt> This attribute configures the machine id of the cache container.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    The presence of the transport element is required when operating in clustered mode            </p>
+        </div>
+    
+</li></ul>            <p>
+    The remaining child elements of <strong class=" ">&lt;cache-container&gt;</strong>, namely <strong class=" ">&lt;local-cache&gt;</strong>, <strong class=" ">&lt;invalidation-cache&gt;</strong>, <strong class=" ">&lt;replicated-cache&gt;</strong> and <strong class=" ">&lt;distributed-cache&gt;</strong>, each configures one of four key cache types or classifications.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    These cache-related elements are actually part of an xsd hierarchy with abstract complexTypes <strong class=" ">cache</strong>, <strong class=" ">clustered-cache</strong>, and <strong class=" ">shared-cache</strong>. In order to simplify the presentation, we notate these as pseudo-elements <strong class=" ">&lt;abstract cache&gt;</strong>, <strong class=" ">&lt;abstract clustered-cache&gt;</strong> and <strong class=" ">&lt;abstract shared-cache&gt;</strong>. In what follows, we first describe the extension hierarchy of base elements, and then show how the cache type elements relate to them.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-4"  id="69370422_InfinispanSubsystem-%3Cabstractcache%3E"  >
+        <h4>&lt;abstract cache&gt;</h4>
+    
+            <p>
+    This abstract base element defines the attributes and child elements common to all non-clustered caches.&nbsp;            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">name</tt> This attribute configures the name of the cache. This name may be referenced by other subsystems.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">start</tt> This attribute configures the cache start mode, which can be EAGER (immediate start) or LAZY (on-demand start).            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">batching</tt> This attribute configures batching. If enabled, the invocation batching API will be made available for this cache.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">indexing</tt> This attribute configures indexing. If enabled, entries will be indexed when they are added to the cache. Indexes will be updated as entries change or are removed.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jndi-name</tt> This attribute is used to assign a name for the cache in the JNDI name service.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">module</tt> This attribute configures the module whose class loader should be used when building this cache container's configuration.            </p>
+    </li></ul>            <p>
+    The &lt;abstract cache&gt; abstract base element has the following child elements: <strong class=" ">&lt;indexing-properties&gt;, &lt;locking&gt;</strong>, <strong class=" ">&lt;transaction&gt;</strong>, <strong class=" ">&lt;eviction&gt;</strong>, <strong class=" ">&lt;expiration&gt;</strong>, <strong class=" ">&lt;store&gt;</strong>, <strong class=" ">&lt;file-store&gt;</strong>, <strong class=" ">&lt;string-keyed-jdbc-store&gt;</strong>, <strong class=" ">&lt;binary-keyed-jdbc-store&gt;</strong>, <strong class=" ">&lt;mixed-keyed-jdbc-store&gt;</strong>, <strong class=" ">&lt;remote-store&gt;</strong>.            </p>
+        <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cindexingproperties%3E"  >
+        <h5>&lt;indexing-properties&gt;</h5>
+    
+            <p>
+    This child element defines properties to control indexing behaviour.            </p>
+        </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Clocking%3E"  >
+        <h5>&lt;locking&gt;</h5>
+    
+            <p>
+    This child element configures the locking behaviour of the cache.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">isolation</tt> This attribute the cache locking isolation level. Allowable values are NONE, SERIALIZABLE, REPEATABLE_READ, READ_COMMITTED, READ_UNCOMMITTED.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">striping</tt> If true, a pool of shared locks is maintained for all entries that need to be locked. Otherwise, a lock is created per entry in the cache. Lock striping helps control memory footprint but may reduce concurrency in the system.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">acquire-timeout</tt> This attribute configures the maximum time to attempt a particular lock acquisition.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">concurrency-level</tt> This attribute is used to configure the concurrency level. Adjust this value according to the number of concurrent threads interacting with Infinispan.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Ctransaction%3E"  >
+        <h5>&lt;transaction&gt;</h5>
+    
+            <p>
+    This child element configures the transactional behaviour of the cache.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">mode</tt> This attribute configures the transaction mode, setting the cache transaction mode to one of NONE, NON_XA, NON_DURABLE_XA, FULL_XA.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">stop-timeout</tt> If there are any ongoing transactions when a cache is stopped, Infinispan waits for ongoing remote and local transactions to finish. The amount of time to wait for is defined by the cache stop timeout.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">locking</tt> This attribute configures the locking mode for this cache, one of OPTIMISTIC or PESSIMISTIC.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Ceviction%3E"  >
+        <h5>&lt;eviction&gt;</h5>
+    
+            <p>
+    This child element configures the eviction behaviour of the cache.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">strategy</tt> This attribute configures the cache eviction strategy. Available options are 'UNORDERED', 'FIFO', 'LRU', 'LIRS' and 'NONE' (to disable eviction).            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max-entries</tt> This attribute configures the maximum number of entries in a cache instance. If selected value is not a power of two the actual value will default to the least power of two larger than selected value. -1 means no limit.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cexpiration%3E"  >
+        <h5>&lt;expiration&gt;</h5>
+    
+            <p>
+    This child element configures the expiration behaviour of the cache.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">max-idle</tt> This attribute configures the maximum idle time a cache entry will be maintained in the cache, in milliseconds. If the idle time is exceeded, the entry will be expired cluster-wide. -1 means the entries never expire.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">lifespan</tt> This attribute configures the maximum lifespan of a cache entry, after which the entry is expired cluster-wide, in milliseconds. -1 means the entries never expire.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">interval</tt> This attribute specifies the interval (in ms) between subsequent runs to purge expired entries from memory and any cache stores. If you wish to disable the periodic eviction process altogether, set wakeupInterval to -1.            </p>
+    </li></ul>            <p>
+    The remaining child elements of the abstract base element <strong class=" ">&lt;cache&gt;</strong>, namely <strong class=" ">&lt;store&gt;</strong>, <strong class=" ">&lt;file-store&gt;</strong>, <strong class=" ">&lt;remote-store&gt;</strong>, <strong class=" ">&lt;string-keyed-jdbc-store&gt;</strong>, <strong class=" ">&lt;binary-keyed-jdbc-store&gt;</strong> and <strong class=" ">&lt;mixed-keyed-jdbc-store&gt;</strong>, each configures one of six key cache store types.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    These cache store-related elements are actually part of an xsd extension hierarchy with abstract complexTypes <strong class=" ">base-store</strong> and <strong class=" ">base-jdbc-store</strong>. As before, in order to simplify the presentation, we notate these as pseudo-elements <strong class=" ">&lt;abstract base-store&gt;</strong> and <strong class=" ">&lt;abstract base-jdbc-store&gt;</strong>.&nbsp; In what follows, we first  describe the extension hierarchy of base elements, and then show how the  cache store elements relate to them.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cabstractbasestore%3E"  >
+        <h5>&lt;abstract base-store&gt;</h5>
+    
+            <p>
+    This abstract base element defines the attributes and child elements common to all cache stores.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">shared</tt> This attribute should be set to true when multiple cache instances share the same cache store (e.g. multiple nodes in a cluster using a JDBC-based CacheStore pointing to the same, shared database) Setting this to true avoids multiple cache instances writing the same modification multiple times. If enabled, only the node where the modification originated will write to the cache store. If disabled, each individual cache reacts to a potential remote update by storing the data to the cache store.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">preload</tt> This attribute configures whether or not, when the cache starts, data stored in the cache loader will be  pre-loaded into memory. This is particularly useful when data in the  cache loader is needed immediately after start-up and you want to avoid  cache operations being delayed as a result of loading this data lazily.  Can be used to provide a 'warm-cache' on start-up, however there is a  performance penalty as start-up time is affected by this process. Note  that pre-loading is done in a local fashion, so any data loaded is only  stored locally in the node. No replication or distribution of the  preloaded data happens. Also, Infinispan only pre-loads up to the maximum  configured number of entries in eviction.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">passivation</tt> If true, data is only written to the cache store when it is evicted from memory, a phenomenon known as <i class=" ">passivation</i>. Next time the data is requested, it will be 'activated' which means that data will be brought back to memory and removed from the persistent store. If false, the cache store contains a copy of the cache contents in memory, so writes to cache result in cache store writes. This essentially gives you a 'write-through' configuration.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">fetch-state</tt> This attribute, if true, causes persistent state to be fetched when joining a cluster. If multiple cache stores are chained, only one of them can have this property enabled.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">purge</tt> This attribute configures whether the cache store is purged upon start-up.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">singleton</tt> This attribute configures whether or not the singleton store cache store is enabled. SingletonStore is a delegating cache store used for situations when only one instance in a cluster should interact with the underlying store.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">class</tt> This attribute configures a custom store implementation class to use for this cache store.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">properties</tt> This attribute is used to configure a list of cache store properties.            </p>
+    </li></ul>            <p>
+    The abstract base element has one child element: <strong class=" ">&lt;write-behind&gt;</strong>            </p>
+        </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cwritebehind%3E"  >
+        <h5>&lt;write-behind&gt;</h5>
+    
+            <p>
+    This element is used to configure a cache store as write-behind instead of write-through. In write-through mode, writes to the cache are also <i class=" ">synchronously</i> written to the cache store, whereas in write-behind mode, writes to the cache are followed by <i class=" ">asynchronous</i> writes to the cache store.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">flush-lock-timeout</tt> This attribute configures the time-out for acquiring the lock which guards the state to be flushed to the cache store periodically.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">modification-queue-size</tt> This attribute configures the maximum number of entries in the asynchronous queue. When the queue is full, the store becomes write-through until it can accept new entries.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">shutdown-timeout</tt> This attribute configures the time-out (in ms) to stop the cache store.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">thread-pool</tt> This attribute is used to configure the size of the thread pool whose threads are responsible for applying the modifications to the cache store.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cabstractbasejdbcstore%3Eextends%3Cabstractbasestore%3E"  >
+        <h5>&lt;abstract base-jdbc-store&gt; extends &lt;abstract base-store&gt;</h5>
+    
+            <p>
+    This abstract base element defines the attributes and child elements common to all JDBC-based cache stores.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">datasource</tt> This attribute configures the datasource for the JDBC-based cache store.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">entry-table</tt> This attribute configures the database table used to store cache entries.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">bucket-table</tt> This attribute configures the database table used to store binary cache entries.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cfilestore%3Eextends%3Cabstractbasestore%3E"  >
+        <h5>&lt;file-store&gt; extends &lt;abstract base-store&gt;</h5>
+    
+            <p>
+    This child element is used to configure a file-based cache store. This requires specifying the name of the file to be used as backing storage for the cache store.&nbsp;            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">relative-to</tt> This attribute optionally configures a relative path prefix for the file store path. Can be null.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">path</tt> This attribute configures an absolute path to a file if <strong class=" ">relative-to</strong> is null; configures a relative path to the file, in relation to the value for <strong class=" ">relative-to</strong>, otherwise.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cremotestore%3Eextends%3Cabstractbasestore%3E"  >
+        <h5>&lt;remote-store&gt; extends &lt;abstract base-store&gt;</h5>
+    
+            <p>
+    This child element of cache is used to configure a remote cache store. It has a child &lt;remote-servers&gt;.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">cache</tt> This attribute configures the name of the remote cache to use for this remote store.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">tcp-nodelay</tt> This attribute configures a TCP_NODELAY value for communication with the remote cache.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">socket-timeout</tt> This attribute configures a socket time-out for communication with the remote cache.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cremoteservers%3E"  >
+        <h5>&lt;remote-servers&gt;</h5>
+    
+            <p>
+    This child element of cache configures a list of remote servers for this cache store.            </p>
+        </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cremoteserver%3E"  >
+        <h5>&lt;remote-server&gt;</h5>
+    
+            <p>
+    This element configures a remote server. A remote server is defined completely by a locally defined outbound socket binding, through which communication is made with the server.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">outbound-socket-binding</tt> This attribute configures an outbound socket binding for a remote server.            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="69370422_InfinispanSubsystem-"  >
+        <h4></h4>
+    
+    </div>
+    
+    <div class="section-4"  id="69370422_InfinispanSubsystem-%3Clocalcache%3Eextends%3Cabstractcache%3E"  >
+        <h4>&lt;local-cache&gt; extends &lt;abstract cache&gt;</h4>
+    
+            <p>
+    This element configures a local cache.            </p>
+        </div>
+    
+    <div class="section-4"  id="69370422_InfinispanSubsystem-%3Cabstractclusteredcache%3Eextends%3Cabstractcache%3E"  >
+        <h4>&lt;abstract clustered-cache&gt; extends &lt;abstract cache&gt;</h4>
+    
+            <p>
+    This abstract base element defines the attributes and child elements common to all clustered caches. A clustered cache is a cache which spans multiple nodes in a cluster. It inherits from &lt;cache&gt;, so that all attributes and elements of &lt;cache&gt; are also defined for &lt;clustered-cache&gt;.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">async-marshalling</tt> This attribute configures async marshalling. If enabled, this will cause marshalling of entries to be performed asynchronously.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">mode</tt> This attribute configures the clustered cache mode, ASYNC for asynchronous operation, or SYNC for synchronous operation.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">queue-size</tt> In ASYNC mode, this attribute can be used to trigger flushing of the queue when it reaches a specific threshold.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">queue-flush-interval</tt> In ASYNC mode, this attribute controls how often the asynchronous thread used to flush the replication queue runs. This should be a positive integer which represents thread wakeup time in milliseconds.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">remote-timeout</tt> In SYNC mode, this attribute (in ms) used to wait for an acknowledgement when making a remote call, after which the call is aborted and an exception is thrown.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="69370422_InfinispanSubsystem-2"  >
+        <h4></h4>
+    
+    </div>
+    
+    <div class="section-4"  id="69370422_InfinispanSubsystem-%3Cinvalidationcache%3Eextends%3Cabstractclusteredcache%3E"  >
+        <h4>&lt;invalidation-cache&gt; extends &lt;abstract clustered-cache&gt;</h4>
+    
+            <p>
+    This element configures an invalidation cache. &nbsp;            </p>
+        </div>
+    
+    <div class="section-4"  id="69370422_InfinispanSubsystem-%3Cabstractsharedcache%3Eextends%3Cabstractclusteredcache%3E"  >
+        <h4>&lt;abstract shared-cache&gt; extends &lt;abstract clustered-cache&gt;</h4>
+    
+            <p>
+    This abstract base element defines the attributes and child elements common to all shared caches.  A shared cache is a clustered cache which shares state with its cache peers in the cluster.  It inherits from &lt;clustered-cache&gt;, so that all attributes and elements of  &lt;clustered-cache&gt; are also defined for &lt;shared-cache&gt;.            </p>
+        <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cstatetransfer%3E"  >
+        <h5>&lt;state-transfer&gt;</h5>
+    
+<ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">enabled</tt> If enabled, this will cause the cache to ask neighbouring caches for state when it starts up, so the cache starts 'warm', although it will impact start-up time.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">timeout</tt> This attribute configures the maximum amount of time (ms) to wait for state from neighbouring caches, before throwing an exception and aborting start-up.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">chunk-size</tt> This attribute configures the size, in bytes, in which to batch the transfer of cache entries.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cbackups%3E"  >
+        <h5>&lt;backups&gt;</h5>
+    
+    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cbackup%3E"  >
+        <h5>&lt;backup&gt;</h5>
+    
+<ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">strategy</tt> This attribute configures the backup strategy for this cache. Allowable values are SYNC, ASYNC.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">failure-policy</tt> This attribute configures the policy to follow when connectivity to the backup site fails. Allowable values are IGNORE, WARN, FAIL, CUSTOM.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">enabled</tt> This attribute configures whether or not this backup is enabled. If enabled, data will be sent to the backup site; otherwise, the backup site will be effectively ignored.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">timeout</tt> This attribute configures the time-out for replicating to the backup site.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">after-failures</tt> This attribute configures the number of failures after which this backup site should go off-line.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">min-wait</tt> This attribute configures the minimum time (in milliseconds) to wait after the max number of failures is reached, after which this backup site should go off-line.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-5"  id="69370422_InfinispanSubsystem-%3Cbackupfor%3E"  >
+        <h5>&lt;backup-for&gt;</h5>
+    
+<ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">remote-cache</tt> This attribute configures the name of the remote cache for which this cache acts as a backup.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">remote-site</tt> This attribute configures the site of the remote cache for which this cache acts as a backup.            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="69370422_InfinispanSubsystem-%3Creplicatedcache%3Eextends%3Cabstractsharedcache%3E"  >
+        <h4>&lt;replicated-cache&gt; extends &lt;abstract shared-cache&gt;</h4>
+    
+            <p>
+    This element configures a replicated cache. With a replicated cache, all contents (key-value pairs) of the cache are replicated on all nodes in the cluster.            </p>
+        </div>
+    
+    <div class="section-4"  id="69370422_InfinispanSubsystem-%3Cdistributedcache%3Eextends%3Cabstractsharedcache%3E"  >
+        <h4>&lt;distributed-cache&gt; extends &lt;abstract shared-cache&gt;</h4>
+    
+            <p>
+    This element configures a distributed cache. With a distributed cache, contents of the cache are selectively replicated on nodes in the cluster, according to the number of owners specified.            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    <tt class=" ">owners</tt> This attribute configures the number of cluster-wide replicas for each cache entry.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">segments</tt> This attribute configures the number of hash space segments which is the granularity for key distribution in the cluster. Value must be strictly positive.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">l1-lifespan</tt> This attribute configures the maximum lifespan of an entry placed in the L1 cache. Configures the L1 cache behaviour in 'distributed' caches instances. In any other cache modes, this element is ignored.            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="69370422_InfinispanSubsystem-UseCases"  >
+        <h2>Use Cases</h2>
+    
+            <p>
+    In many cases, cache containers and caches will be configured via XML as in the example above, so that they will be available upon server start-up. However, cache containers and caches may also be added, removed or have their configurations changed in a running server by making use of the Wildfly management API command-line interface (CLI).&nbsp;In this section, we present some key use cases for the Infinispan management API.            </p>
+                <p>
+    The key use cases covered are:            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    adding a cache container            </p>
+    </li><li class=" ">            <p>
+    adding a cache to an existing cache container            </p>
+    </li><li class=" ">            <p>
+    configuring the transaction subsystem of a cache            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    The Wildfly management API command-line interface (CLI) can be used to provide extensive information on the attributes and commands available in the Infinispan subsystem interface used in these examples.            </p>
+        </div>
+    
+</li></ul>    <div class="section-3"  id="69370422_InfinispanSubsystem-Addacachecontainer"  >
+        <h3>Add a cache container</h3>
+    
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=infinispan/cache-container=mycontainer:add(default-cache=&lt;default-cache-name&gt;)
+/subsystem=infinispan/cache-container=mycontainer/transport=TRANSPORT:add(lock-timeout=&lt;timeout&gt;)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="69370422_InfinispanSubsystem-Addacache"  >
+        <h3>Add a cache</h3>
+    
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=infinispan/cache-container=mycontainer/local-cache=mylocalcache:add()</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="69370422_InfinispanSubsystem-Configurethetransactioncomponentofacache"  >
+        <h3>Configure the transaction component of a cache</h3>
+    
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=infinispan/cache-container=mycontainer/local-cache=mylocalcache/transaction=TRANSACTION:add(mode=&lt;transaction-mode&gt;)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

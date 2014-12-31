@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Create the schema</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Create the schema</h1>
+        </div>
+        
+        <div id="66322988" class="content prepend-top">
+            <p>
+    First, let us define the schema for our subsystem. Rename&nbsp;<tt class=" ">src/main/resources/schema/mysubsystem.xsd</tt> to&nbsp;<tt class=" ">src/main/resources/schema/acme.xsd</tt>. Then open&nbsp;<tt class=" ">acme.xsd</tt>&nbsp;and modify it to the following<br/>    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;xs:schema xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
+            targetNamespace=&quot;urn:com.acme.corp.tracker:1.0&quot;
+            xmlns=&quot;urn:com.acme.corp.tracker:1.0&quot;
+            elementFormDefault=&quot;qualified&quot;
+            attributeFormDefault=&quot;unqualified&quot;
+            version=&quot;1.0&quot;&gt;
+
+   &lt;!-- The subsystem root element --&gt;
+   &lt;xs:element name=&quot;subsystem&quot; type=&quot;subsystemType&quot;/&gt;
+   &lt;xs:complexType name=&quot;subsystemType&quot;&gt;
+      &lt;xs:all&gt;
+         &lt;xs:element name=&quot;deployment-types&quot; type=&quot;deployment-typesType&quot;/&gt;
+      &lt;/xs:all&gt;
+   &lt;/xs:complexType&gt;
+   &lt;xs:complexType name=&quot;deployment-typesType&quot;&gt;
+      &lt;xs:choice minOccurs=&quot;0&quot; maxOccurs=&quot;unbounded&quot;&gt;
+         &lt;xs:element name=&quot;deployment-type&quot; type=&quot;deployment-typeType&quot;/&gt;
+      &lt;/xs:choice&gt;
+   &lt;/xs:complexType&gt;
+   &lt;xs:complexType name=&quot;deployment-typeType&quot;&gt;
+      &lt;xs:attribute name=&quot;suffix&quot; use=&quot;required&quot;/&gt;
+      &lt;xs:attribute name=&quot;tick&quot; type=&quot;xs:long&quot; use=&quot;optional&quot; default=&quot;10000&quot;/&gt;
+   &lt;/xs:complexType&gt;
+&lt;/xs:schema&gt;</code></pre>
+        </div>
+    </div>
+Note that we modified the <tt class=" ">xmlns</tt>&nbsp;and <tt class=" ">targetNamespace</tt> values to &#65279;<tt class=" ">urn.com.acme.corp.tracker:1.0</tt>. Our new <tt class=" ">subsystem</tt> element has a child called <tt class=" ">deployment-types</tt>, which in turn can have zero or more children called <tt class=" ">deployment-type</tt>. Each <tt class=" ">deployment-type</tt> has a required <tt class=" ">suffix</tt> attribute, and a <tt class=" ">tick</tt> attribute which defaults to <tt class=" ">true.</tt>            </p>
+                <p>
+    Now modify the&nbsp;&#65279;<tt class=" ">com.acme.corp.tracker.extension.SubsystemExtension</tt> class to contain the new namespace.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class SubsystemExtension implements Extension {
+
+    /** The name space used for the {@code substystem} element */
+    public static final String NAMESPACE = &quot;urn:com.acme.corp.tracker:1.0&quot;;
+    ...</code></pre>
+        </div>
+    </div>
+        </div>
+    </div>
+</body>
+</html>

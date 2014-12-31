@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Resource adapters</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Resource adapters</h1>
+        </div>
+        
+        <div id="66322730" class="content prepend-top">
+            <p>
+    Resource adapters are configured through the <i class=" ">resource-adapters</i> subsystem.  Declaring a new resource adapter consists of two separate steps: You would  need to deploy the .rar archive and define a resource adapter entry in the subsystem.            </p>
+        <div class="section-2"  id="66322730_Resourceadapters-ResourceAdapterDefinitions"  >
+        <h2>Resource Adapter Definitions</h2>
+    
+            <p>
+    The resource adapter itself is defined within the subsystem <i class=" ">resource-adapters</i>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:resource-adapters:1.0&quot;&gt;
+    &lt;resource-adapters&gt;
+       &lt;resource-adapter&gt;
+          &lt;archive&gt;eis.rar&lt;/archive&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;!-- Resource adapter level config-property --&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;config-property name=&quot;Server&quot;&gt;localhost&lt;/config-property&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;config-property name=&quot;Port&quot;&gt;19000&lt;/config-property&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;transaction-support&gt;XATransaction&lt;/transaction-support&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;connection-definitions&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;connection-definition class-name=&quot;com.acme.eis.ra.EISManagedConnectionFactory&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; jndi-name=&quot;java:/eis/AcmeConnectionFactory&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pool-name=&quot;AcmeConnectionFactory&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;!-- Managed connection factory level config-property --&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;config-property name=&quot;Name&quot;&gt;Acme Inc&lt;/config-property&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;pool&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;min-pool-size&gt;10&lt;/min-pool-size&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;max-pool-size&gt;100&lt;/max-pool-size&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/pool&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;security&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;application/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/security&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/connection-definition&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/connection-definitions&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;admin-objects&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;admin-object class-name=&quot;com.acme.eis.ra.EISAdminObjectImpl&quot;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; jndi-name=&quot;java:/eis/AcmeAdminObject&quot;&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;config-property name=&quot;Threshold&quot;&gt;10&lt;/config-property&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/admin-object&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/admin-objects&gt;
+       &lt;/resource-adapter&gt;
+    &lt;/resource-adapters&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Note, that only JNDI bindings under java:/ or java:jboss/ are supported.            </p>
+                <p>
+    <sub class=" ">(See</sub> <tt class=" ">standalone/configuration/standalone.xml</tt><sub class=" ">)</sub>            </p>
+        </div>
+    
+    <div class="section-2"  id="66322730_Resourceadapters-Usingsecuritydomains"  >
+        <h2>Using security domains</h2>
+    
+            <p>
+    Information about using security domains can be found at <a href="https://community.jboss.org/wiki/JBossAS7SecurityDomainModel">https://community.jboss.org/wiki/JBossAS7SecurityDomainModel</a>            </p>
+        </div>
+    
+    <div class="section-2"  id="66322730_Resourceadapters-Automaticactivationofresourceadapterarchives"  >
+        <h2>Automatic activation of resource adapter archives</h2>
+    
+            <p>
+    A resource adapter archive can be automatically activated with a  configuration by including an META-INF/ironjacamar.xml in the archive.            </p>
+                <p>
+    The schema can be found at <a href="http://docs.jboss.org/ironjacamar/schema/ironjacamar_1_0.xsd">http://docs.jboss.org/ironjacamar/schema/ironjacamar_1_0.xsd</a>            </p>
+        </div>
+    
+    <div class="section-2"  id="66322730_Resourceadapters-ComponentReference"  >
+        <h2>Component Reference</h2>
+    
+            <p>
+    The resource adapter subsystem is provided by the <a href="http://www.jboss.org/ironjacamar">IronJacamar</a> project. For a detailed description of the available configuration properties, please consult the project documentation.            </p>
+    <ul class=" "><li class=" ">            <p>
+    IronJacamar homepage:&nbsp;<a href="http://www.jboss.org/ironjacamar">http://www.jboss.org/ironjacamar</a>            </p>
+    </li><li class=" ">            <p>
+    Project Documentation: &nbsp;<a href="http://www.jboss.org/ironjacamar/docs">http://www.jboss.org/ironjacamar/docs</a>            </p>
+    </li><li class=" ">            <p>
+    Schema description:&nbsp;<a href="http://docs.jboss.org/ironjacamar/userguide/1.0/en-US/html/deployment.html#deployingra_descriptor">http://docs.jboss.org/ironjacamar/userguide/1.0/en-US/html/deployment.html#deployingra_descriptor</a>            </p>
+    </li></ul>    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

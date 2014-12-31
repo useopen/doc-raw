@@ -1,0 +1,2481 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Subsystem configuration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Subsystem configuration</h1>
+        </div>
+        
+        <div id="66322700" class="content prepend-top">
+            <p>
+    The following chapters will focus on the high level management use cases that are available through the CLI and the web interface. For a detailed description of each subsystem configuration property, please consult the respective component reference.            </p>
+        <div class="confbox admonition admonition-tip">
+            <div class="title">Schema Location</div>
+        
+            <p>
+    The configuration schemas can found in <tt class=" ">$JBOSS_HOME/docs/schema</tt>.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322700_Subsystemconfiguration-EESubsystemConfiguration"  >
+        <h2>EE Subsystem Configuration</h2>
+    
+    </div>
+    
+    <div class="section-2"  id="66322700_Subsystemconfiguration-Overview"  >
+        <h2>Overview</h2>
+    
+            <p>
+    The EE subsystem provides common functionality in the Java EE platform, such as the EE Concurrency Utilities (JSR 236) and <tt class=" ">@Resource</tt> injection. The subsystem is also responsible for managing the lifecycle of Java EE application's deployments, that is, <tt class=" ">.ear</tt> files.            </p>
+                <p>
+    The EE subsystem configuration may be used to:            </p>
+    <ul class=" "><li class=" ">            <p>
+    customise the deployment of Java EE applications            </p>
+    </li><li class=" ">            <p>
+    create EE Concurrency Utilities instances            </p>
+    </li><li class=" ">            <p>
+    define the default bindings            </p>
+    </li></ul>            <p>
+    The subsystem name is ee and this document covers EE subsystem version <tt class=" ">2.0</tt>, which XML namespace within WildFly XML configurations is&nbsp;<tt class=" ">urn:jboss:domain:ee:2.0</tt>. The path for the subsystem's XML schema, within WildFly's distribution, is <tt class=" ">docs/schema/jboss-as-ee_2_0.xsd</tt>.            </p>
+                <p>
+    Subsystem XML configuration example with all elements and attributes specified:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:ee:2.0&quot; &gt;
+    &lt;global-modules&gt;
+        &lt;module name=&quot;org.jboss.logging&quot;
+                slot=&quot;main&quot;/&gt;
+        &lt;module name=&quot;org.apache.log4j&quot;
+                annotations=&quot;true&quot;
+                meta-inf=&quot;true&quot;
+                services=&quot;false&quot; /&gt;
+    &lt;/global-modules&gt;
+    &lt;ear-subdeployments-isolated&gt;true&lt;/ear-subdeployments-isolated&gt;
+    &lt;spec-descriptor-property-replacement&gt;false&lt;/spec-descriptor-property-replacement&gt;
+    &lt;jboss-descriptor-property-replacement&gt;false&lt;/jboss-descriptor-property-replacement&gt;
+    &lt;annotation-property-replacement&gt;false&lt;/annotation-property-replacement&gt;
+    &lt;concurrent&gt;
+        &lt;context-services&gt;
+            &lt;context-service
+                    name=&quot;default&quot;
+                    jndi-name=&quot;java:jboss/ee/concurrency/context/default&quot;
+                    use-transaction-setup-provider=&quot;true&quot; /&gt;
+        &lt;/context-services&gt;
+        &lt;managed-thread-factories&gt;
+            &lt;managed-thread-factory
+                    name=&quot;default&quot;
+                    jndi-name=&quot;java:jboss/ee/concurrency/factory/default&quot;
+                    context-service=&quot;default&quot;
+                    priority=&quot;1&quot; /&gt;
+        &lt;/managed-thread-factories&gt;
+        &lt;managed-executor-services&gt;
+            &lt;managed-executor-service
+                    name=&quot;default&quot;
+                    jndi-name=&quot;java:jboss/ee/concurrency/executor/default&quot;
+                    context-service=&quot;default&quot;
+                    thread-factory=&quot;default&quot;
+                    hung-task-threshold=&quot;60000&quot;
+                    core-threads=&quot;5&quot;
+                    max-threads=&quot;25&quot;
+                    keepalive-time=&quot;5000&quot;
+                    queue-length=&quot;1000000&quot;
+                    reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+        &lt;/managed-executor-services&gt;
+        &lt;managed-scheduled-executor-services&gt;
+            &lt;managed-scheduled-executor-service
+                    name=&quot;default&quot;
+                    jndi-name=&quot;java:jboss/ee/concurrency/scheduler/default&quot;
+                    context-service=&quot;default&quot;
+                    thread-factory=&quot;default&quot;
+                    hung-task-threshold=&quot;60000&quot;
+                    core-threads=&quot;5&quot;
+                    keepalive-time=&quot;5000&quot;
+                    reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+        &lt;/managed-scheduled-executor-services&gt;
+    &lt;/concurrent&gt;
+    &lt;default-bindings
+            context-service=&quot;java:jboss/ee/concurrency/context/default&quot;
+            datasource=&quot;java:jboss/datasources/ExampleDS&quot;
+            jms-connection-factory=&quot;java:jboss/DefaultJMSConnectionFactory&quot;
+            managed-executor-service=&quot;java:jboss/ee/concurrency/executor/default&quot;
+            managed-scheduled-executor-service=&quot;java:jboss/ee/concurrency/scheduler/default&quot;
+            managed-thread-factory=&quot;java:jboss/ee/concurrency/factory/default&quot; /&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322700_Subsystemconfiguration-JavaEEApplicationDeployment"  >
+        <h2>Java EE Application Deployment</h2>
+    
+            <p>
+    The EE subsystem configuration allows the customisation of the deployment behaviour for Java EE Applications.            </p>
+        <div class="section-3"  id="66322700_Subsystemconfiguration-GlobalModules"  >
+        <h3>Global Modules</h3>
+    
+            <p>
+    Global modules is a set of JBoss Modules that will be added as dependencies to the JBoss Module of every Java EE deployment. Such dependencies allows Java EE deployments to see the classes exported by the global modules.            </p>
+                <p>
+    Each global module is defined through the <tt class=" ">module</tt> resource, an example of its XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;global-modules&gt;
+    &lt;module name=&quot;org.jboss.logging&quot; slot=&quot;main&quot;/&gt;
+    &lt;module name=&quot;org.apache.log4j&quot; annotations=&quot;true&quot; meta-inf=&quot;true&quot; services=&quot;false&quot; /&gt;
+  &lt;/global-modules&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The only mandatory attribute is the JBoss Module <tt class=" ">name</tt>, the <tt class=" ">slot</tt> attribute defaults to <tt class=" ">main</tt>, and both define the JBoss Module ID to reference.            </p>
+                <p>
+    The optional <tt class=" ">annotations</tt> attribute, which defaults to <tt class=" ">false</tt>, indicates if a pre-computed annotation index should be imported from META-INF/jandex.idx            </p>
+                <p>
+    The optional <tt class=" ">services</tt> attribute indicates if any services exposed in META-INF/services should be made available to the deployments class loader, and defaults to <tt class=" ">false</tt>.            </p>
+                <p>
+    The optional <tt class=" ">meta-inf</tt> attribute, which defaults to <tt class=" ">true</tt>, indicates if the Module's <tt class=" ">META-INF</tt> path should be available to the deployment's class loader.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-EARSubdeploymentsIsolation"  >
+        <h3>EAR Subdeployments Isolation</h3>
+    
+            <p>
+    A flag indicating whether each of the subdeployments within a <tt class=" ">.ear</tt> can access classes belonging to another subdeployment within the same <tt class=" ">.ear</tt>. The default value is <tt class=" ">false</tt>, which allows the subdeployments to see classes belonging to other subdeployments within the <tt class=" ">.ear</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;ear-subdeployments-isolated&gt;true&lt;/ear-subdeployments-isolated&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>myapp.ear
+|
+|--- web.war
+|
+|--- ejb1.jar
+|
+|--- ejb2.jar
+</code></pre>
+        </div>
+    </div>
+            <p>
+    If the <tt class=" ">ear-subdeployments-isolated</tt> is set to false, then the classes in <tt class=" ">web.war</tt> can access classes belonging to <tt class=" ">ejb1.jar</tt> and <tt class=" ">ejb2.jar</tt>. Similarly, classes from <tt class=" ">ejb1.jar</tt> can access classes from <tt class=" ">ejb2.jar</tt> (and vice-versa).            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    This flag has no effect on the isolated classloader of the <tt class=" ">.war</tt> file(s), i.e. irrespective of whether this flag is set to <tt class=" ">true</tt> or <tt class=" ">false</tt>, the <tt class=" ">.war</tt> within a <tt class=" ">.ear</tt> will have a isolated classloader, and other subdeployments within that <tt class=" ">.ear</tt> will not be able to access classes from that <tt class=" ">.war</tt>. This is as per spec.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-PropertyReplacement"  >
+        <h3>Property Replacement</h3>
+    
+            <p>
+    The EE subsystem configuration includes flags to configure whether system property replacement will be done on XML descriptors and Java Annotations, included in Java EE deployments.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    System properties etc are resolved in the security context of the application server itself, not the deployment that contains the file. This means that if you are running with a security manager and enable this property, a deployment can potentially access system properties or environment entries that the security manager would have otherwise prevented.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-SpecDescriptorPropertyReplacement"  >
+        <h4>Spec Descriptor Property Replacement</h4>
+    
+            <p>
+    Flag indicating whether system property replacement will be performed on standard Java EE XML descriptors. This defaults to <tt class=" ">true</tt>, however it is disabled in the default configurations.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;spec-descriptor-property-replacement&gt;false&lt;/spec-descriptor-property-replacement&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-JBossDescriptorPropertyReplacement"  >
+        <h4>JBoss Descriptor Property Replacement</h4>
+    
+            <p>
+    Flag indicating whether system property replacement will be performed on WildFly proprietary XML descriptors, such as <tt class=" ">jboss-app.xml</tt>. This defaults to <tt class=" ">true</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;jboss-descriptor-property-replacement&gt;false&lt;/jboss-descriptor-property-replacement&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-AnnotationPropertyReplacement"  >
+        <h4>Annotation Property Replacement</h4>
+    
+            <p>
+    Flag indicating whether system property replacement will be performed on Java annotations. The default value is&nbsp;<tt class=" ">false</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;annotation-property-replacement&gt;false&lt;/annotation-property-replacement&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322700_Subsystemconfiguration-EEConcurrencyUtilities"  >
+        <h2>EE Concurrency Utilities</h2>
+    
+            <p>
+    EE Concurrency Utilities (JSR 236) were introduced with Java EE 7, to ease the task of writing multithreaded Java EE applications. Instances of these utilities are managed by WildFly, and the related configuration provided by the EE subsystem.            </p>
+        <div class="section-3"  id="66322700_Subsystemconfiguration-ContextServices"  >
+        <h3>Context Services</h3>
+    
+            <p>
+    The Context Service is a concurrency utility which creates contextual proxies from existent objects. WildFly Context Services are also used to propagate the context from a Java EE application invocation thread, to the threads internally used by the other EE Concurrency Utilities. Context Service instances may be created using the subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;context-services&gt;
+    &lt;context-service
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/context/default&quot;
+	use-transaction-setup-provider=&quot;true&quot; /&gt;
+  &lt;/context-services&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">name</tt> attribute is mandatory, and it's value should be a unique name within all Context Services.            </p>
+                <p>
+    The <tt class=" ">jndi-name</tt> attribute is also mandatory, and defines where in the JNDI the Context Service should be placed.            </p>
+                <p>
+    The optional <tt class=" ">use-trasaction-setup-provider</tt> attribute indicates if the contextual proxies built by the Context Service should suspend transactions in context, when invoking the proxy objects, and its value defaults to true.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Context Service instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/context-service=other:add(jndi-name=java\:jboss\/ee\/concurrency\/other)
+/subsystem=ee/context-service=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-ManagedThreadFactories"  >
+        <h3>Managed Thread Factories</h3>
+    
+            <p>
+    The Managed Thread Factory allows Java EE applications to create new threads. WildFly Managed Thread Factory instances may also, optionally, use a Context Service instance to propagate the Java EE application thread&rsquo;s context to the new threads. Instance creation is done through the EE subsystem, by editing the subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;managed-thread-factories&gt;
+    &lt;managed-thread-factory
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/factory/default&quot;
+	context-service=&quot;default&quot;
+	priority=&quot;1&quot; /&gt;
+  &lt;/managed-thread-factories&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The&nbsp;<tt class=" ">name</tt>&nbsp;attribute is mandatory, and it's value should be a unique name within all Managed Thread Factories.            </p>
+                <p>
+    The&nbsp;<tt class=" ">jndi-name</tt>&nbsp;attribute is also mandatory, and defines where in the JNDI the Managed Thread Factory should be placed.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">context-service</tt>&nbsp;references an existent Context Service by its <tt class=" ">name</tt>. If specified then thread created by the factory will propagate the invocation context, present when creating the thread.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">priority</tt>&nbsp;indicates the priority for new threads created by the factory, and defaults to <tt class=" ">5</tt>.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Managed Thread Factory instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/managed-thread-factory=other:add(jndi-name=java\:jboss\/ee\/factory\/other)
+/subsystem=ee/managed-thread-factory=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-ManagedExecutorServices"  >
+        <h3>Managed Executor Services</h3>
+    
+            <p>
+    The Managed Executor Service is the Java EE adaptation of Java SE Executor Service, providing to Java EE applications the functionality of asynchronous task execution. WildFly is responsible to manage the lifecycle of Managed Executor Service instances, which are specified through the EE subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;managed-executor-services&gt;
+    &lt;managed-executor-service
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/executor/default&quot;
+	context-service=&quot;default&quot;
+	thread-factory=&quot;default&quot;
+	hung-task-threshold=&quot;60000&quot;
+	core-threads=&quot;5&quot;
+	max-threads=&quot;25&quot;
+	keepalive-time=&quot;5000&quot;
+	queue-length=&quot;1000000&quot;
+	reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+  &lt;/managed-executor-services&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The&nbsp;<tt class=" ">name</tt>&nbsp;attribute is mandatory, and it's value should be a unique name within all Managed Executor Services.            </p>
+                <p>
+    The&nbsp;<tt class=" ">jndi-name</tt>&nbsp;attribute is also mandatory, and defines where in the JNDI the Managed Executor Service should be placed.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">context-service</tt>&nbsp;references an existent Context Service by its&nbsp;<tt class=" ">name</tt>. If specified then the referenced Context Service will capture the invocation context present when submitting a task to the executor, which will then be used when executing the task.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">thread-factory</tt>&nbsp;references an existent Managed Thread Factory by its&nbsp;<tt class=" ">name</tt>, to handle the creation of internal threads. If not specified then a Managed Thread Factory with default configuration will be created and used internally.            </p>
+                <p>
+    The mandatory&nbsp;<tt class=" ">core-threads</tt>&nbsp;provides the number of threads to keep in the executor's pool, even if they are idle. A value of&nbsp;<tt class=" ">0</tt>&nbsp;means there is no limit.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">queue-length</tt>&nbsp;indicates the number of tasks that can be stored in the input queue. The default value is <tt class=" ">0</tt>, which means the queue capacity is unlimited.            </p>
+                <p>
+    The executor&rsquo;s task queue is based on the values of the attributes&nbsp;<tt class=" ">core-threads</tt> and <tt class=" ">queue-length</tt>:            </p>
+    <ul class=" "><li class=" ">            <p>
+    If <tt class=" ">queue-length</tt> is <tt class=" ">0</tt>, or <tt class=" ">queue-length</tt> is <tt class=" ">Integer.MAX_VALUE (2147483647)</tt> and <tt class=" ">core-threads</tt> is <tt class=" ">0</tt>, direct handoff queuing strategy will be used and a synchronous queue will be created.            </p>
+    </li><li class=" ">            <p>
+    If <tt class=" ">queue-length</tt> is <tt class=" ">Integer.MAX_VALUE</tt> but <tt class=" ">core-threads</tt> is not <tt class=" ">0</tt>, an unbounded queue will be used.            </p>
+    </li><li class=" ">            <p>
+    For any other valid value for <tt class=" ">queue-length</tt>, a bounded queue wil be created.            </p>
+    </li></ul>            <p>
+    The optional&nbsp;<tt class=" ">hung-task-threshold</tt>&nbsp;defines a threshold value, in milliseconds, to hung a possibly blocked task. A value of&nbsp;<tt class=" ">0</tt>&nbsp;will never hung a task, and is the default.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">long-running-tasks</tt>&nbsp;is a hint to optimize the execution of long running tasks, and defaults to <tt class=" ">false</tt>.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">max-threads</tt>&nbsp;defines the the maximum number of threads used by the executor, which defaults to Integer.MAX_VALUE&nbsp;(2147483647).            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">keepalive-time</tt>&nbsp;defines the time, in milliseconds, that an internal thread may be idle. The attribute default value is <tt class=" ">60000</tt>.            </p>
+                <p>
+    The optional&nbsp;reject-policy defines the policy to use when a task is rejected by the executor. The attribute value may be the default <tt class=" ">ABORT</tt>, which means an exception should be thrown, or <tt class=" ">RETRY_ABORT</tt>, which means the executor will try to submit it once more, before throwing an exception.&nbsp;            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Managed Executor Service instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/managed-executor-service=other:add(jndi-name=java\:jboss\/ee\/executor\/other, core-threads=2)
+/subsystem=ee/managed-executor-service=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-ManagedScheduledExecutorServices"  >
+        <h3>Managed Scheduled Executor Services</h3>
+    
+            <p>
+    The Managed Scheduled  Executor Service is the Java EE adaptation of Java SE Scheduled Executor Service, providing to Java EE applications the functionality of scheduling task execution. WildFly is responsible to manage the lifecycle of Managed Scheduled  Executor Service instances, which are specified through the EE subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;managed-scheduled-executor-services&gt;
+    &lt;managed-scheduled-executor-service
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/scheduler/default&quot;
+	context-service=&quot;default&quot;
+	thread-factory=&quot;default&quot;
+	hung-task-threshold=&quot;60000&quot;
+	core-threads=&quot;5&quot;
+	keepalive-time=&quot;5000&quot;
+	reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+  &lt;/managed-scheduled-executor-services&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The&nbsp;<tt class=" ">name</tt>&nbsp;attribute is mandatory, and it's value should be a unique name within all Managed Scheduled Executor Services.            </p>
+                <p>
+    The&nbsp;<tt class=" ">jndi-name</tt>&nbsp;attribute is also mandatory, and defines where in the JNDI the Managed Scheduled Executor Service should be placed.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">context-service</tt>&nbsp;references an existent Context Service by its&nbsp;<tt class=" ">name</tt>. If specified then the referenced Context Service will capture the invocation context present when submitting a task to the executor, which will then be used when executing the task.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">thread-factory</tt>&nbsp;references an existent Managed Thread Factory by its&nbsp;<tt class=" ">name</tt>, to handle the creation of internal threads. If not specified then a Managed Thread Factory with default configuration will be created and used internally.            </p>
+                <p>
+    The mandatory&nbsp;<tt class=" ">core-threads</tt>&nbsp;provides the number of threads to keep in the executor's pool, even if they are idle. A value of&nbsp;<tt class=" ">0</tt>&nbsp;means there is no limit.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">hung-task-threshold</tt>&nbsp;defines a threshold value, in milliseconds, to hung a possibly blocked task. A value of&nbsp;<tt class=" ">0</tt>&nbsp;will never hung a task, and is the default.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">long-running-tasks</tt>&nbsp;is a hint to optimize the execution of long running tasks, and defaults to&nbsp;<tt class=" ">false</tt>.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">keepalive-time</tt>&nbsp;defines the time, in milliseconds, that an internal thread may be idle. The attribute default value is&nbsp;<tt class=" ">60000</tt>.            </p>
+                <p>
+    The optional&nbsp;reject-policy defines the policy to use when a task is rejected by the executor. The attribute value may be the default&nbsp;<tt class=" ">ABORT</tt>, which means an exception should be thrown, or<tt class=" ">RETRY_ABORT</tt>, which means the executor will try to submit it once more, before throwing an exception.&nbsp;            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Managed Scheduled Executor Service instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/managed-scheduled-executor-service=other:add(jndi-name=java\:jboss\/ee\/scheduler\/other, core-threads=2)
+/subsystem=ee/managed-scheduled-executor-service=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322700_Subsystemconfiguration-DefaultEEBindings"  >
+        <h2>Default EE Bindings</h2>
+    
+            <p>
+    The Java EE Specification mandates the existence of a default instance for each of the following resources:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Context Service            </p>
+    </li><li class=" ">            <p>
+    Datasource            </p>
+    </li><li class=" ">            <p>
+    JMS Connection Factory            </p>
+    </li><li class=" ">            <p>
+    Managed Executor Service            </p>
+    </li><li class=" ">            <p>
+    Managed Scheduled Executor Service            </p>
+    </li><li class=" ">            <p>
+    Managed Thread Factory            </p>
+    </li></ul>            <p>
+    The EE subsystem looks up the default instances from JNDI, using the names in the default bindings configuration, before placing those in the standard JNDI names, such as <tt class=" ">java:comp/DefaultManagedExecutorService</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;default-bindings
+	context-service=&quot;java:jboss/ee/concurrency/context/default&quot;
+	datasource=&quot;java:jboss/datasources/ExampleDS&quot;
+	jms-connection-factory=&quot;java:jboss/DefaultJMSConnectionFactory&quot;
+	managed-executor-service=&quot;java:jboss/ee/concurrency/executor/default&quot;
+	managed-scheduled-executor-service=&quot;java:jboss/ee/concurrency/scheduler/default&quot;
+	managed-thread-factory=&quot;java:jboss/ee/concurrency/factory/default&quot; /&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    The default bindings are optional, if the jndi name for a default binding is not configured then the related resource will not be available to Java EE applications.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Datasources"  >
+        <h3>Data sources</h3>
+    
+            <p>
+    Datasources are configured through the <i class=" ">datasource</i> subsystem. Declaring a new datasource consists of two separate steps: You would need to provide a JDBC driver and define a datasource that references the driver you installed.&nbsp;            </p>
+        <div class="section-4"  id="66322700_Subsystemconfiguration-JDBCDriverInstallation"  >
+        <h4>JDBC Driver Installation</h4>
+    
+            <p>
+    The recommended way to install a JDBC driver into WildFly 8&nbsp;is to deploy it as a regular JAR deployment.&nbsp; The reason for this is that when you run WildFly 8&nbsp;in domain mode, deployments are automatically propagated to all servers to which the deployment applies; thus distribution of the driver JAR is one less thing for you to worry about!            </p>
+                <p>
+    Any JDBC 4-compliant driver will automatically be recognized and installed into the system by name and version. A JDBC JAR is identified using the Java service provider mechanism. Such JARs will contain a text a file named <tt class=" ">META-INF/services/java.sql.Driver</tt>, which contains the name of the class(es) of the Drivers which exist in that JAR. If your JDBC driver JAR is not JDBC 4-compliant, it can be made deployable in one of a few ways.            </p>
+                <p>
+    <strong class=" ">Modify the JAR</strong>            </p>
+                <p>
+    The most straightforward solution is to simply modify the JAR and add the missing file. You can do this from your command shell by:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Change to, or create, an empty temporary directory.            </p>
+    </li><li class=" ">            <p>
+    Create a <tt class=" ">META-INF</tt> subdirectory.            </p>
+    </li><li class=" ">            <p>
+    Create a <tt class=" ">META-INF/services</tt> subdirectory.            </p>
+    </li><li class=" ">            <p>
+    Create a <tt class=" ">META-INF/services/java.sql.Driver</tt> file which contains one line - the fully-qualified class name of the JDBC driver.            </p>
+    </li><li class=" ">            <p>
+    Use the <tt class=" ">jar</tt> command-line tool to update the JAR like this:            </p>
+    </li></ol>    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>jar \-uf jdbc-driver.jar META-INF/services/java.sql.Driver</code></pre>
+        </div>
+    </div>
+            <p>
+    For a detailed explanation how to deploy JDBC 4 compliant driver jar, please refer to the chapter &quot;<a href="https://docs.jboss.org/author/display/AS71/Application+deployment">Application Deployment</a>&quot;.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-DatasourceDefinitions"  >
+        <h4>Datasource Definitions</h4>
+    
+            <p>
+    The datasource itself is defined within the subsystem <i class=" ">datasources</i>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:datasources:1.0&quot;&gt;
+    &lt;datasources&gt;
+        &lt;datasource jndi-name=&quot;java:jboss/datasources/ExampleDS&quot; pool-name=&quot;ExampleDS&quot;&gt;
+            &lt;connection-url&gt;jdbc:h2:mem:test;DB_CLOSE_DELAY=-1&lt;/connection-url&gt;
+            &lt;driver&gt;h2&lt;/driver&gt;
+            &lt;pool&gt;
+                &lt;min-pool-size&gt;10&lt;/min-pool-size&gt;
+                &lt;max-pool-size&gt;20&lt;/max-pool-size&gt;
+                &lt;prefill&gt;true&lt;/prefill&gt;
+            &lt;/pool&gt;
+            &lt;security&gt;
+                &lt;user-name&gt;sa&lt;/user-name&gt;
+                &lt;password&gt;sa&lt;/password&gt;
+            &lt;/security&gt;
+        &lt;/datasource&gt;
+        &lt;xa-datasource&nbsp;jndi-name=&quot;java:jboss/datasources/ExampleXADS&quot;&nbsp;pool-name=&quot;ExampleXADS&quot;&gt;
+          &nbsp;&lt;driver&gt;h2&lt;/driver&gt;
+       &nbsp;&nbsp;&nbsp; &lt;xa-datasource-property&nbsp;name=&quot;URL&quot;&gt;jdbc:h2:mem:test&lt;/xa-datasource-property&gt;
+           &lt;xa-pool&gt;
+                &lt;min-pool-size&gt;10&lt;/min-pool-size&gt;
+                &lt;max-pool-size&gt;20&lt;/max-pool-size&gt;
+                &lt;prefill&gt;true&lt;/prefill&gt;
+           &lt;/xa-pool&gt;
+       &nbsp;&nbsp;&nbsp; &lt;security&gt;
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;user-name&gt;sa&lt;/user-name&gt;
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;password&gt;sa&lt;/password&gt;
+       &nbsp;&nbsp;&nbsp; &lt;/security&gt;
+      &nbsp; &lt;/xa-datasource&gt;
+        &lt;drivers&gt;
+           &nbsp;&lt;driver name=&quot;h2&quot; module=&quot;com.h2database.h2&quot;&gt;
+                &lt;xa-datasource-class&gt;org.h2.jdbcx.JdbcDataSource&lt;/xa-datasource-class&gt;
+            &lt;/driver&gt;
+        &lt;/drivers&gt;
+  &lt;/datasources&gt;
+
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    <sub class=" ">(See</sub> <tt class=" ">standalone/configuration/standalone.xml</tt><sub class=" ">)</sub>            </p>
+                <p>
+    As you can see the datasource references a driver by it's logical name.            </p>
+                <p>
+    You can easily query the same information through the CLI:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=datasources:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;data-source&quot; =&gt; {&quot;java:/H2DS&quot; =&gt; {
+            &quot;connection-url&quot; =&gt; &quot;jdbc:h2:mem:test;DB_CLOSE_DELAY=-1&quot;,
+            &quot;jndi-name&quot; =&gt; &quot;java:/H2DS&quot;,
+            &quot;driver-name&quot; =&gt; &quot;h2&quot;,
+            &quot;pool-name&quot; =&gt; &quot;H2DS&quot;,
+            &quot;use-java-context&quot; =&gt; true,
+            &quot;enabled&quot; =&gt; true,
+            &quot;jta&quot; =&gt; true,
+            &quot;pool-prefill&quot; =&gt; true,
+            &quot;pool-use-strict-min&quot; =&gt; false,
+            &quot;user-name&quot; =&gt; &quot;sa&quot;,
+            &quot;password&quot; =&gt; &quot;sa&quot;,
+            &quot;flush-strategy&quot; =&gt; &quot;FailingConnectionOnly&quot;,
+            &quot;background-validation&quot; =&gt; false,
+            &quot;use-fast-fail&quot; =&gt; false,
+            &quot;validate-on-match&quot; =&gt; false,
+            &quot;use-ccm&quot; =&gt; true
+        }},
+        &quot;xa-data-source&quot; =&gt; undefined,
+        &quot;jdbc-driver&quot; =&gt; {&quot;h2&quot; =&gt; {
+            &quot;driver-name&quot; =&gt; &quot;h2&quot;,
+            &quot;driver-module-name&quot; =&gt; &quot;com.h2database.h2&quot;,
+            &quot;driver-xa-datasource-class-name&quot; =&gt; &quot;org.h2.jdbcx.JdbcDataSource&quot;
+        }}
+    }
+}
+
+
+[standalone@localhost:9999 /] /subsystem=datasources:installed-drivers-list
+{
+&nbsp;&nbsp; &nbsp;&quot;outcome&quot; =&gt; &quot;success&quot;,
+&nbsp;&nbsp; &nbsp;&quot;result&quot; =&gt; [{
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&quot;driver-name&quot; =&gt; &quot;h2&quot;,
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&quot;deployment-name&quot; =&gt; undefined,
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&quot;driver-module-name&quot; =&gt; &quot;com.h2database.h2&quot;,
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&quot;module-slot&quot; =&gt; &quot;main&quot;,
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&quot;driver-xa-datasource-class-name&quot; =&gt; &quot;org.h2.jdbcx.JdbcDataSource&quot;,
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&quot;driver-class-name&quot; =&gt; &quot;org.h2.Driver&quot;,
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&quot;driver-major-version&quot; =&gt; 1,
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&quot;driver-minor-version&quot; =&gt; 2,
+&nbsp;&nbsp; &nbsp; &nbsp; &nbsp;&quot;jdbc-compliant&quot; =&gt; true
+&nbsp;&nbsp; &nbsp;}]
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-tip">
+        
+            <p>
+    Using the web console or the CLI greatly simplifies the deployment of JDBC drivers and the creation of datasources.            </p>
+        </div>
+    
+            <p>
+    The CLI offers a set of commands to create and modify datasources:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] help
+Supported commands:
+
+ [...]
+
+ data-source             - allows to add new, modify and remove existing data sources
+ xa-data-source          - allows add new, modify and remove existing XA data sources
+
+For a more detailed description of a specific command,
+execute the command with '--help' as the argument.</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-Usingsecuritydomains"  >
+        <h4>Using security domains</h4>
+    
+            <p>
+    Information can be found at <a href="https://community.jboss.org/wiki/JBossAS7SecurityDomainModel">https://community.jboss.org/wiki/JBossAS7SecurityDomainModel</a>            </p>
+        </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-Deploymentof%5Cds.xmlfiles"  >
+        <h4>Deployment of -ds.xml files</h4>
+    
+            <p>
+    Starting with WildFly 8, you have the ability to deploy a -ds.xml file following the schema:            </p>
+                <p>
+    <a href="http://www.ironjacamar.org/doc/schema/datasources_1_1.xsd">http://www.ironjacamar.org/doc/schema/datasources_1_1.xsd</a>            </p>
+                <p>
+    It is mandatory to use a reference to an already deployed / defined &lt;driver&gt; entry.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    This feature <strong class=" ">is&nbsp;primarily intended for development</strong>, and thus has a few limitations to be aware of. It can not be altered in any of the management interfaces (consle, CLI, etc). Only limited runtime information is available. Also, password vaults and security domains are not deployable, so these can not be bundled with a datasource deployment.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-ComponentReference"  >
+        <h4>Component Reference</h4>
+    
+            <p>
+    The datasource subsystem is provided by the <a href="http://www.jboss.org/ironjacamar">IronJacamar</a> project. For a detailed description of the available configuration properties, please consult the project documentation.            </p>
+        <div class="confbox panel">
+    <ul class=" "><li class=" ">            <p>
+    IronJacamar homepage: <a href="http://ironjacamar.org/">http://ironjacamar.org/</a>            </p>
+    </li><li class=" ">            <p>
+    Project Documentation:&nbsp; <a href="http://ironjacamar.org/documentation.html">http://ironjacamar.org/documentation.html</a>            </p>
+    </li><li class=" ">            <p>
+    Schema description: <a href="http://www.ironjacamar.org/doc/userguide/1.1/en-US/html_single/index.html#deployingds_descriptor">http://www.ironjacamar.org/doc/userguide/1.1/en-US/html_single/index.html#deployingds_descriptor</a>            </p>
+    </li></ul>    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Messaging"  >
+        <h3>Messaging</h3>
+    
+<ul class=" "><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-Connectors">Connectors</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-JMSConnectionFactories">JMS Connection Factories</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-JMSQueuesandTopics">JMS Queues and Topics</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-DeadLetter%26Redelivery">Dead Letter &amp; Redelivery</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-SecuritySettingsforHornetQaddressesandJMSdestinations">Security Settings for HornetQ addresses and JMS destinations</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-SecurityDomainforUsers">Security Domain for Users</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-ClusterAuthentication">Cluster Authentication</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-Deploymentof%5Cjms.xmlfiles">Deployment of -jms.xml files</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-JMSBridge">JMS Bridge</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-Modulesforothermessagingbrokers">Modules for other messaging brokers</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-Configuration">Configuration</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-Managementcommands">Management commands</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-ComponentReference">Component Reference</a>            </p>
+    </li></ul>            <p>
+    The JMS server configuration is done through the <i class=" ">messaging</i> subsystem. In this chapter we are going outline the frequently used configuration options. For a more detailed explanation please consult the HornetQ user guide (See &quot;Component Reference&quot;).&nbsp;            </p>
+        <div class="section-4"  id="66322700_Subsystemconfiguration-Connectors"  >
+        <h4>Connectors</h4>
+    
+            <p>
+    There are three kind of connectors that can be used to connect to WildFly JMS Server            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">invm-connector</tt> can be used by a local client (i.e. one running in the same JVM as the server)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">netty-connector</tt> can be used by a remote client (and uses Netty over TCP for the communication)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">http-connector</tt> can be used by a remote client (and uses Undertow Web Server to upgrade from a HTTP connection)            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-JMSConnectionFactories"  >
+        <h4>JMS Connection Factories</h4>
+    
+            <p>
+    There are three kinds of <i class=" ">basic</i> JMS <tt class=" ">connection-factory</tt> that depends on the type of connectors that is used.            </p>
+                <p>
+    There is also a <tt class=" ">pooled-connection-factory</tt>&nbsp;which is special in that it is essentially a configuration facade for <i class=" ">both</i>&nbsp;the inbound and outbound connectors of the&nbsp;the&nbsp;HornetQ JCA Resource Adapter. &nbsp;An MDB can be configured to use a <tt class=" ">pooled-connection-factory</tt> (e.g. using <tt class=" ">@ResourceAdapter</tt>). &nbsp;In this context, the MDB leverages the <i class=" ">inbound connector</i>&nbsp;of the HornetQ JCA RA. &nbsp;Other kinds of clients can look up the pooled-connection-factory in JNDI (or inject it) and use it to send messages. &nbsp;In this context, such a client would leverage the <i class=" ">outbound connector</i>&nbsp;of the HornetQ JCA RA. &nbsp;A <tt class=" ">pooled-connection-factory</tt>&nbsp;is also special because:            </p>
+    <ul class=" "><li class=" ">            <p>
+    It is only available to local clients, although it can be configured to point to a remote server.            </p>
+    </li><li class=" ">            <p>
+    As the name suggests, it is pooled and therefore provides superior performance to the clients which are able to use it. &nbsp;The pool size can be configured via the <tt class=" ">max-pool-size</tt> and <tt class=" ">min-pool-size</tt> attributes.            </p>
+    </li><li class=" ">            <p>
+    It should only be used to&nbsp;<i class=" ">send</i>&nbsp;(i.e. produce) messages when looked up in JNDI or injected.            </p>
+    </li><li class=" ">            <p>
+    It can be configured to use specific security credentials via the <tt class=" ">user</tt> and <tt class=" ">password</tt> attributes. &nbsp;This is useful if the remote server to which it is pointing is secured.            </p>
+    </li><li class=" ">            <p>
+    Resources acquired from it will be automatically enlisted any on-going JTA transaction. &nbsp;If you want to send a message from an EJB using CMT then this is likely the connection factory you want to use so the send operation will be atomically committed along with the rest of the EJB's transaction operations.            </p>
+    </li></ul>            <p>
+    To be clear, the <i class=" ">inbound connector</i>&nbsp;of the HornetQ JCA RA (which is for consuming messages) is only used by MDBs and other JCA-based components. &nbsp;It is not available to traditional clients.            </p>
+                <p>
+    Both a&nbsp;<tt class=" ">connection-factory</tt>&nbsp;and a <tt class=" ">pooled-connection-factory</tt> reference a <tt class=" ">connector</tt> declaration. &nbsp;            </p>
+                <p>
+    A <tt class=" ">netty-connector</tt> is&nbsp;associated with a <tt class=" ">socket-binding</tt>&nbsp;which tells the client using the <tt class=" ">connection-factory</tt> where to connect.            </p>
+    <ul class=" "><li class=" ">            <p>
+    A <tt class=" ">connection-factory</tt> referencing a <tt class=" ">netty-connector</tt> is suitable to be used by a&nbsp;<i class=" ">remote</i> client to send messages to or receive messages from the server (assuming the connection-factory has an appropriately exported <tt class=" ">entry</tt>). &nbsp;            </p>
+    </li><li class=" ">            <p>
+    A <tt class=" ">pooled-connection-factory</tt> looked up in JNDI or injected which is&nbsp;referencing a <tt class=" ">netty-connector</tt> is suitable to be used by a <i class=" ">local</i> client to send messages to a remote server granted the <tt class=" ">socket-binding</tt>&nbsp;references an <tt class=" ">outbound-socket-binding</tt> pointing to the remote server in question.            </p>
+    </li><li class=" ">            <p>
+    A&nbsp;<tt class=" ">pooled-connection-factory</tt>&nbsp;used by an MDB which is&nbsp;referencing a&nbsp;<tt class=" ">netty-connector</tt>&nbsp;is suitable to consume&nbsp;messages from a remote server granted the&nbsp;<tt class=" ">socket-binding</tt>&nbsp;references an&nbsp;<tt class=" ">outbound-socket-binding</tt>&nbsp;pointing to the remote server in question.            </p>
+    </li></ul>            <p>
+    An <tt class=" ">in-vm-connector</tt> is associated with a <tt class=" ">server-id</tt> which tells the client using the <tt class=" ">connection-factory</tt> where to connect (since multiple HornetQ servers can run in a single JVM).            </p>
+    <ul class=" "><li class=" ">            <p>
+    A&nbsp;<tt class=" ">connection-factory</tt> referencing an <tt class=" ">in-vm-connector</tt> is suitable to be used by a <i class=" ">local</i> client to either send messages to or receive messages from a local server. &nbsp;            </p>
+    </li><li class=" ">            <p>
+    A&nbsp;<tt class=" ">pooled-connection-factory</tt>&nbsp;looked up in JNDI or injected which is referencing an <tt class=" ">in-vm-connector</tt> is suitable to be used by a <i class=" ">local</i> client only to send messages to a local server.            </p>
+    </li><li class=" ">            <p>
+    A&nbsp;<tt class=" ">pooled-connection-factory</tt>&nbsp;used by an MDB which is referencing an&nbsp;<tt class=" ">in-vm-connector</tt>&nbsp;is suitable only to consume messages from a local server.            </p>
+    </li></ul>            <p>
+    A <tt class=" ">http-connector</tt> is associated with the <tt class=" ">socket-binding</tt> that represents the HTTP socket (by default, named <tt class=" ">http</tt>).            </p>
+    <ul class=" "><li class=" ">            <p>
+    A <tt class=" ">connection-factory</tt> referencing a <tt class=" ">http-connector</tt> is suitable to be used by a remote client to send messages to or receive messages from the server by connecting to its HTTP port before upgrading to the messaging protocol.            </p>
+    </li><li class=" ">            <p>
+    A <tt class=" ">pooled-connection-factory</tt> referencing a <tt class=" ">http-connector</tt> is suitable to be used by a local client to send messages&nbsp;to a remote server &nbsp;granted the&nbsp;<tt class=" ">socket-binding</tt>&nbsp;references an&nbsp;<tt class=" ">outbound-socket-binding</tt>&nbsp;pointing to the remote server in question.            </p>
+    </li><li class=" ">            <p>
+    A&nbsp;<tt class=" ">pooled-connection-factory</tt>&nbsp;used by an MDB which is referencing a&nbsp;<tt class=" ">http-connector</tt>&nbsp;is suitable&nbsp;only to consume messages from&nbsp;a remote server&nbsp;granted the&nbsp;<tt class=" ">socket-binding</tt>&nbsp;references an&nbsp;<tt class=" ">outbound-socket-binding</tt>&nbsp;pointing to the remote server in question.            </p>
+    </li></ul>            <p>
+    The <tt class=" ">entry</tt> declaration of a <tt class=" ">connection-factory</tt> or a <tt class=" ">pooled-connection-factory</tt> specifies the JNDI name under which the factory will be exposed. &nbsp;Only JNDI names bound in the <tt class=" ">&quot;java:jboss/exported&quot;</tt> namespace are available to remote clients. &nbsp;If a <tt class=" ">connection-factory</tt> has an entry bound in the&nbsp;<tt class=" ">&quot;java:jboss/exported&quot;</tt> namespace a remote client would look-up the <tt class=" ">connection-factory</tt> using the text <i class=" ">after</i>&nbsp;<tt class=" ">&quot;java:jboss/exported&quot;</tt>. &nbsp;For example, the &quot;<tt class=" ">RemoteConnectionFactory</tt>&quot; is bound by default to&nbsp;<tt class=" ">&quot;java:jboss/exported/jms/RemoteConnectionFactory&quot;</tt> which means a remote client would look-up this <tt class=" ">connection-factory</tt> using &quot;<tt class=" ">jms/RemoteConnectionFactory</tt>&quot;. &nbsp;A <tt class=" ">pooled-connection-factory</tt> should <i class=" ">not</i> have any <tt class=" ">entry</tt> bound in the&nbsp;&quot;<tt class=" ">java:jboss/exported</tt>&quot; namespace because a <tt class=" ">pooled-connection-factory</tt> is not suitable for remote clients.            </p>
+                <p>
+    Since JMS 2.0, a default JMS connection factory is accessible to EE application&nbsp;under the JNDI name <tt class=" ">java:comp/DefaultJMSConnectionFactory.</tt> WildFly messaging subsystem defines a&nbsp;<tt class=" ">pooled-connection-factory</tt> that is used to provide this default connection factory. Any parameter change on this <tt class=" ">pooled-connection-factory</tt> will be take into account by any EE application looking the default JMS provider&nbsp;under the JNDI name&nbsp;<tt class=" ">java:comp/DefaultJMSConnectionFactory.</tt>            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:messaging:2.0&quot;&gt;
+   &lt;hornetq-server&gt;
+      [...]
+&nbsp; &nbsp; &nbsp; &lt;connectors&gt;
+         &lt;http-connector name=&quot;http-connector&quot; socket-binding=&quot;http&quot;&gt;
+            &lt;param key=&quot;http-upgrade-endpoint&quot; value=&quot;http-acceptor&quot;/&gt;
+         &lt;/http-connector&gt;
+         &lt;http-connector name=&quot;http-connector-throughput&quot; socket-binding=&quot;http&quot;&gt;
+            &lt;param key=&quot;http-upgrade-endpoint&quot; value=&quot;http-acceptor-throughput&quot;/&gt;
+            &lt;param key=&quot;batch-delay&quot; value=&quot;50&quot;/&gt;
+         &lt;/http-connector&gt;
+         &lt;in-vm-connector name=&quot;in-vm&quot; server-id=&quot;0&quot;/&gt;
+      &lt;/connectors&gt;
+      [...]
+      &lt;jms-connection-factories&gt;
+         &lt;connection-factory name=&quot;InVmConnectionFactory&quot;&gt;
+            &lt;connectors&gt;
+               &lt;connector-ref connector-name=&quot;in-vm&quot;/&gt;
+            &lt;/connectors&gt;
+            &lt;entries&gt;
+               &lt;entry name=&quot;java:/ConnectionFactory&quot;/&gt;&nbsp;
+            &lt;/entries&gt;
+         &lt;/connection-factory&gt;&nbsp;
+         &lt;connection-factory name=&quot;RemoteConnectionFactory&quot;&gt;
+            &lt;connectors&gt;
+               &lt;connector-ref connector-name=&quot;http-connector&quot;/&gt;
+            &lt;/connectors&gt;
+            &lt;entries&gt;
+               &lt;entry name=&quot;java:jboss/exported/jms/RemoteConnectionFactory&quot;/&gt;
+            &lt;/entries&gt;
+         &lt;/connection-factory&gt;
+         &lt;pooled-connection-factory name=&quot;hornetq-ra&quot;&gt;
+            &lt;transaction mode=&quot;xa&quot;/&gt;
+            &lt;connectors&gt;
+               &lt;connector-ref connector-name=&quot;in-vm&quot;/&gt;
+            &lt;/connectors&gt;
+            &lt;entries&gt;
+               &lt;entry name=&quot;java:/JmsXA&quot;/&gt;
+               &lt;!-- Global JNDI entry used to provide a default JMS Connection factory to EE application --&gt;
+               &lt;entry name=&quot;java:jboss/DefaultJMSConnectionFactory&quot;/&gt;
+            &lt;/entries&gt;
+         &lt;/pooled-connection-factory&gt;
+      &lt;/jms-connection-factories&gt;
+      [...]
+   &lt;/hornetq-server&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    <sub class=" ">(See standalone/configuration/standalone-full.xml)</sub>            </p>
+        </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-JMSQueuesandTopics"  >
+        <h4>JMS Queues and Topics</h4>
+    
+            <p>
+    JMS queues and topics are sub resources of the messaging subsystem. &nbsp;They are defined in the <tt class=" ">jms-destinations</tt> section. &nbsp;One can define either a <tt class=" ">jms-queue</tt> or <tt class=" ">jms-topic</tt>. &nbsp;Each destination <i class=" ">must</i> be given a <tt class=" ">name</tt> and contain at least one <tt class=" ">entry</tt> element.            </p>
+                <p>
+    Each <tt class=" ">entry</tt> refers to a JNDI name of the queue or topic. &nbsp;Keep in mind that any <tt class=" ">jms-queue</tt>&nbsp;or&nbsp;<tt class=" ">jms-topic</tt>&nbsp;which needs to be accessed by a remote client needs to have an <tt class=" ">entry</tt> in the &quot;java:jboss/exported&quot; namespace. &nbsp;As with connection factories, if a&nbsp;<tt class=" ">jms-queue</tt>&nbsp;or&nbsp;<tt class=" ">jms-topic</tt>&nbsp;has an <tt class=" ">entry</tt> bound in the&nbsp;&quot;java:jboss/exported&quot; namespace a remote client would look it up using the text&nbsp;<i class=" ">after</i>&nbsp;&quot;java:jboss/exported&quot;. &nbsp;For example, the following&nbsp;<tt class=" ">jms-queue</tt> &quot;testQueue&quot; is bound to&nbsp;&quot;java:jboss/exported/jms/queue/test&quot; which means a remote client would look-up this&nbsp;<tt class=" ">jms-queue</tt>&nbsp;using &quot;jms/queue/test&quot;. &nbsp;A local client could look it up using &quot;java:jboss/exported/jms/queue/test&quot;, &quot;java:jms/queue/test&quot;, or more simply &quot;jms/queue/test&quot;:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:messaging:2.0&quot;&gt;
+   &lt;hornetq-server&gt;
+      [...]
+      &lt;jms-destinations&gt;
+         &lt;jms-queue name=&quot;testQueue&quot;&gt;
+             &lt;entry name=&quot;jms/queue/test&quot;/&gt;
+             &lt;entry name=&quot;java:jboss/exported/jms/queue/test&quot;/&gt;
+         &lt;/jms-queue&gt;
+         &lt;jms-topic name=&quot;testTopic&quot;&gt;
+            &lt;entry name=&quot;jms/topic/test&quot;/&gt;
+            &lt;entry name=&quot;java:jboss/exported/jms/topic/test&quot;/&gt;
+         &lt;/jms-topic&gt;
+      &lt;/jms-destinations&gt;
+   &lt;/hornetq-server&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    <sub class=" ">(See standalone/configuration/standalone-full.xml)</sub>            </p>
+                <p>
+    JMS endpoints can easily be created through the CLI:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9990 /] jms-queue add --queue-address=myQueue --entries=queues/myQueue</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9990 /] /subsystem=messaging/hornetq-server=default/jms-queue=myQueue:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;durable&quot; =&gt; true,
+        &quot;entries&quot; =&gt; [&quot;queues/myQueue&quot;],
+        &quot;selector&quot; =&gt; undefined
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A number of additional commands to maintain the JMS subsystem are available as well:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9990 /] jms-queue --help --commands
+add
+...
+remove
+To read the description of a specific command execute 'jms-queue command_name --help'.</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-DeadLetter%26Redelivery"  >
+        <h4>Dead Letter &amp; Redelivery</h4>
+    
+            <p>
+    Some of the settings are applied against an address wild card instead of a specific messaging destination. The dead letter queue and redelivery settings belong into this group:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:messaging:2.0&quot;&gt;
+   &lt;hornetq-server&gt;
+      [...]
+      &lt;address-settings&gt;
+         &lt;address-setting match=&quot;#&quot;&gt;
+            &lt;dead-letter-address&gt;jms.queue.DLQ&lt;/dead-letter-address&gt;
+            &lt;expiry-address&gt;jms.queue.ExpiryQueue&lt;/expiry-address&gt;
+            &lt;redelivery-delay&gt;0&lt;/redelivery-delay&gt;
+            [...]
+         &lt;/address-setting&gt;
+      &lt;/address-settings&gt;
+      [...]
+   &lt;/hornetq-server&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    <sub class=" ">(See standalone/configuration/standalone-full.xml)</sub>            </p>
+        </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-SecuritySettingsforHornetQaddressesandJMSdestinations"  >
+        <h4>Security Settings for HornetQ addresses and JMS destinations</h4>
+    
+            <p>
+    Security constraints are matched against an address wildcard, similar to the DLQ and redelivery settings. &nbsp;<strong class=" ">Note</strong>: Multiple roles are separated by spaces.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:messaging:2.0&quot;&gt;
+   &lt;hornetq-server&gt;
+      [...]
+      &lt;security-settings&gt;
+         &lt;security-setting match=&quot;#&quot;&gt;
+            &lt;permission type=&quot;send&quot; roles=&quot;guest&quot;/&gt;
+            &lt;permission type=&quot;consume&quot; roles=&quot;guest&quot;/&gt;
+            &lt;permission type=&quot;createNonDurableQueue&quot; roles=&quot;role1&quot;/&gt;
+            &lt;permission type=&quot;deleteNonDurableQueue&quot; roles=&quot;role1 role2&quot;/&gt;
+         &lt;/security-setting&gt;
+      &lt;/security-settings&gt;
+      [...]
+   &lt;/hornetq-server&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    <sub class=" ">(See standalone/configuration/standalone-full.xml)</sub>            </p>
+        </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-SecurityDomainforUsers"  >
+        <h4>Security Domain for Users</h4>
+    
+            <p>
+    By default, HornetQ will use the &quot;<tt class=" ">other</tt>&quot; JAAS security domain. &nbsp;This domain is used to authenticate users making connections to HornetQ and then they are authorized to perform specific functions based on their role(s) and the <tt class=" ">security-settings</tt> described above. &nbsp;This domain can be changed by using&nbsp;<tt class=" ">security-domain</tt>, e.g.:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:messaging:2.0&quot;&gt;
+   &lt;hornetq-server&gt;
+      [...]
+      &lt;security-domain&gt;mySecurityDomain&lt;/security-domain&gt;
+      [...]
+   &lt;/hornetq-server&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-ClusterAuthentication"  >
+        <h4>Cluster Authentication</h4>
+    
+            <p>
+        <span style="color: #333333;">
+If the HornetQ server is configured to be clustered (    </span>
+    <span style="color: #333333;">
+<tt class=" ">&lt;clustered&gt;true&lt;/clustered&gt;</tt>    </span>
+    <span style="color: #333333;">
+), it will use the    </span>
+     <span style="color: #333333;">
+<tt class=" ">&lt;cluster-user&gt;</tt>    </span>
+     <span style="color: #333333;">
+and    </span>
+     <span style="color: #333333;">
+<tt class=" ">&lt;cluster-password&gt;</tt>    </span>
+     <span style="color: #333333;">
+attributes to connect to other HornetQ nodes in the cluster.    </span>
+            </p>
+                <p>
+    If you do not change the default value of &lt;cluster-password&gt;, HornetQ will fail to authenticate with the error:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>HQ224018: Failed to create session: HornetQExceptionerrorType=CLUSTER_SECURITY_EXCEPTION message=HQ119099: Unable to authenticate cluster user: HORNETQ.CLUSTER.ADMIN.USER</code></pre>
+        </div>
+    </div>
+            <p>
+    To prevent this error, you must specify a value for&nbsp;<tt class=" ">&lt;cluster-password&gt;</tt>.&nbsp;It is possible to encrypt this value&nbsp;by following <a href="https://access.redhat.com/site/documentation/en-US/JBoss_Enterprise_Application_Platform/6.1/html/Security_Guide/sect-Password_Vaults_for_Sensitive_Strings.html">this guide</a>.            </p>
+                <p>
+    Alternatively,&nbsp;you&nbsp;can use the system property&nbsp;jboss.messaging.cluster.password to specify the cluster password from the command line.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-Deploymentof%5Cjms.xmlfiles"  >
+        <h4>Deployment of -jms.xml files</h4>
+    
+            <p>
+    Starting with WildFly 8,&nbsp;you have the ability to deploy a -jms.xml file defining JMS destinations, e.g.:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;messaging-deployment xmlns=&quot;urn:jboss:messaging-deployment:1.0&quot;&gt;
+   &lt;hornetq-server&gt;
+      &lt;jms-destinations&gt;
+         &lt;jms-queue name=&quot;sample&quot;&gt;
+            &lt;entry name=&quot;jms/queue/sample&quot;/&gt;
+            &lt;entry name=&quot;java:jboss/exported/jms/queue/sample&quot;/&gt;
+         &lt;/jms-queue&gt;
+      &lt;/jms-destinations&gt;
+   &lt;/hornetq-server&gt;
+&lt;/messaging-deployment&gt;</code></pre>
+        </div>
+    </div>
+    <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+        <img src="images/author/images/icons/emoticons/1124446108.gif" alt="images/author/images/icons/emoticons/1124446108.gif" />
+                </td>
+                <td rowspan="1" colspan="1">
+    This feature&nbsp;<strong class=" ">is&nbsp;primarily intended for development</strong>&nbsp;as destinations deployed this way can not be managed with any of the provided management tools (e.g. console, CLI, etc).            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-JMSBridge"  >
+        <h4>JMS Bridge</h4>
+    
+            <p>
+    The function of a JMS bridge is to consume messages from a source JMS destination, and send them to a target JMS destination. Typically either the source or the target destinations are on different servers.<br/>The bridge can also be used to bridge messages from other non HornetQ JMS servers, as long as they are JMS 1.1 compliant.            </p>
+                <p>
+    The JMS Bridge is provided by the HornetQ project. Fo a detailed description of the available configuration properties, please consult the project documentation.            </p>
+        <div class="section-5"  id="66322700_Subsystemconfiguration-Modulesforothermessagingbrokers"  >
+        <h5>Modules for other messaging brokers</h5>
+    
+            <p>
+    Source and target JMS resources (destination and connection factories) are looked up using JNDI.<br/>If either the source or the target resources are managed by another messaging server than WildFly, the required client classes must be bundled in a module. The name of the module must then be declared when the JMS Bridge is configured.            </p>
+                <p>
+    The use of a JMS bridges with any messaging provider will require to create a module containing the jar of this provider.            </p>
+                <p>
+    Let's suppose we want to use an hypothetical messaging provider named AcmeMQ. We want to bridge messages coming from a source AcmeMQ destination to a target destination on the local WildFly messaging server.&nbsp;To lookup AcmeMQ resources from JNDI, 2 jars are required, acmemq-1.2.3.jar, mylogapi-0.0.1.jar (please note these jars do not exist, this is just for the example purpose). We must <i class=" ">not</i> include a JMS jar since it will be provided by a WildFly module directly.            </p>
+                <p>
+    To use these resources in a JMS bridge, we must bundle them in a WildFly&nbsp;module:            </p>
+                <p>
+    in JBOSS_HOME/modules, we create the layout:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>modules/
+`-- org
+    `-- acmemq
+        `-- main
+            |-- acmemq-1.2.3.jar
+            |-- mylogapi-0.0.1.jar
+            `-- module.xml</code></pre>
+        </div>
+    </div>
+            <p>
+    We define the module in <tt class=" ">module.xml</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;module xmlns=&quot;urn:jboss:module:1.1&quot; name=&quot;org.acmemq&quot;&gt;
+    &lt;properties&gt;
+        &lt;property name=&quot;jboss.api&quot; value=&quot;private&quot;/&gt;
+    &lt;/properties&gt;
+
+
+    &lt;resources&gt;
+        &lt;!-- insert resources required to connect to the source or target   --&gt;
+        &lt;!-- messaging brokers if it not another WildFly instance           --&gt;
+        &lt;resource-root path=&quot;acmemq-1.2.3.jar&quot; /&gt;
+        &lt;resource-root path=&quot;mylogapi-0.0.1.jar&quot; /&gt;
+    &lt;/resources&gt;
+
+
+    &lt;dependencies&gt;
+       &lt;!-- add the dependencies required by JMS Bridge code                --&gt;
+       &lt;module name=&quot;javax.api&quot; /&gt;
+       &lt;module name=&quot;javax.jms.api&quot; /&gt;
+       &lt;module name=&quot;javax.transaction.api&quot;/&gt;
+       &lt;module name=&quot;org.jboss.remote-naming&quot;/&gt;
+       &lt;!-- we depend on org.hornetq module since we will send messages to  --&gt;
+       &lt;!-- the HornetQ server embedded in the local WildFly instance       --&gt;
+       &lt;module name=&quot;org.hornetq&quot; /&gt;
+    &lt;/dependencies&gt;
+&lt;/module&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-5"  id="66322700_Subsystemconfiguration-Configuration"  >
+        <h5>Configuration</h5>
+    
+            <p>
+    A JMS bridge is defined inside a <tt class=" ">jms-bridge</tt> section of the `messaging` subsystem in the XML configuration files.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:messaging:2.0&quot;&gt;
+   &lt;jms-bridge name=&quot;myBridge&quot; module=&quot;org.acmemq&quot;&gt;
+      &lt;source&gt;
+         &lt;connection-factory name=&quot;ConnectionFactory&quot;/&gt;
+         &lt;destination name=&quot;sourceQ&quot;/&gt;
+         &lt;user&gt;user1&lt;/user&gt;
+         &lt;password&gt;pwd1&lt;/password&gt;
+         &lt;context&gt;
+            &lt;property key=&quot;java.naming.factory.initial&quot; value=&quot;org.acmemq.jndi.AcmeMQInitialContextFactory&quot;/&gt;
+            &lt;property key=&quot;java.naming.provider.url&quot;    value=&quot;tcp://127.0.0.1:9292&quot;/&gt;
+         &lt;/context&gt;
+      &lt;/source&gt;
+      &lt;target&gt;
+         &lt;connection-factory name=&quot;/jms/invmTargetCF&quot;/&gt;
+         &lt;destination name=&quot;/jms/targetQ&quot;/&gt;
+      &lt;/target&gt;
+      &lt;quality-of-service&gt;AT_MOST_ONCE&lt;/quality-of-service&gt;
+      &lt;failure-retry-interval&gt;500&lt;/failure-retry-interval&gt;
+      &lt;max-retries&gt;1&lt;/max-retries&gt;
+      &lt;max-batch-size&gt;500&lt;/max-batch-size&gt;
+      &lt;max-batch-time&gt;500&lt;/max-batch-time&gt;
+      &lt;add-messageID-in-header&gt;true&lt;/add-messageID-in-header&gt;
+   &lt;/jms-bridge&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">source</tt> and <tt class=" ">target</tt> sections contain the name of the JMS resource (<tt class=" ">connection-factory</tt> and <tt class=" ">destination</tt>) that will be looked up in JNDI.<br/>It optionally defines the <tt class=" ">user</tt> and <tt class=" ">password</tt> credentials. If they are set, they will be passed as arguments when creating the JMS connection from the looked up ConnectionFactory.<br/>It is also possible to define JNDI context properties in the <tt class=" ">context</tt> section. If the <tt class=" ">context</tt> section is absent, the JMS resources will be looked up in the local WildFly instance (as it is the case in the <tt class=" ">target</tt> section in the example above).            </p>
+        </div>
+    
+    <div class="section-5"  id="66322700_Subsystemconfiguration-Managementcommands"  >
+        <h5>Management commands</h5>
+    
+            <p>
+    A JMS Bridge can also be managed using the WildFly&nbsp;command line interface:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9990 /] /subsystem=messaging/jms-bridge=myBridge/:add(module=&quot;org.acmemq&quot;,      \
+      source-destination=&quot;sourceQ&quot;,                                                                   \
+      source-connection-factory=&quot;ConnectionFactory&quot;,                                                  \
+      source-user=&quot;user1&quot;,                                                                            \
+      source-password=&quot;pwd1&quot;,                                                                         \
+      source-context={&quot;java.naming.factory.initial&quot; =&gt; &quot;org.acmemq.jndi.AcmeMQInitialContextFactory&quot;, \
+                      &quot;java.naming.provider.url&quot; =&gt; &quot;tcp://127.0.0.1:9292&quot;},                          \
+      target-destination=&quot;/jms/targetQ&quot;,                                                              \
+      target-connection-factory=&quot;/jms/invmTargetCF&quot;,                                                  \
+      quality-of-service=AT_MOST_ONCE,                                                                \
+      failure-retry-interval=500,                                                                     \
+      max-retries=1,                                                                                  \
+      max-batch-size=500,                                                                             \
+      max-batch-time=500,                                                                             \
+      add-messageID-in-header=true)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+            <p>
+    You can also see the complete JMS Bridge resource description from the CLI:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9990 /] /subsystem=messaging/jms-bridge=*/:read-resource-description
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [{
+        &quot;address&quot; =&gt; [
+            (&quot;subsystem&quot; =&gt; &quot;messaging&quot;),
+            (&quot;jms-bridge&quot; =&gt; &quot;*&quot;)
+        ],
+        &quot;outcome&quot; =&gt; &quot;success&quot;,
+        &quot;result&quot; =&gt; {
+            &quot;description&quot; =&gt; &quot;A JMS bridge instance.&quot;,
+            &quot;attributes&quot; =&gt; {
+                ...
+        }
+    }]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-ComponentReference2"  >
+        <h4>Component Reference</h4>
+    
+            <p>
+    The messaging subsystem is provided by the HornetQ project. For a detailed description of the available configuration properties, please consult the project documentation.            </p>
+        <div class="confbox panel">
+    <ul class=" "><li class=" ">            <p>
+    HornetQ homepage:&nbsp;<a href="http://www.jboss.org/hornetq">http://www.jboss.org/hornetq</a>            </p>
+    </li><li class=" ">            <p>
+    Project Documentation: &nbsp;<a href="http://www.jboss.org/hornetq/docs">http://www.jboss.org/hornetq/docs</a>            </p>
+    </li></ul>    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Web"  >
+        <h3>Web</h3>
+    
+<div class=" error">            <p>
+    Couldn't find a page to include called: <a href="https://docs.jboss.org/author/pages/createpage.action?spaceKey=WFLY8&amp;title=Web+subsystem+configuration&amp;linkCreation=true&amp;fromPageId=66322700">Web subsystem configuration</a>            </p>
+    </div>    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Webservices"  >
+        <h3>Web services</h3>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322700_Subsystemconfiguration-Domainmanagement"  >
+        <h2>Domain management</h2>
+    
+            <p>
+    JBossWS components are provided to the application server through the webservices subsystem.&nbsp; JBossWS components handle the processing of WS endpoints.&nbsp; The subsystem supports the configuration of published endpoint addresses, and endpoint handler chains.&nbsp; A default webservice subsystem is provided in the server's domain and standalone configuration files.            </p>
+        <div class="section-3"  id="66322700_Subsystemconfiguration-Structureofthewebservicessubsystem"  >
+        <h3>Structure of the webservices subsystem</h3>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-Publishedendpointaddress"  >
+        <h4>Published endpoint address</h4>
+    
+            <p>
+    JBossWS supports the rewriting of the <tt class=" ">&lt;soap:address&gt;</tt>&nbsp;element of endpoints published in WSDL contracts.&nbsp; This feature is useful for controlling the server address that is advertised to clients for each endpoint.            </p>
+                <p>
+    The following elements are available and can be modified (all are optional and require server restart upon modification):            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Type            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    modify-wsdl-address            </td>
+                <td rowspan="1" colspan="1">
+    boolean            </td>
+                <td rowspan="1" colspan="1">
+    This boolean enables and disables the address rewrite functionality.<br/><br/>When modify-wsdl-address is set to true and the content of &lt;soap:address&gt; is a valid URL, JBossWS will rewrite the URL using the values of wsdl-host and wsdl-port or wsdl-secure-port.<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>When modify-wsdl-address is set to false and the content of &lt;soap:address&gt; is a valid URL, JBossWS will not rewrite the URL.&nbsp; The &lt;soap:address&gt; URL will be used.<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;<br/>When the content of &lt;soap:address&gt; is not a valid URL, JBossWS will rewrite it no matter what the setting of modify-wsdl-address.<br/><br/>If modify-wsdl-address is set to true and wsdl-host is not defined or explicitly set to <i class=" ">'</i><tt class=" ">jbossws.undefined.host</tt><i class=" ">'&nbsp;</i> the content of &lt;soap:address&gt; URL is use.&nbsp; JBossWS uses the requester's host when rewriting the &lt;soap:address&gt;<br/><br/>When modify-wsdl-address is not defined JBossWS uses a default value of true.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    wsdl-host            </td>
+                <td rowspan="1" colspan="1">
+    string            </td>
+                <td rowspan="1" colspan="1">
+    The hostname / IP address to be used for rewriting <tt class=" ">&lt;soap:address&gt;</tt>.<br/>If&nbsp;<tt class=" ">wsdl-host</tt>&nbsp;is set to&nbsp;<tt class=" ">jbossws.undefined.host</tt>, JBossWS uses the requester's host when rewriting the&nbsp;<tt class=" ">&lt;soap:address&gt;</tt><br/>When wsdl-host is not defined JBossWS uses a default value of '<tt class=" ">jbossws.undefined.host</tt>'.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    wsdl-port            </td>
+                <td rowspan="1" colspan="1">
+    int            </td>
+                <td rowspan="1" colspan="1">
+    Set this property to explicitly define the HTTP port that will be used for rewriting the SOAP address.<br/>Otherwise the HTTP port will be identified by querying the list of installed HTTP connectors.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    wsdl-secure-port            </td>
+                <td rowspan="1" colspan="1">
+    int            </td>
+                <td rowspan="1" colspan="1">
+    Set this property to explicitly define the HTTPS port that will be used for rewriting the SOAP address.<br/>Otherwise the HTTPS port will be identified by querying the list of installed HTTPS connectors.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-Predefinedendpointconfigurations"  >
+        <h4>Predefined endpoint configurations</h4>
+    
+            <p>
+    JBossWS enables extra setup configuration data to be predefined and associated with an endpoint implementation.&nbsp; Predefined endpoint configurations can be used for JAX-WS client and JAX-WS endpoint setup.&nbsp; Endpoint configurations can include JAX-WS handlers and key/value properties declarations.&nbsp; This feature provides a convenient way to add handlers to WS endpoints and to set key/value properties that control JBossWS and Apache CXF internals (<a href="https://docs.jboss.org/author/display/JBWS/Apache+CXF+integration#ApacheCXFintegration-Deploymentdescriptorproperties">see Apache CXF configuration</a>).            </p>
+                <p>
+    The webservices subsystem provides <a href="http://www.jboss.org/schema/jbossas/jboss-as-webservices_1_2.xsd">schema</a> to support the definition of named sets of endpoint configuration data.&nbsp; Annotation, <i class=" ">org.jboss.ws.api.annotation.EndpointConfig</i> is provided to map the named configuration to the endpoint implementation.            </p>
+                <p>
+    There is no limit to the number of endpoint configurations that can be defined within the webservices subsystem.&nbsp; Each endpoint configuration must have a name that is unique within the webservices subsystem.&nbsp; Endpoint configurations defined in the webservices subsystem are available for reference by name through the annotation to any endpoint in a deployed application.            </p>
+                <p>
+    WildFly ships with two predefined endpoint configurations.&nbsp; Standard-Endpoint-Config is the default configuration.&nbsp; Recording-Endpoint-Config is an example of custom endpoint configuration and includes a recording handler.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;endpoint&quot; =&gt; {},
+        &quot;modify-wsdl-address&quot; =&gt; true,
+        &quot;wsdl-host&quot; =&gt; expression &quot;${jboss.bind.address:127.0.0.1}&quot;,
+        &quot;endpoint-config&quot; =&gt; {
+            &quot;Standard-Endpoint-Config&quot; =&gt; undefined,
+            &quot;Recording-Endpoint-Config&quot; =&gt; undefined
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-info">
+        
+            <p>
+    The <tt class=" ">Standard-Endpoint-Config</tt> is a special endpoint configuration.&nbsp; It is used for any endpoint that does not have an explicitly assigned endpoint configuration.            </p>
+        </div>
+    
+    <div class="section-5"  id="66322700_Subsystemconfiguration-Endpointconfigs"  >
+        <h5>Endpoint configs</h5>
+    
+            <p>
+    Endpoint configs are defined using <tt class=" ">the endpoint-config</tt> element.&nbsp; Each endpoint configuration may include properties and handlers set to the endpoints associated to the configuration.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=Recording-Endpoint-Config:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;post-handler-chain&quot; =&gt; undefined,
+        &quot;property&quot; =&gt; undefined,
+        &quot;pre-handler-chain&quot; =&gt; {&quot;recording-handlers&quot; =&gt; undefined}
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A new endpoint configuration can be added as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=My-Endpoint-Config:add
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;response-headers&quot; =&gt; {
+        &quot;operation-requires-restart&quot; =&gt; true,
+        &quot;process-state&quot; =&gt; &quot;restart-required&quot;
+    }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-5"  id="66322700_Subsystemconfiguration-Handlerchains"  >
+        <h5>Handler chains</h5>
+    
+            <p>
+    Each endpoint configuration may be associated with zero or more PRE and POST handler chains.&nbsp; Each handler chain may include JAXWS handlers.&nbsp; For outbound messages the PRE handler chains are executed before any handler that is attached to the endpoint using the standard means, such as with annotation @HandlerChain, and POST handler chains are executed after those objects have executed.&nbsp; For inbound messages the POST handler chains are executed before any handler that is attached to the endpoint using the standard means and the PRE handler chains are executed after those objects have executed.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>* Server inbound messages
+Client --&gt; ... --&gt; POST HANDLER --&gt; ENDPOINT HANDLERS --&gt; PRE HANDLERS --&gt; Endpoint
+
+* Server outbound messages
+Endpoint --&gt; PRE HANDLER --&gt; ENDPOINT HANDLERS --&gt; POST HANDLERS --&gt; ... --&gt; Client</code></pre>
+        </div>
+    </div>
+            <p>
+    The protocol-binding attribute must be used to set the protocols for which the chain will be triggered.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=Recording-Endpoint-Config/pre-handler-chain=recording-handlers:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;protocol-bindings&quot; =&gt; &quot;##SOAP11_HTTP ##SOAP11_HTTP_MTOM ##SOAP12_HTTP ##SOAP12_HTTP_MTOM&quot;,
+        &quot;handler&quot; =&gt; {&quot;RecordingHandler&quot; =&gt; undefined}
+    },
+    &quot;response-headers&quot; =&gt; {&quot;process-state&quot; =&gt; &quot;restart-required&quot;}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A new handler chain can be added as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=My-Endpoint-Config/post-handler-chain=my-handlers:add(protocol-bindings=&quot;##SOAP11_HTTP&quot;)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;response-headers&quot; =&gt; {
+        &quot;operation-requires-restart&quot; =&gt; true,
+        &quot;process-state&quot; =&gt; &quot;restart-required&quot;
+    }
+}
+[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=My-Endpoint-Config/post-handler-chain=my-handlers:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;handler&quot; =&gt; undefined,
+        &quot;protocol-bindings&quot; =&gt; &quot;##SOAP11_HTTP&quot;
+    },
+    &quot;response-headers&quot; =&gt; {&quot;process-state&quot; =&gt; &quot;restart-required&quot;}
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-5"  id="66322700_Subsystemconfiguration-Handlers"  >
+        <h5>Handlers</h5>
+    
+            <p>
+    JAXWS handler can be added in handler chains:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=Recording-Endpoint-Config/pre-handler-chain=recording-handlers/handler=RecordingHandler:read-resource
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;class&quot; =&gt; &quot;org.jboss.ws.common.invocation.RecordingServerHandler&quot;},
+    &quot;response-headers&quot; =&gt; {&quot;process-state&quot; =&gt; &quot;restart-required&quot;}
+}
+[standalone@localhost:9999 /] /subsystem=webservices/endpoint-config=My-Endpoint-Config/post-handler-chain=my-handlers/handler=foo-handler:add(class=&quot;org.jboss.ws.common.invocation.RecordingServerHandler&quot;)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;response-headers&quot; =&gt; {
+        &quot;operation-requires-restart&quot; =&gt; true,
+        &quot;process-state&quot; =&gt; &quot;restart-required&quot;
+    }
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+            <div class="title">Endpoint-config handler classloading</div>
+        
+            <p>
+    The <tt class=" ">class</tt> attribute is used to provide the fully qualified class name of the handler.&nbsp; At deploy time, an instance of the class is created for each referencing deployment.&nbsp; For class creation to succeed, either the deployment classloader or the classloader for module, <tt class=" ">org.jboss.as.webservices.server.integration,</tt> must to be able to load the handler class.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322700_Subsystemconfiguration-Runtimeinformation"  >
+        <h2>Runtime information</h2>
+    
+            <p>
+    Each web service endpoint is exposed through the deployment that provides the endpoint implementation. Each endpoint can be queried as a deployment resource. For further information please consult the chapter &quot;Application Deployment&quot;. Each web service endpoint specifies a web context and a WSDL Url:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /deployment=&quot;*&quot;/subsystem=webservices/endpoint=&quot;*&quot;:read-resource
+{
+   &quot;outcome&quot; =&gt; &quot;success&quot;,
+   &quot;result&quot; =&gt; [{
+       &quot;address&quot; =&gt; [
+           (&quot;deployment&quot; =&gt; &quot;jaxws-samples-handlerchain.war&quot;),
+           (&quot;subsystem&quot; =&gt; &quot;webservices&quot;),
+           (&quot;endpoint&quot; =&gt; &quot;jaxws-samples-handlerchain:TestService&quot;)
+       ],
+       &quot;outcome&quot; =&gt; &quot;success&quot;,
+       &quot;result&quot; =&gt; {
+           &quot;class&quot; =&gt; &quot;org.jboss.test.ws.jaxws.samples.handlerchain.EndpointImpl&quot;,
+           &quot;context&quot; =&gt; &quot;jaxws-samples-handlerchain&quot;,
+           &quot;name&quot; =&gt; &quot;TestService&quot;,
+           &quot;type&quot; =&gt; &quot;JAXWS_JSE&quot;,
+           &quot;wsdl-url&quot; =&gt; &quot;http://localhost:8080/jaxws-samples-handlerchain?wsdl&quot;
+       }
+   }]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322700_Subsystemconfiguration-ComponentReference3"  >
+        <h2>Component Reference</h2>
+    
+            <p>
+        <span style="color: #333333;">
+The web service subsystem is provided by the JBossWS project. For a detailed description of the available configuration properties, please consult the project documentation.    </span>
+            </p>
+        <div class="confbox panel">
+    <ul class=" "><li class=" ">            <p>
+    JBossWS homepage:&nbsp;<a href="http://www.jboss.org/jbossws">http://www.jboss.org/jbossws</a>            </p>
+    </li><li class=" ">            <p>
+    Project Documentation: &nbsp;<a href="https://docs.jboss.org/author/display/JBWS">https://docs.jboss.org/author/display/JBWS</a>            </p>
+    </li></ul>    </div>
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Logging"  >
+        <h3>Logging</h3>
+    
+<ul class=" "><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-Overview">Overview</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-Attributes">Attributes</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-%7B%7Baddloggingapidependencies%7D%7D"> <tt class=" ">add-logging-api-dependencies</tt></a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-%7B%7Busedeploymentloggingconfig%7D%7D"> <tt class=" ">use-deployment-logging-config</tt></a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-PerdeploymentLogging">Per-deployment Logging</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-LoggingProfiles">Logging Profiles</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-DefaultLogFileLocations">Default Log File Locations</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-ManagedDomain">Managed Domain</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-StandaloneServer">Standalone Server</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-FilterExpressions">Filter Expressions</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-ListLogFilesandReadingLogFiles">List Log Files and Reading Log Files</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-ListLogFiles">List Log Files</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-ReadLogFile">Read Log File</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-FAQ">FAQ</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322700.html#66322700_Subsystemconfiguration-Whyistherea%7B%7Blogging.properties%7D%7Dfile%3F">Why is there a <tt class=" ">logging.properties</tt> file?</a>            </p>
+    </li></ul></li></ul>            <p>
+                </p>
+        </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Overview2"  >
+        <h3>Overview</h3>
+    
+            <p>
+    The overall server logging configuration is represented by the logging subsystem. It consists of four notable parts: <tt class=" ">handler</tt> configurations, <tt class=" ">logger</tt>, the <tt class=" ">root logger</tt> declarations (aka log categories) and logging profiles. Each logger does reference a handler (or set of handlers). Each handler declares the log format and output:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:logging:1.0&quot;&gt;
+   &lt;console-handler name=&quot;CONSOLE&quot; autoflush=&quot;true&quot;&gt;
+       &lt;level name=&quot;DEBUG&quot;/&gt;
+       &lt;formatter&gt;
+           &lt;pattern-formatter pattern=&quot;%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%E%n&quot;/&gt;
+       &lt;/formatter&gt;
+   &lt;/console-handler&gt;
+   &lt;periodic-rotating-file-handler name=&quot;FILE&quot; autoflush=&quot;true&quot;&gt;
+       &lt;formatter&gt;
+           &lt;pattern-formatter pattern=&quot;%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%E%n&quot;/&gt;
+       &lt;/formatter&gt;
+       &lt;file relative-to=&quot;jboss.server.log.dir&quot; path=&quot;server.log&quot;/&gt;
+       &lt;suffix value=&quot;.yyyy-MM-dd&quot;/&gt;
+   &lt;/periodic-rotating-file-handler&gt;
+   &lt;logger category=&quot;com.arjuna&quot;&gt;
+       &lt;level name=&quot;WARN&quot;/&gt;
+   &lt;/logger&gt;
+   [...]
+   &lt;root-logger&gt;
+       &lt;level name=&quot;DEBUG&quot;/&gt;
+       &lt;handlers&gt;
+           &lt;handler name=&quot;CONSOLE&quot;/&gt;
+           &lt;handler name=&quot;FILE&quot;/&gt;
+       &lt;/handlers&gt;
+   &lt;/root-logger&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+                </p>
+        </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Attributes"  >
+        <h3>Attributes</h3>
+    
+            <p>
+    The root resource contains two notable attributes <tt class=" ">add-logging-api-dependencies</tt> and <tt class=" ">use-deployment-logging-config</tt>.            </p>
+        <div class="section-4"  id="66322700_Subsystemconfiguration-%7B%7Baddloggingapidependencies%7D%7D"  >
+        <h4>logging-api-dependencies</h4>
+    
+            <p>
+    The <tt class=" ">add-logging-api-dependencies</tt> controls whether or not the container adds <a href="https://docs.jboss.org/author/display/WFLY8/Implicit+module+dependencies+for+deployments#Implicitmoduledependenciesfordeployments-ImplicitmoduledependenciesfordeploymentsWhicha...">implicit</a> logging API dependencies to your deployments. If set to <tt class=" ">true</tt>, the default, all the implicit logging API dependencies are added. If set to <tt class=" ">false</tt> the dependencies are not added to your deployments.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-%7B%7Busedeploymentloggingconfig%7D%7D"  >
+        <h4>deployment-logging-config</h4>
+    
+            <p>
+    The <tt class=" ">use-deployment-logging-config</tt> controls whether or not your deployment is scanned for <a href="66322700.html#66322700_Subsystemconfiguration-PerdeploymentLogging">per-deployment logging</a>. If set to <tt class=" ">true</tt>, the default, <a href="66322700.html#66322700_Subsystemconfiguration-PerdeploymentLogging">per-deployment logging</a> is enabled. Set to <tt class=" ">false</tt> to disable this feature.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-PerdeploymentLogging"  >
+        <h3>deployment Logging</h3>
+    
+            <p>
+    Per-deployment logging allows you to add a logging configuration file to your deployment and have the logging for that deployment configured according to the configuration file. In an EAR the configuration should be in the <tt class=" ">META-INF</tt> directory. In a WAR or JAR deployment the configuration file can be in either the <tt class=" ">META-INF</tt> or <tt class=" ">WEB-INF</tt> directories.            </p>
+                <p>
+    The following configuration files are allowed:            </p>
+    <ul class=" "><li class=" ">            <p>
+    logging.properties            </p>
+    </li><li class=" ">            <p>
+    jboss-logging.properties            </p>
+    </li><li class=" ">            <p>
+    log4j.properties            </p>
+    </li><li class=" ">            <p>
+    log4j.xml            </p>
+    </li><li class=" ">            <p>
+    jboss-log4j.xml            </p>
+    </li></ul>            <p>
+    You can also disable this functionality by changing the <tt class=" ">use-deployment-logging-config</tt> attribute to <tt class=" ">false</tt>.            </p>
+                <p>
+                </p>
+        </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-LoggingProfiles"  >
+        <h3>Logging Profiles</h3>
+    
+            <p>
+    Logging profiles are like additional logging subsystems. Each logging profile constists of three of the four notable parts listed above: <tt class=" ">handler</tt> configurations, <tt class=" ">logger</tt> and the <tt class=" ">root logger</tt> declarations.            </p>
+                <p>
+    You can assign a logging profile to a deployment via the deployments manifest. Add a <tt class=" ">Logging-Profile</tt> entry to the <tt class=" ">MANIFEST.MF</tt> file with a value of the logging profile id. For example a logging profile defined on <tt class=" ">/subsystem=logging/logging-profile=ejbs</tt> the MANIFEST.MF would look like:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Manifest-Version: 1.0
+Logging-Profile: ejbs</code></pre>
+        </div>
+    </div>
+            <p>
+    A logging profile can be assigned to any number of deployments. Using a logging profile also allows for runtime changes to the configuration. This is an advantage over the per-deployment logging configuration as the redeploy is not required for logging changes to take affect.            </p>
+                <p>
+                </p>
+        </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-DefaultLogFileLocations"  >
+        <h3>Default Log File Locations</h3>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-ManagedDomain"  >
+        <h4>Managed Domain</h4>
+    
+            <p>
+    In a managed domain two types of log files do exist: Controller and server logs. The controller components govern the domain as whole. It's their responsibility to start/stop server instances and execute managed operations throughout the domain. Server logs contain the logging information for a particular server instance. They are co-located with the host the server is running on.            </p>
+                <p>
+    For the sake of simplicity we look at the default setup for managed domain. In this case, both the domain controller components and the servers are located on the same host:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Process            </td>
+                <td rowspan="1" colspan="1">
+    Log File            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Host Controller            </td>
+                <td rowspan="1" colspan="1">
+    ./domain/log/host-controller.log            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Process Controller            </td>
+                <td rowspan="1" colspan="1">
+    ./domain/log/process-controller.log            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    &quot;Server One&quot;            </td>
+                <td rowspan="1" colspan="1">
+    ./domain/servers/server-one/log/server.log            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    &quot;Server Two&quot;            </td>
+                <td rowspan="1" colspan="1">
+    ./domain/servers/server-two/log/server.log            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    &quot;Server Three&quot;            </td>
+                <td rowspan="1" colspan="1">
+    ./domain/servers/server-three/log/server.log            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-StandaloneServer"  >
+        <h4>Standalone Server</h4>
+    
+            <p>
+    The default log files for a standalone server can be found in the log subdirectory of the distribution:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Process            </td>
+                <td rowspan="1" colspan="1">
+    Log File            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Server            </td>
+                <td rowspan="1" colspan="1">
+    ./standalone/log/server.log            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+                </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-FilterExpressions"  >
+        <h3>Filter Expressions</h3>
+    
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Filter Type            </td>
+                <td rowspan="1" colspan="1">
+    Expression            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+                <td rowspan="1" colspan="1">
+    Parameter(s)            </td>
+                <td rowspan="1" colspan="1">
+    Examples            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    accept            </td>
+                <td rowspan="1" colspan="1">
+    accept            </td>
+                <td rowspan="1" colspan="1">
+    Accepts all log messages.            </td>
+                <td rowspan="1" colspan="1">
+    None            </td>
+                <td rowspan="1" colspan="1">
+    accept            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    deny            </td>
+                <td rowspan="1" colspan="1">
+    deny            </td>
+                <td rowspan="1" colspan="1">
+    enies all log messages.            </td>
+                <td rowspan="1" colspan="1">
+    None            </td>
+                <td rowspan="1" colspan="1">
+    deny            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    not            </td>
+                <td rowspan="1" colspan="1">
+    not(filterExpression)            </td>
+                <td rowspan="1" colspan="1">
+    Accepts a filter as an argument and inverts the returned value.            </td>
+                <td rowspan="1" colspan="1">
+    The expression takes a single filter for it's argument.            </td>
+                <td rowspan="1" colspan="1">
+    not(match(&quot;JBAS&quot;))            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    all            </td>
+                <td rowspan="1" colspan="1">
+    all(filterExpressions)            </td>
+                <td rowspan="1" colspan="1">
+    A filter consisting of several filters in a chain. If any filter find the log message to be unloggable, the message will not be logged and subsequent filters will not be checked.            </td>
+                <td rowspan="1" colspan="1">
+    The expression takes a comma delimited list of filters for it's argument.            </td>
+                <td rowspan="1" colspan="1">
+    all(match(&quot;JBAS&quot;), match(&quot;WELD&quot;))            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    any            </td>
+                <td rowspan="1" colspan="1">
+    any(filterExpressions)            </td>
+                <td rowspan="1" colspan="1">
+    A filter consisting of several filters in a chain. If any filter fins the log message to be loggable, the message will be logged and the subsequent filters will not be checked.            </td>
+                <td rowspan="1" colspan="1">
+    The expression takes a comma delimited list of filters for it's argument.            </td>
+                <td rowspan="1" colspan="1">
+    any(match(&quot;JBAS&quot;), match(&quot;WELD&quot;))            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    levelChange            </td>
+                <td rowspan="1" colspan="1">
+    levelChange(level)            </td>
+                <td rowspan="1" colspan="1">
+    A filter which modifies the log record with a new level.            </td>
+                <td rowspan="1" colspan="1">
+    The expression takes a single string based level for it's argument.            </td>
+                <td rowspan="1" colspan="1">
+    levelChange(&quot;WARN&quot;)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    levels            </td>
+                <td rowspan="1" colspan="1">
+    levels(levels)            </td>
+                <td rowspan="1" colspan="1">
+    A filter which includes log messages with a level that is listed in the list of levels.            </td>
+                <td rowspan="1" colspan="1">
+    The expression takes a comma delimited list of string based levels for it's argument.            </td>
+                <td rowspan="1" colspan="1">
+    levels(&quot;DEBUG&quot;, &quot;INFO&quot;, &quot;WARN&quot;, &quot;ERROR&quot;)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    levelRange            </td>
+                <td rowspan="1" colspan="1">
+    levelRange([minLevel,maxLevel])            </td>
+                <td rowspan="1" colspan="1">
+    A filter which logs records that are within the level range.            </td>
+                <td rowspan="1" colspan="1">
+    The filter expression uses a &quot;[&quot; to indicate a minimum inclusive level and a &quot;]&quot; to indicate a maximum inclusive level. Otherwise use &quot;(&quot; or &quot;)&quot; respectively indicate exclusive. The first argument for the expression is the minimum level allowed, the second argument is the maximum level allowed.            </td>
+                <td rowspan="1" colspan="1">
+    <ul class="alternate "><li class=" ">            <p>
+    minimum level must be less than ERROR and the maximum level must be greater than DEBUG<br/><br/>levelRange(&quot;ERROR&quot;, &quot;DEBUG&quot;)            </p>
+    </li><li class=" ">            <p>
+    minimum level must be less than or equal to ERROR and the maximum level must be greater than DEBUG<br/><br/>levelRange[&quot;ERROR&quot;, &quot;DEBUG&quot;)            </p>
+    </li><li class=" ">            <p>
+    minimum level must be less than or equal to ERROR and the maximum level must be greater or equal to INFO<br/><br/>levelRange[&quot;ERROR&quot;, &quot;INFO&quot;]            </p>
+    </li></ul>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    match            </td>
+                <td rowspan="1" colspan="1">
+    match(&quot;pattern&quot;)            </td>
+                <td rowspan="1" colspan="1">
+    A regular-expression based filter. The raw unformatted message is used against the pattern.            </td>
+                <td rowspan="1" colspan="1">
+    The expression takes a regular expression for it's argument. match(&quot;JBAS\d+&quot;)            </td>
+                <td rowspan="1" colspan="1">
+                </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    substitute            </td>
+                <td rowspan="1" colspan="1">
+    substitute(&quot;pattern&quot;, &quot;replacement value&quot;)            </td>
+                <td rowspan="1" colspan="1">
+    A filter which replaces the first match to the pattern with the replacement value.            </td>
+                <td rowspan="1" colspan="1">
+    The first argument for the expression is the pattern the second argument is the replacement text.            </td>
+                <td rowspan="1" colspan="1">
+    substitute(&quot;JBAS&quot;, &quot;EAP&quot;)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    substituteAll            </td>
+                <td rowspan="1" colspan="1">
+    substituteAll(&quot;pattern&quot;, &quot;replacement value&quot;)            </td>
+                <td rowspan="1" colspan="1">
+    A filter which replaces all matches of the pattern with the replacement value.            </td>
+                <td rowspan="1" colspan="1">
+    The first argument for the expression is the pattern the second argument is the replacement text.            </td>
+                <td rowspan="1" colspan="1">
+    substituteAll(&quot;JBAS&quot;, &quot;EAP&quot;)            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-ListLogFilesandReadingLogFiles"  >
+        <h3>List Log Files and Reading Log Files</h3>
+    
+            <p>
+    Log files can be listed and viewed via management operations. The log files allowed to be listed and/or viewed is intentionally limited to files that exist in the <tt class=" ">jboss.server.log.dir</tt> and are associated with a known file handler. Known file handler types include <tt class=" ">file-handler</tt>, <tt class=" ">periodic-rotating-file-handler</tt> and <tt class=" ">size-rotating-file-handler</tt>. The operations are valid in both standalone and domain modes.            </p>
+        <div class="section-4"  id="66322700_Subsystemconfiguration-ListLogFiles"  >
+        <h4>List Log Files</h4>
+    
+            <p>
+    The <tt class=" ">list-log-files</tt> operation is available on the root logging resource, <tt class=" ">/subsystem=logging</tt> in standalone CLI syntax. The files listed are the only files allowed to be read by the <tt class=" ">read-log-file</tt> operation.            </p>
+        <div class="confbox programlisting">
+                    <div class="title">CLI command and output</div>
+                <div class="content">
+        <pre><code>[standalone@localhost:9990 /] /subsystem=logging:list-log-files
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        {
+            &quot;file-name&quot; =&gt; &quot;server.log&quot;,
+            &quot;file-size&quot; =&gt; 10973L,
+            &quot;last-modified-date&quot; =&gt; &quot;2014-02-14T14:16:49.000-0800&quot;
+        },
+        {
+            &quot;file-name&quot; =&gt; &quot;server.log.2014-02-12&quot;,
+            &quot;file-size&quot; =&gt; 27688L,
+            &quot;last-modified-date&quot; =&gt; &quot;2014-02-12T11:20:35.000-0800&quot;
+        },
+        {
+            &quot;file-name&quot; =&gt; &quot;server.log.2014-02-13&quot;,
+            &quot;file-size&quot; =&gt; 359154L,
+            &quot;last-modified-date&quot; =&gt; &quot;2014-02-13T20:43:49.000-0800&quot;
+        }
+    ]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-ReadLogFile"  >
+        <h4>Read Log File</h4>
+    
+            <p>
+    The <tt class=" ">read-log-file</tt> operation is available on the root logging resource, <tt class=" ">/subsystem=logging</tt> in standalone CLI syntax. Only files available in the <tt class=" ">list-log-files</tt> operation are allowed to be read. This operation has one required parameters and 4 additional parameters.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    name (required)            </td>
+                <td rowspan="1" colspan="1">
+    the name of the log file to be read            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    encoding            </td>
+                <td rowspan="1" colspan="1">
+    the encoding the file should be read in            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    lines            </td>
+                <td rowspan="1" colspan="1">
+    the number of lines from the file. A value of -1 indicates all lines should be read.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    skip            </td>
+                <td rowspan="1" colspan="1">
+    the number of lines to skip before reading.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    tail            </td>
+                <td rowspan="1" colspan="1">
+    true to read from the end of the file up or false to read top down.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    <div class="confbox programlisting">
+                    <div class="title">CLI command and output</div>
+                <div class="content">
+        <pre><code>[standalone@localhost:9990 /] /subsystem=logging:read-log-file(name=server.log)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        &quot;2014-02-14 14:16:48,781 INFO  [org.jboss.as.server.deployment.scanner] (MSC service thread 1-11) JBAS015012: Started FileSystemDeploymentService for directory /home/jperkins/servers/wildfly-8.0.0.Final/standalone/deployments&quot;,
+        &quot;2014-02-14 14:16:48,782 INFO  [org.jboss.as.connector.subsystems.datasources] (MSC service thread 1-8) JBAS010400: Bound data source [java:jboss/myDs]&quot;,
+        &quot;2014-02-14 14:16:48,782 INFO  [org.jboss.as.connector.subsystems.datasources] (MSC service thread 1-15) JBAS010400: Bound data source [java:jboss/datasources/ExampleDS]&quot;,
+        &quot;2014-02-14 14:16:48,786 INFO  [org.jboss.as.server.deployment] (MSC service thread 1-9) JBAS015876: Starting deployment of \&quot;simple-servlet.war\&quot; (runtime-name: \&quot;simple-servlet.war\&quot;)&quot;,
+        &quot;2014-02-14 14:16:48,978 INFO  [org.jboss.ws.common.management] (MSC service thread 1-10) JBWS022052: Starting JBoss Web Services - Stack CXF Server 4.2.3.Final&quot;,
+        &quot;2014-02-14 14:16:49,160 INFO  [org.wildfly.extension.undertow] (MSC service thread 1-16) JBAS017534: Registered web context: /simple-servlet&quot;,
+        &quot;2014-02-14 14:16:49,189 INFO  [org.jboss.as.server] (Controller Boot Thread) JBAS018559: Deployed \&quot;simple-servlet.war\&quot; (runtime-name : \&quot;simple-servlet.war\&quot;)&quot;,
+        &quot;2014-02-14 14:16:49,224 INFO  [org.jboss.as] (Controller Boot Thread) JBAS015961: Http management interface listening on http://127.0.0.1:9990/management&quot;,
+        &quot;2014-02-14 14:16:49,224 INFO  [org.jboss.as] (Controller Boot Thread) JBAS015951: Admin console listening on http://127.0.0.1:9990&quot;,
+        &quot;2014-02-14 14:16:49,225 INFO  [org.jboss.as] (Controller Boot Thread) JBAS015874: WildFly 8.0.0.Final \&quot;WildFly\&quot; started in 1906ms - Started 258 of 312 services (90 services are lazy, passive or on-demand)&quot;
+    ]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-FAQ"  >
+        <h3>FAQ</h3>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-Whyistherea%7B%7Blogging.properties%7D%7Dfile%3F"  >
+        <h4>Why is there a  logging.properties  file?</h4>
+    
+            <p>
+    You may have noticed that there is a <tt class=" ">logging.properties</tt> file in the configuration directory. This logging configuration is used when the server boots up until the logging subsystem kicks in. If the logging subsystem is not included in your configuration, then this would act as the logging configuration for the entire server.            </p>
+        <div class="confbox admonition admonition-tip">
+        
+            <p>
+    The <tt class=" ">logging.properties</tt> file is overwritten at boot and with each change to the logging subsystem. Any changes made to the file are not persisted. Any changes made to the XML configuration or via management operations will be persisted to the <tt class=" ">logging.properties</tt> file and used on the next boot.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-JMX"  >
+        <h3>JMX</h3>
+    
+            <p>
+    The JMX subsystem registers a service with the Remoting endpoint so that remote access to JMX can be obtained over the exposed Remoting connector.            </p>
+                <p>
+    This is switched on by default in standalone mode and accessible over port 9990 but in domain mode is switched off so needs to be enabled - in domain mode the port will be the port of the Remoting connector for the WildFly 8&nbsp;instance to be monitored.            </p>
+                <p>
+    To use the connector you can access it in the standard way using a <tt class=" ">service:jmx</tt> URL:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import javax.management.MBeanServerConnection;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
+
+public class JMXExample {
+
+    public static void main(String[] args) throws Exception {
+        //Get a connection to the WildFly 8 MBean server on localhost
+        String host = &quot;localhost&quot;;
+        int port = 9990;  // management-web port
+        String urlString =
+            System.getProperty(&quot;jmx.service.url&quot;,&quot;service:jmx:http-remoting-jmx://&quot; + host + &quot;:&quot; + port);
+        JMXServiceURL serviceURL = new JMXServiceURL(urlString);
+        JMXConnector jmxConnector = JMXConnectorFactory.connect(serviceURL, null);
+        MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
+
+        //Invoke on the WildFly 8 MBean server
+        int count = connection.getMBeanCount();
+        System.out.println(count);
+       &nbsp;jmxConnector.close();
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    You also need to set your classpath when running the above example.&nbsp; The following script covers Linux.&nbsp; If your environment is much different, paste your script when you have it working.            </p>
+        <div class="confbox panel">
+                <p>
+    !/bin/bash            </p>
+                <p>
+    # specify your WildFly 8&nbsp;folder<br/>export YOUR_JBOSS_HOME=~/WildFly8            </p>
+                <p>
+    java -classpath $YOUR_JBOSS_HOME/bin/client/jboss-client.jar:./ JMXExample            </p>
+        </div>
+            <p>
+    You can also connect using jconsole.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    If using jconsole use the <tt class=" ">jconsole.sh</tt> and <tt class=" ">jconsole.bat</tt> scripts included in the /bin directory of the WildFly 8&nbsp;distribution as these set the classpath as required to connect over Remoting.            </p>
+        </div>
+    
+            <p>
+    In addition to the standard JVM MBeans, the WildFly 8&nbsp;MBean server contains the following MBeans:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    JMX ObjectName            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.msc:type=container,name=jboss-as</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Exposes management operations on the JBoss Modular Service Container, which is the dependency injection framework at the heart of WildFly 8. It is useful for debugging dependency problems, for example if you are integrating your own subsystems, as it exposes operations to dump all services and their current states            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.naming:type=JNDIView</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Shows what is bound in JNDI            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">jboss.modules:type=ModuleLoader,name=*</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This collection of MBeans exposes management operations on JBoss Modules classloading layer. It is useful for debugging dependency problems arising from missing module dependencies            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Auditlogging"  >
+        <h3>Audit logging</h3>
+    
+            <p>
+    Audit logging for the JMX MBean server managed by the JMX subsystem. The resource is at <tt class=" ">/subsystem=jmx/configuration=audit-log</tt> and its attributes are similar to the ones mentioned for <tt class=" ">/core-service=management/access=audit/logger=audit-log</tt> in <a href="69536296.html">Audit logging</a>.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">enabled</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> to enable logging of the JMX operations            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">log-boot</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> to log the JMX operations when booting the server, <tt class=" ">false</tt> otherwise            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">log-read-only</tt>            </td>
+                <td rowspan="1" colspan="1">
+    If <tt class=" ">true</tt> all operations will be audit logged, if <tt class=" ">false</tt> only operations that change the model will be logged            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    Then which handlers are used to log the management operations are configured as <tt class=" ">handler=*</tt> children of the logger. These handlers and their formatters are defined in the global <tt class=" ">/core-service=management/access=audit</tt> section mentioned in <a href="69536296.html">Audit logging</a>.            </p>
+        <div class="section-4"  id="66322700_Subsystemconfiguration-JSONFormatter"  >
+        <h4>JSON Formatter</h4>
+    
+            <p>
+    The same JSON Formatter is used as described in <a href="69536296.html">Audit logging</a>. However the records for MBean Server invocations have slightly different fields from those logged for the core management layer.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>2013-08-29 18:26:29 - {
+    &quot;type&quot; : &quot;jmx&quot;,
+    &quot;r/o&quot; : false,
+    &quot;booting&quot; : false,
+    &quot;version&quot; : &quot;8.0.0.Beta1-SNAPSHOT&quot;,
+    &quot;user&quot; : &quot;$local&quot;,
+    &quot;domainUUID&quot; : null,
+    &quot;access&quot; : &quot;JMX&quot;,
+    &quot;remote-address&quot; : &quot;127.0.0.1/127.0.0.1&quot;,
+    &quot;method&quot; : &quot;invoke&quot;,
+    &quot;sig&quot; : [
+        &quot;javax.management.ObjectName&quot;,
+        &quot;java.lang.String&quot;,
+        &quot;[Ljava.lang.Object;&quot;,
+        &quot;[Ljava.lang.String;&quot;
+    ],
+    &quot;params&quot; : [
+        &quot;java.lang:type=Threading&quot;,
+        &quot;getThreadInfo&quot;,
+        &quot;[Ljava.lang.Object;@5e6c33c&quot;,
+        &quot;[Ljava.lang.String;@4b681c69&quot;
+    ]
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    It includes an optional timestamp and then the following information in the json record            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Field name            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">type</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This will have the value <tt class=" ">jmx</tt> meaning it comes from the jmx subsystem            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">r/o</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> if the operation has read only impact on the MBean(s)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">booting</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> if the operation was executed during the bootup process, <tt class=" ">false</tt> if it was executed once the server is up and running            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">version</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The version number of the WildFly instance            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">user</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The username of the authenticated user.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">domainUUID</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This is not currently populated for JMX operations            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">access</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This can have one of the following values:<br/>*<tt class=" ">NATIVE</tt> - The operation came in through the native management interface, for example the CLI<br/>*<tt class=" ">HTTP</tt> - The operation came in through the domain HTTP interface, for example the admin console<br/>*<tt class=" ">JMX</tt> - The operation came in through the JMX subsystem. See <a href="66322718.html">JMX</a> for how to configure audit logging for JMX.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">remote-address</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The address of the client executing this operation            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">method</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The name of the called MBeanServer method            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">sig</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The signature of the called called MBeanServer method            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">params</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The actual parameters passed in to the MBeanServer method, a simple <tt class=" ">Object.toString()</tt> is called on each parameter.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">error</tt>            </td>
+                <td rowspan="1" colspan="1">
+    If calling the MBeanServer method resulted in an error, this field will be populated with <tt class=" ">Throwable.getMessage()</tt>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-OSGi"  >
+        <h3>OSGi</h3>
+    
+            <p>
+    OSGi functionality in WildFly 8&nbsp;is provided through the OSGi subsystem.            </p>
+                <p>
+    The documentation of this functionality can be found at the <a href="https://docs.jboss.org/author/display/JBOSGI/JBoss+OSGi+Home">JBoss OSGi documentation pages</a>.            </p>
+                <p>
+    Integration with WildFly&nbsp;and reference the the OSGi subsystem in the WildFly&nbsp;XML configuration file can be found in the <a href="https://docs.jboss.org/author/display/JBOSGI/Application+Server+Integration">Application Server Integration</a> section.            </p>
+        <div class="confbox admonition admonition-tip">
+        
+            <p>
+    More information on the OSGi component in WildFly&nbsp;can be found on the <a href="http://www.jboss.org/jbossas/osgi">JBoss OSGi project pages</a>.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-DeploymentScanner"  >
+        <h3>Deployment Scanner</h3>
+    
+            <p>
+    The deployment scanner is only used in standalone mode. Its job is to monitor a directory for new files and to deploy those files. It can be found in <tt class=" ">standalone.xml</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:deployment-scanner:1.0&quot;&gt;
+   &lt;deployment-scanner scan-interval=&quot;5000&quot;
+      relative-to=&quot;jboss.server.base.dir&quot; path=&quot;deployments&quot; /&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    You can define more <tt class=" ">deployment-scanner</tt> entries to scan for deployments from more locations. The configuration showed will scan the <tt class=" ">JBOSS_HOME/standalone/deployments</tt> directory every five seconds. The runtime model is shown below, and uses default values for attributes not specified in the xml:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=deployment-scanner:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;scanner&quot; =&gt; {&quot;default&quot; =&gt; {
+        &quot;auto-deploy-exploded&quot; =&gt; false,
+        &quot;auto-deploy-zipped&quot; =&gt; true,
+        &quot;deployment-timeout&quot; =&gt; 60L,
+        &quot;name&quot; =&gt; &quot;default&quot;,
+        &quot;path&quot; =&gt; &quot;deployments&quot;,
+        &quot;relative-to&quot; =&gt; &quot;jboss.server.base.dir&quot;,
+        &quot;scan-enabled&quot; =&gt; true,
+        &quot;scan-interval&quot; =&gt; 5000
+    }}}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The attributes are            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Type            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">name</tt>            </td>
+                <td rowspan="1" colspan="1">
+    STRING            </td>
+                <td rowspan="1" colspan="1">
+    The name of the scanner. <tt class=" ">default</tt> is used if not specified            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">path</tt>            </td>
+                <td rowspan="1" colspan="1">
+    STRING            </td>
+                <td rowspan="1" colspan="1">
+    The actual filesystem path to be scanned. Treated as an absolute path, unless the 'relative-to' attribute is specified, in which case the value is treated as relative to that path.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">relative-to</tt>            </td>
+                <td rowspan="1" colspan="1">
+    STRING            </td>
+                <td rowspan="1" colspan="1">
+    Reference to a filesystem path defined in the &quot;paths&quot; section of the server configuration, or one of the system properties specified on startup. In the example above <tt class=" ">jboss.server.base.dir</tt> resolves to&nbsp;<tt class=" ">JBOSS_HOME/standalone</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">scan-enabled</tt>            </td>
+                <td rowspan="1" colspan="1">
+    BOOLEAN            </td>
+                <td rowspan="1" colspan="1">
+    If true scanning is enabled            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">scan-interval</tt>            </td>
+                <td rowspan="1" colspan="1">
+    INT            </td>
+                <td rowspan="1" colspan="1">
+    Periodic interval, in milliseconds, at which the repository should be scanned for changes. A value of less than 1 indicates the repository should only be scanned at initial startup.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">auto-deploy-zipped</tt>            </td>
+                <td rowspan="1" colspan="1">
+    BOOLEAN            </td>
+                <td rowspan="1" colspan="1">
+    Controls whether zipped deployment content should be automatically deployed by the scanner without requiring the user to add a .dodeploy marker file.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">auto-deploy-exploded</tt>            </td>
+                <td rowspan="1" colspan="1">
+    BOOLEAN            </td>
+                <td rowspan="1" colspan="1">
+    Controls whether exploded deployment content should be automatically deployed by the scanner without requiring the user to add a .dodeploy marker file. Setting this to 'true' is not recommended for anything but basic development scenarios,  as there is no way to ensure that deployment will not occur in the middle of changes to the content.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">deployment-timeout</tt>            </td>
+                <td rowspan="1" colspan="1">
+    LONG            </td>
+                <td rowspan="1" colspan="1">
+    Timeout, in seconds, a deployment is allows to execute before being canceled.  The default is 60 seconds.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    Deployment scanners can be added by modifying <tt class=" ">standalone.xml</tt> before starting up the server or they can be added and removed at runtime using the CLI            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=deployment-scanner/scanner=new:add(scan-interval=10000,relative-to=&quot;jboss.server.base.dir&quot;,path=&quot;other-deployments&quot;)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}
+[standalone@localhost:9999 /] /subsystem=deployment-scanner/scanner=new:remove
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+            <p>
+    You can also change the attributes at runtime, so for example to turn off scanning you can do            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=deployment-scanner/scanner=default:write-attribute(name=&quot;scan-enabled&quot;,value=false)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}
+[standalone@localhost:9999 /] /subsystem=deployment-scanner:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;scanner&quot; =&gt; {&quot;default&quot; =&gt; {
+        &quot;auto-deploy-exploded&quot; =&gt; false,
+        &quot;auto-deploy-zipped&quot; =&gt; true,
+        &quot;deployment-timeout&quot; =&gt; 60L,
+        &quot;name&quot; =&gt; &quot;default&quot;,
+        &quot;path&quot; =&gt; &quot;deployments&quot;,
+        &quot;relative-to&quot; =&gt; &quot;jboss.server.base.dir&quot;,
+        &quot;scan-enabled&quot; =&gt; false,
+        &quot;scan-interval&quot; =&gt; 5000
+    }}}
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Threadssubsystemconfiguration"  >
+        <h3>Threads subsystem configuration</h3>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-Definingthreadpools"  >
+        <h4>Defining thread pools</h4>
+    
+            <p>
+    Subsystems can reference thread  pools defined by the threading subsystem. Externalizing thread pool in  this way has the additional advantage of being able to manage the thread  pools via native WildFly management mechanisms, and allows you to  share thread pools across subsystems. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:threads:1.0&quot;&gt;
+    &lt;thread-factory name=&quot;infinispan-factory&quot; priority=&quot;1&quot;/&gt;
+    &lt;bounded-queue-thread-pool name=&quot;infinispan-transport&quot;&gt;
+        &lt;core-threads count=&quot;1&quot;/&gt;
+        &lt;queue-length count=&quot;100000&quot;/&gt;
+        &lt;max-threads count=&quot;25&quot;/&gt;
+        &lt;thread-factory name=&quot;infinispan-factory&quot;/&gt;
+    &lt;/bounded-queue-thread-pool&gt;
+    &lt;bounded-queue-thread-pool name=&quot;infinispan-listener&quot;&gt;
+        &lt;core-threads count=&quot;1&quot;/&gt;
+        &lt;queue-length count=&quot;100000&quot;/&gt;
+        &lt;max-threads count=&quot;1&quot;/&gt;
+        &lt;thread-factory name=&quot;infinispan-factory&quot;/&gt;
+    &lt;/bounded-queue-thread-pool&gt;
+    &lt;scheduled-thread-pool name=&quot;infinispan-eviction&quot;&gt;
+        &lt;max-threads count=&quot;1&quot;/&gt;
+        &lt;thread-factory name=&quot;infinispan-factory&quot;/&gt;
+    &lt;/scheduled-thread-pool&gt;
+    &lt;scheduled-thread-pool name=&quot;infinispan-repl-queue&quot;&gt;
+        &lt;max-threads count=&quot;1&quot;/&gt;
+        &lt;thread-factory name=&quot;infinispan-factory&quot;/&gt;
+    &lt;/scheduled-thread-pool&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Infinispan configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;cache-container name=&quot;web&quot; default-cache=&quot;repl&quot; listener-executor=&quot;infinispan-listener&quot; eviction-executor=&quot;infinispan-eviction&quot; replication-queue-executor=&quot;infinispan-repl-queue&quot;&gt;
+    &lt;transport executor=&quot;infinispan-transport&quot;/&gt;
+    &lt;replicated-cache name=&quot;repl&quot; mode=&quot;ASYNC&quot; batching=&quot;true&quot;&gt;
+        &lt;locking isolation=&quot;REPEATABLE_READ&quot;/&gt;
+        &lt;file-store/&gt;
+    &lt;/replicated-cache&gt;
+&lt;/cache-container&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322700_Subsystemconfiguration-Operationrequestexamples"  >
+        <h4>Operation request examples</h4>
+    
+            <p>
+    &#65279;            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/profile=production/subsystem=threads/bounded-queue-thread-pool=pool1:write-core-threads (count=0, per-cpu=20)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322700_Subsystemconfiguration-Simpleconfigurationsubsystems"  >
+        <h3>Simple configuration subsystems</h3>
+    
+            <p>
+    The following subsystems currently have no configuration beyond its root element in the configuration            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:ejb3:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:jaxrs:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:remoting:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:sar:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:threads:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:weld:1.0&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The presence of each of these turns on a piece of functionality:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">EJB3</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Enables the deployment and functionality of EJB 3.1 applications.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">JAXRS</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Enables the deployment and functionality of JAX-RS applications. This is implemented by the RestEasy project            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">Remoting</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Turns on the remoting subsystem, which is used for the management communication and will be what underlies remote JNDI lookups and remote EJB calls in a future release.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">Sar</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Enables the deployment of .SAR archives containing MBean services, as supported by previous versions of&nbsp;WildFly            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">Threads</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This subsystem is being deprecated and will not be part of the next release            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">Weld</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Enables the deployment and functionality of CDI applications            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

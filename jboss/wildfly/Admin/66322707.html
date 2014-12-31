@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Deployment Scanner configuration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Deployment Scanner configuration</h1>
+        </div>
+        
+        <div id="66322707" class="content prepend-top">
+            <p>
+    The deployment scanner is only used in standalone mode. Its job is to monitor a directory for new files and to deploy those files. It can be found in <tt class=" ">standalone.xml</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:deployment-scanner:1.0&quot;&gt;
+   &lt;deployment-scanner scan-interval=&quot;5000&quot;
+      relative-to=&quot;jboss.server.base.dir&quot; path=&quot;deployments&quot; /&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    You can define more <tt class=" ">deployment-scanner</tt> entries to scan for deployments from more locations. The configuration showed will scan the <tt class=" ">JBOSS_HOME/standalone/deployments</tt> directory every five seconds. The runtime model is shown below, and uses default values for attributes not specified in the xml:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=deployment-scanner:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;scanner&quot; =&gt; {&quot;default&quot; =&gt; {
+        &quot;auto-deploy-exploded&quot; =&gt; false,
+        &quot;auto-deploy-zipped&quot; =&gt; true,
+        &quot;deployment-timeout&quot; =&gt; 60L,
+        &quot;name&quot; =&gt; &quot;default&quot;,
+        &quot;path&quot; =&gt; &quot;deployments&quot;,
+        &quot;relative-to&quot; =&gt; &quot;jboss.server.base.dir&quot;,
+        &quot;scan-enabled&quot; =&gt; true,
+        &quot;scan-interval&quot; =&gt; 5000
+    }}}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The attributes are            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Type            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">name</tt>            </td>
+                <td rowspan="1" colspan="1">
+    STRING            </td>
+                <td rowspan="1" colspan="1">
+    The name of the scanner. <tt class=" ">default</tt> is used if not specified            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">path</tt>            </td>
+                <td rowspan="1" colspan="1">
+    STRING            </td>
+                <td rowspan="1" colspan="1">
+    The actual filesystem path to be scanned. Treated as an absolute path, unless the 'relative-to' attribute is specified, in which case the value is treated as relative to that path.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">relative-to</tt>            </td>
+                <td rowspan="1" colspan="1">
+    STRING            </td>
+                <td rowspan="1" colspan="1">
+    Reference to a filesystem path defined in the &quot;paths&quot; section of the server configuration, or one of the system properties specified on startup. In the example above <tt class=" ">jboss.server.base.dir</tt> resolves to&nbsp;<tt class=" ">JBOSS_HOME/standalone</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">scan-enabled</tt>            </td>
+                <td rowspan="1" colspan="1">
+    BOOLEAN            </td>
+                <td rowspan="1" colspan="1">
+    If true scanning is enabled            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">scan-interval</tt>            </td>
+                <td rowspan="1" colspan="1">
+    INT            </td>
+                <td rowspan="1" colspan="1">
+    Periodic interval, in milliseconds, at which the repository should be scanned for changes. A value of less than 1 indicates the repository should only be scanned at initial startup.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">auto-deploy-zipped</tt>            </td>
+                <td rowspan="1" colspan="1">
+    BOOLEAN            </td>
+                <td rowspan="1" colspan="1">
+    Controls whether zipped deployment content should be automatically deployed by the scanner without requiring the user to add a .dodeploy marker file.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">auto-deploy-exploded</tt>            </td>
+                <td rowspan="1" colspan="1">
+    BOOLEAN            </td>
+                <td rowspan="1" colspan="1">
+    Controls whether exploded deployment content should be automatically deployed by the scanner without requiring the user to add a .dodeploy marker file. Setting this to 'true' is not recommended for anything but basic development scenarios,  as there is no way to ensure that deployment will not occur in the middle of changes to the content.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">deployment-timeout</tt>            </td>
+                <td rowspan="1" colspan="1">
+    LONG            </td>
+                <td rowspan="1" colspan="1">
+    Timeout, in seconds, a deployment is allows to execute before being canceled.  The default is 60 seconds.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    Deployment scanners can be added by modifying <tt class=" ">standalone.xml</tt> before starting up the server or they can be added and removed at runtime using the CLI            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=deployment-scanner/scanner=new:add(scan-interval=10000,relative-to=&quot;jboss.server.base.dir&quot;,path=&quot;other-deployments&quot;)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}
+[standalone@localhost:9999 /] /subsystem=deployment-scanner/scanner=new:remove
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+            <p>
+    You can also change the attributes at runtime, so for example to turn off scanning you can do            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=deployment-scanner/scanner=default:write-attribute(name=&quot;scan-enabled&quot;,value=false)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}
+[standalone@localhost:9999 /] /subsystem=deployment-scanner:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;scanner&quot; =&gt; {&quot;default&quot; =&gt; {
+        &quot;auto-deploy-exploded&quot; =&gt; false,
+        &quot;auto-deploy-zipped&quot; =&gt; true,
+        &quot;deployment-timeout&quot; =&gt; 60L,
+        &quot;name&quot; =&gt; &quot;default&quot;,
+        &quot;path&quot; =&gt; &quot;deployments&quot;,
+        &quot;relative-to&quot; =&gt; &quot;jboss.server.base.dir&quot;,
+        &quot;scan-enabled&quot; =&gt; false,
+        &quot;scan-interval&quot; =&gt; 5000
+    }}}
+}</code></pre>
+        </div>
+    </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>RS Reference Guide</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>RS Reference Guide</h1>
+        </div>
+        
+        <div id="66322769" class="content prepend-top">
+            <p>
+    This page outlines the three options you have for deploying JAX-RS applications in WildFly 8. These three methods are specified in the JAX-RS 1.1 specification in section 2.3.2.            </p>
+        <div class="section-2"  id="66322769_JAX-RSReferenceGuide-Subclassing%7B%7Bjavax.ws.rs.core.Application%7D%7Dandusing%7B%7B%40ApplicationPath%7D%7D"  >
+        <h2>Subclassing  javax.ws.rs.core.Application  and using  @ApplicationPath</h2>
+    
+            <p>
+    This is the easiest way and does not require any xml configuration. Simply include a subclass of <tt class=" ">javax.ws.rs.core.Application</tt> in your application, and annotate it with the path that you want your JAX-RS classes to be available. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@ApplicationPath(&quot;/mypath&quot;)
+public class MyApplication extends Application {
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    This will make your JAX-RS resources available under <tt class=" ">/</tt><tt class=" ">mywebappcontext</tt><tt class=" ">/mypath</tt>.            </p>
+        <div class="confbox admonition admonition-warning">
+        
+            <p>
+    Note that that the path is <tt class=" ">/mypath</tt> not <tt class=" ">/mypath/*</tt>            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322769_JAX-RSReferenceGuide-Subclassing%7B%7Bjavax.ws.rs.core.Application%7D%7Dandusing%7B%7Bweb.xml%7D%7D"  >
+        <h2>Subclassing  javax.ws.rs.core.Application  and using  web.xml</h2>
+    
+            <p>
+    If you do not wish to use <tt class=" ">@ApplicationPath</tt> but still need to subclass <tt class=" ">Application</tt> you can set up the JAX-RS mapping in web.xml:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class MyApplication extends Application {
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;servlet-mapping&gt;
+   &lt;servlet-name&gt;com.acme.MyApplication&lt;/servlet-name&gt;
+   &lt;url-pattern&gt;/hello/*&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    This will make your JAX-RS resources available under <tt class=" ">/</tt><tt class=" ">mywebappcontext</tt><tt class=" ">/hello</tt>.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    You can also use this approach to override an application path set with the <tt class=" ">@ApplicationPath</tt> annotation.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322769_JAX-RSReferenceGuide-Using%7B%7Bweb.xml%7D%7D"  >
+        <h2>Using  web.xml</h2>
+    
+            <p>
+    If you don't wan't to subclass <tt class=" ">Application</tt> you can set the JAX-RS mapping in web.xml as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;servlet-mapping&gt;
+   &lt;servlet-name&gt;javax.ws.rs.core.Application&lt;/servlet-name&gt;
+   &lt;url-pattern&gt;/hello/*&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    This will make your JAX-RS resources available under <tt class=" ">/</tt><tt class=" ">mywebappcontext</tt><tt class=" ">/hello</tt>.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Note that you only have to add the mapping, not the corresponding servlet. The server is responsible for adding the corresponding servlet automatically.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

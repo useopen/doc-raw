@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Implicit module dependencies for deployments</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Implicit module dependencies for deployments</h1>
+        </div>
+        
+        <div id="66322752" class="content prepend-top">
+            <p>
+    As explained in the&nbsp;<a href="66322749.html">Class Loading in WildFly</a> article, WildFly 8&nbsp;is based on module classloading. A class within a module B isn't visible to a class within a module A, unless module B adds a dependency on module A. Module dependencies can be explicitly (as explained in that classloading article) or can be &quot;implicit&quot;. This article will explain what implicit module dependencies mean and how, when and which modules are added as implicit dependencies.            </p>
+        <div class="section-2"  id="66322752_Implicitmoduledependenciesfordeployments-What%27sanimplicitmoduledependency%3F"  >
+        <h2>What&apos;s an implicit module dependency?</h2>
+    
+            <p>
+    Consider an application deployment which contains EJBs. EJBs typically need access to classes from the javax.ejb.* package and other Java EE API packages. The jars containing these packages are already shipped in WildFly&nbsp;and are available as &quot;modules&quot;. The module which contains the javax.ejb.* classes has a specific name and so does the module which contains all the Java EE API classes. For an application to be able to use these classes, it has to add a dependency on the relevant modules. Forcing the application developers to add module dependencies like these (i.e. dependencies which can be &quot;inferred&quot;) isn't a productive approach. Hence, whenever an application is being deployed, the deployers within the server, which are processing this deployment &quot;implicitly&quot; add these module dependencies to the deployment so that these classes are visible to the deployment at runtime. This way the application developer doesn't have to worry about adding them explicitly. How and when these implicit dependencies are added is explained in the next section.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322752_Implicitmoduledependenciesfordeployments-Howandwhenisanimplicitmoduledependencyadded%3F"  >
+        <h2>How and when is an implicit module dependency added?</h2>
+    
+            <p>
+    When a deployment is being processed by the server, it goes through a chain of &quot;deployment processors&quot;. Each of these processors will have a way to check if the deployment meets a certain criteria and if it does, the deployment processor adds a implicit module dependency to that deployment. Let's take an example - Consider (again) an EJB3 deployment which has the following class:            </p>
+        <div class="confbox programlisting">
+                    <div class="title">MySuperDuperBean.java</div>
+                <div class="content">
+        <pre><code>@Stateless
+public class MySuperDuperBean {
+
+...
+
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    As can be seen, we have a simple @Stateless EJB. When the deployment containing this class is being processed, the EJB deployment processor will see that the deployment contains a class with the @Stateless annotation and thus identifies this as a EJB deployment. <strong class=" "><u class=" ">This is just one of the several ways, various deployment processors can identify a deployment of some specific type.</u></strong> The EJB deployment processor will then add an implicit dependency on the Java EE API module, so that all the Java EE API classes are visible to the deployment.            </p>
+                <p>
+    Some subsystems will always add a API classes, even if the trigger condition is not met. These are listed&nbsp;separately&nbsp;below.&nbsp;            </p>
+                <p>
+    In the next section, we'll list down the implicit module dependencies that are added to a deployment, by various deployers within WildFly.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322752_Implicitmoduledependenciesfordeployments-Whicharetheimplicitmoduledependencies%3F"  >
+        <h2>Which are the implicit module dependencies?</h2>
+    
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+Subsystem responsible for adding the implicit dependency    </span>
+            </td>
+                <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+Dependencies that are always added    </span>
+            </td>
+                <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+Dependencies that are added if a trigger condition is met    </span>
+            </td>
+                <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+Trigger which leads to the implicit module dependency being added    </span>
+            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Core Server            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javax.api&nbsp;            </p>
+    </li><li class=" ">            <p>
+    sun.jdk            </p>
+    </li><li class=" ">            <p>
+    org.jboss.vfs            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    EE Subsystem            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javaee.api            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    EJB3 subsystem            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javaee.api            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    The presence of ejb-jar.xml (in valid locations in the deployment, as specified by spec) or the presence of annotation based EJBs (ex: @Stateless, @Stateful, @MessageDriven etc)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    JAX-RS (Resteasy) subsystem            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javax.xml.bind.api            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    org.jboss.resteasy.resteasy-atom-provider&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.resteasy.resteasy-cdi&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.resteasy.resteasy-jaxrs&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.resteasy.resteasy-jaxb-provider&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.resteasy.resteasy-jackson-provider&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.resteasy.resteasy-jsapi&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.resteasy.resteasy-multipart-provider&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.resteasy.async-http-servlet-30            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    The presence of JAX-RS annotations in the deployment            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    JCA sub-system            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javax.resource.api            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javax.jms.api&nbsp;            </p>
+    </li><li class=" ">            <p>
+    javax.validation.api&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.logging&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.ironjacamar.api&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.jboss.ironjacamar.impl&nbsp;            </p>
+    </li><li class=" ">            <p>
+    org.hibernate.validator            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    If the deployment is a resource adaptor (RAR) deployment.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    JPA (Hibernate) subsystem            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javax.persistence.api            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javaee.api            </p>
+    </li><li class=" ">            <p>
+    org.jboss.as.jpa            </p>
+    </li><li class=" ">            <p>
+    org.hibernate            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    The presence of an @PersistenceUnit or @PersistenceContext annotation, or a &lt;persistence-unit-ref&gt; or &lt;persistence-context-ref&gt; in a deployment descriptor.<br/>.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Logging Subsystem            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    org.jboss.logging            </p>
+    </li><li class=" ">            <p>
+    org.apache.commons.logging            </p>
+    </li><li class=" ">            <p>
+    org.apache.log4j            </p>
+    </li><li class=" ">            <p>
+    org.slf4j            </p>
+    </li><li class=" ">            <p>
+    org.jboss.logging.jul-to-slf4j-stub            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    SAR Subsystem            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    org.jboss.logging            </p>
+    </li><li class=" ">            <p>
+    org.jboss.modules            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    The deployment is a SAR archive            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Security Subsystem            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    org.picketbox            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Web Subsystem            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javaee.api            </p>
+    </li><li class=" ">            <p>
+    com.sun.jsf-impl            </p>
+    </li><li class=" ">            <p>
+    org.hibernate.validator            </p>
+    </li><li class=" ">            <p>
+    org.jboss.as.web            </p>
+    </li><li class=" ">            <p>
+    org.jboss.logging            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    The deployment is a WAR archive. JSF is only added if used. Multiple version options exist for mojarra.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Web Services Subsystem            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    org.jboss.ws.api            </p>
+    </li><li class=" ">            <p>
+    org.jboss.ws.spi            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Weld (CDI) Subsystem            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+                <td rowspan="1" colspan="1">
+    <ul class=" "><li class=" ">            <p>
+    javax.persistence.api            </p>
+    </li><li class=" ">            <p>
+    javaee.api            </p>
+    </li><li class=" ">            <p>
+    org.javassist            </p>
+    </li><li class=" ">            <p>
+    org.jboss.interceptor            </p>
+    </li><li class=" ">            <p>
+    org.jboss.as.weld            </p>
+    </li><li class=" ">            <p>
+    org.jboss.logging            </p>
+    </li><li class=" ">            <p>
+    org.jboss.weld.core            </p>
+    </li><li class=" ">            <p>
+    org.jboss.weld.api            </p>
+    </li><li class=" ">            <p>
+    org.jboss.weld.spi            </p>
+    </li></ul>            </td>
+                <td rowspan="1" colspan="1">
+    If a beans.xml file is detected in the deployment            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

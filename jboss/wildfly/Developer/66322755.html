@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>jboss-ejb3.xml Reference</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>jboss-ejb3.xml Reference</h1>
+        </div>
+        
+        <div id="66322755" class="content prepend-top">
+            <p>
+    <tt class=" ">jboss-ejb3.xml</tt> is a custom deployment descriptor that can be placed in either ejb-jar or war archives. If it is placed in an ejb-jar then it must be placed in the <tt class=" ">META-INF</tt> folder, in a web archive it must be placed in the <tt class=" ">WEB-INF</tt> folder.            </p>
+                <p>
+    The contents of <tt class=" ">jboss-ejb3.xml</tt> are merged with the contents of <tt class=" ">ejb-jar.xml</tt>, with the <tt class=" ">jboss-ejb3.xml</tt> items taking precedence.            </p>
+        <div class="section-2"  id="66322755_jboss-ejb3.xmlReference-ExampleFile"  >
+        <h2>Example File</h2>
+    
+            <p>
+    A simple example is shown below:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.1&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;jboss:ejb-jar xmlns:jboss=&quot;http://www.jboss.com/xml/ns/javaee&quot;
+               xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+               xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+               xmlns:s=&quot;urn:security:1.1&quot;
+               xsi:schemaLocation=&quot;http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-ejb3-2_0.xsd http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_1.xsd&quot;
+               version=&quot;3.1&quot;
+               impl-version=&quot;2.0&quot;&gt;
+    &lt;enterprise-beans&gt;
+        &lt;message-driven&gt;
+            &lt;ejb-name&gt;ReplyingMDB&lt;/ejb-name&gt;
+            &lt;ejb-class&gt;org.jboss.as.test.integration.ejb.mdb.messagedestination.ReplyingMDB&lt;/ejb-class&gt;
+            &lt;activation-config&gt;
+                &lt;activation-config-property&gt;
+                    &lt;activation-config-property-name&gt;destination&lt;/activation-config-property-name&gt;
+                    &lt;activation-config-property-value&gt;java:jboss/mdbtest/messageDestinationQueue
+                    &lt;/activation-config-property-value&gt;
+                &lt;/activation-config-property&gt;
+            &lt;/activation-config&gt;
+        &lt;/message-driven&gt;
+    &lt;/enterprise-beans&gt;
+    &lt;assembly-descriptor&gt;
+        &lt;s:security&gt;
+            &lt;ejb-name&gt;DDMyDomainSFSB&lt;/ejb-name&gt;
+            &lt;s:security-domain&gt;myDomain&lt;/s:security-domain&gt;
+            &lt;s:run-as-principal&gt;myPrincipal&lt;/s:run-as-principal&gt;
+        &lt;/s:security&gt;
+    &lt;/assembly-descriptor&gt;
+&lt;/jboss:ejb-jar&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see the format is largely similar to <tt class=" ">ejb-jar.xml</tt>, in fact they even use the same namespaces, however <tt class=" ">jboss-ejb3.xml</tt> adds some additional namespaces of its own to allow for configuring non-spec info. The format of the standard <tt class=" ">http://java.sun.com/xml/ns/javaee</tt> is well documented elsewhere, this document will cover the non-standard namespaces.            </p>
+        <div class="section-3"  id="66322755_jboss-ejb3.xmlReference-Therootnamespace%7B%7B"  >
+        <h3>The root namespace  http://www.jboss.com/xml/ns/javaee</h3>
+    
+    </div>
+    
+    <div class="section-3"  id="66322755_jboss-ejb3.xmlReference-Assemblydescriptornamespaces"  >
+        <h3>Assembly descriptor namespaces</h3>
+    
+            <p>
+    The following namespaces can all be used in the <tt class=" ">&lt;assembly-descriptor&gt;</tt> element. They can be used to apply their configuration to a single bean, or to all beans in the deployment by using <tt class=" ">*</tt> as the <tt class=" ">ejb-name</tt>.            </p>
+        <div class="section-4"  id="66322755_jboss-ejb3.xmlReference-Thesecuritynamespace%7B%7Burn%3Asecurity%7D%7D"  >
+        <h4>The security namespace  urn:security</h4>
+    
+            <p>
+    This allows you to set the security domain and the run-as principal for an EJB.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;s:security&gt;
+  &lt;ejb-name&gt;*&lt;/ejb-name&gt;
+  &lt;s:security-domain&gt;myDomain&lt;/s:security-domain&gt;
+  &lt;s:run-as-principal&gt;myPrincipal&lt;/s:run-as-principal&gt;
+&lt;/s:security&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322755_jboss-ejb3.xmlReference-Theresourceadaptornamespace%7B%7Burn%3Aresourceadapterbinding%7D%7D"  >
+        <h4>The resource adaptor namespace  urn:resource-adapter-binding</h4>
+    
+            <p>
+    This allows you to set the resource adaptor for an MDB.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;r:resource-adapter-binding&gt;
+  &lt;ejb-name&gt;*&lt;/ejb-name&gt;
+  &lt;r:resource-adapter-name&gt;myResourceAdaptor&lt;/r:resource-adapter-name&gt;
+&lt;/r:resource-adapter-binding&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322755_jboss-ejb3.xmlReference-TheIIOPnamespace%7B%7Burn%3Aiiop%7D%7D"  >
+        <h4>The IIOP namespace  urn:iiop</h4>
+    
+            <p>
+    The IIOP namespace is where IIOP settings are configured. As there are quite a large number of options these are covered in the <a href="https://docs.jboss.org/author/display/AS71/EJB+IIOP+Guide">IIOP guide</a>.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322755_jboss-ejb3.xmlReference-Thepoolnamespace%7B%7Burn%3Aejbpool%3A1.0%7D%7D"  >
+        <h4>The pool namespace  urn:ejb-pool:1.0</h4>
+    
+            <p>
+    This allows you to select the pool that is used by the SLSB or MDB. Pools are defined in the server configuration (i.e. <tt class=" ">standalone.xml</tt> or <tt class=" ">domain.xml</tt>)            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;p:pool&gt;
+  &lt;ejb-name&gt;*&lt;/ejb-name&gt;
+  &lt;p:bean-instance-pool-ref&gt;my-pool&lt;/p:bean-instance-pool-ref&gt;
+&lt;/p:pool&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322755_jboss-ejb3.xmlReference-Thecachenamespace%7B%7Burn%3Aejbcache%3A1.0%7D%7D"  >
+        <h4>The cache namespace  urn:ejb-cache:1.0</h4>
+    
+            <p>
+    This allows you to select the cache that is used by the SFSB. Caches are defined in the server configuration (i.e. <tt class=" ">standalone.xml</tt> or <tt class=" ">domain.xml</tt>)            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;c:cache&gt;
+  &lt;ejb-name&gt;*&lt;/ejb-name&gt;
+  &lt;c:cache-ref&gt;my-cache&lt;/c:cache-ref&gt;
+&lt;/c:cache&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322755_jboss-ejb3.xmlReference-Theclusteringnamespace%7B%7Burn%3Aclustering%3A1.0%7D%7D"  >
+        <h4>The clustering namespace  urn:clustering:1.0</h4>
+    
+            <p>
+    This namespace is deprecated and as of WildFly 8 its use has no effect. The clustering behavior of EJBs is determined by the profile in use on the server.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

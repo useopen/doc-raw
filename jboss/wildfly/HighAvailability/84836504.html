@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Load Balanced HA Standalone Cluster - Howto</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Load Balanced HA Standalone Cluster - Howto</h1>
+        </div>
+        
+        <div id="84836504" class="content prepend-top">
+<ul class=" "><li class=" ">            <p>
+    <a href="84836504.html#84836504_LoadBalancedHAStandaloneCluster-Howto-PreparationandScenario">Preparation and Scenario</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="84836504.html#84836504_LoadBalancedHAStandaloneCluster-Howto-Scenario">Scenario</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="84836504.html#84836504_LoadBalancedHAStandaloneCluster-Howto-DownloadWildFly8">Download WildFly 8</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="84836504.html#84836504_LoadBalancedHAStandaloneCluster-Howto-StartingWildflyinClusterConfiguration">Starting Wildfly in Cluster Configuration</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="84836504.html#84836504_LoadBalancedHAStandaloneCluster-Howto-Installing%26ConfiguringApacheHttpd">Installing &amp; Configuring Apache Httpd</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="84836504.html#84836504_LoadBalancedHAStandaloneCluster-Howto-DownloadApachehttpd">Download Apache httpd</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="84836504.html#84836504_LoadBalancedHAStandaloneCluster-Howto-Configuration">Configuration</a>            </p>
+    </li></ul></li></ul>            <p>
+    In this article, I would like to document how to set up a load balanced high availability standalone cluster.            </p>
+                <p>
+    For domain cluster refer to&nbsp;<a href="66322836.html">WildFly 8 Cluster Howto</a>            </p>
+        <div class="section-2"  id="84836504_LoadBalancedHAStandaloneCluster-Howto-PreparationandScenario"  >
+        <h2>Preparation and Scenario</h2>
+    
+            <p>
+    We need to prepare two hosts for this. We will assume that the following conditions are satisfied            </p>
+    <ul class="alternate "><li class=" ">            <p>
+    Two Nodes with *Nix installed            </p>
+    </li><li class=" ">            <p>
+    Make sure that they are in same local network            </p>
+    </li><li class=" ">            <p>
+    Make sure that they can access each other via different TCP/UDP ports(better turn off firewall and disable SELinux during the experiment or they will cause network problems).            </p>
+    </li></ul>    <div class="section-3"  id="84836504_LoadBalancedHAStandaloneCluster-Howto-Scenario"  >
+        <h3>Scenario</h3>
+    
+<ul class="alternate "><li class=" ">            <p>
+    We are going to install 2 standalone instances of WildFly - Let's call them Server One and Server Two            </p>
+    </li><li class=" ">            <p>
+    Both servers execute the full-ha profile            </p>
+    </li><li class=" ">            <p>
+    Apache httpd will be run on Server One and in httpd we will enable the mod_cluster module. The WildFly 8 on both the servers will form a cluster and discovered by httpd.            </p>
+        <img src="images/author/download/attachments/84836504/-1907527039.png" alt="images/author/download/attachments/84836504/-1907527039.png" />
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="84836504_LoadBalancedHAStandaloneCluster-Howto-DownloadWildFly8"  >
+        <h2>Download WildFly 8</h2>
+    
+            <p>
+    First we should download WildFly 8 from the website:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ wget http://download.jboss.org/wildfly/8.1.0.Final/wildfly-8.1.0.Final.tar.gz</code></pre>
+        </div>
+    </div>
+            <p>
+    Next untar the downloaded zip            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code> mkdir ./wildfly;tar -xvf ~/wildfly-8.1.0.Final.tar.gz -C wildfly --strip-components=1</code></pre>
+        </div>
+    </div>
+            <p>
+    The above command will untar the package in to the wildfly directory            </p>
+                <p>
+    On changing to the wildfly directory and listing the directory structure, you should see the below structure            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bash-4.1$ cd wildfly/
+bash-4.1$ ls
+appclient  bin  copyright.txt  docs  domain  jboss-modules.jar  LICENSE.txt  modules  README.txt  standalone  welcome-content</code></pre>
+        </div>
+    </div>
+    <div class="section-3"  id="84836504_LoadBalancedHAStandaloneCluster-Howto-StartingWildflyinClusterConfiguration"  >
+        <h3>Starting Wildfly in Cluster Configuration</h3>
+    
+            <p>
+    Starting the wildfly instance can be done using the below command on Unix on both the servers            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./standalone.sh -c standalone-ha.xml -b=$HOSTNAME -bmanagement=$HOSTNAME -u 230.0.0.4 -Djboss.node.name=$HOSTNAME</code></pre>
+        </div>
+    </div>
+            <p>
+    Here the -c option specifies the configuration file to use. We are going to use the High-Availability setup<br/>The -u option describes the multicast address. It is using this IP both servers communicate.<br/>For ease of setup, I have included the $HOSTNAME in the nodename and start up options            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    For windows User, replace the $HOSTNAME with %COMPUTERNAME%            </p>
+        </div>
+    
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    Please note that you should be in wildfy/bin when you execute the above command            </p>
+        </div>
+    
+            <p>
+    You should observer similar output            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>=========================================================================
+
+  JBoss Bootstrap Environment
+
+  JBOSS_HOME: /opt/app/wildfly
+
+  JAVA: /opt/app/java/bin/java
+
+  JAVA_OPTS:  -server -Xms64m -Xmx512m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true
+
+=========================================================================
+
+15:00:42,515 INFO  [org.jboss.modules] (main) JBoss Modules version 1.3.3.Final
+15:00:42,845 INFO  [org.jboss.msc] (main) JBoss MSC version 1.2.2.Final
+15:00:42,943 INFO  [org.jboss.as] (MSC service thread 1-5) JBAS015899: WildFly 8.1.0.Final &quot;Kenny&quot; starting
+
+......
+
+15:00:47,028 INFO  [org.jboss.as.messaging] (MSC service thread 1-1) JBAS011601: Bound messaging object to jndi name java:jboss/DefaultJMSConnectionFactory
+15:00:47,087 INFO  [org.jboss.as] (Controller Boot Thread) JBAS015961: Http management interface listening on http://135.101.232.143:9990/management
+15:00:47,087 INFO  [org.jboss.as] (Controller Boot Thread) JBAS015951: Admin console listening on http://135.101.232.143:9990
+15:00:47,088 INFO  [org.jboss.as] (Controller Boot Thread) JBAS015874: WildFly 8.1.0.Final &quot;Kenny&quot; started in 4954ms - Started 232 of 359 services (175 services are lazy, passive or on-demand)
+
+
+</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="84836504_LoadBalancedHAStandaloneCluster-Howto-Installing%26ConfiguringApacheHttpd"  >
+        <h2>Installing &amp; Configuring Apache Httpd</h2>
+    
+    <div class="section-3"  id="84836504_LoadBalancedHAStandaloneCluster-Howto-DownloadApachehttpd"  >
+        <h3>Download Apache httpd</h3>
+    
+            <p>
+    Get the httpd from the JBoss downlode site:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>wget http://downloads.jboss.org/mod_cluster//1.2.6.Final/linux-x86_64/mod_cluster-1.2.6.Final-linux2-x64.tar.gz</code></pre>
+        </div>
+    </div>
+            <p>
+    This version is pre-configured with all set up necessary to run mod_cluster out of the box and connect with JBoss            </p>
+                <p>
+    If you already have HTTPD installed, then, please get the following archive and untar            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>wget http://downloads.jboss.org/mod_cluster//1.2.6.Final/linux-x86_64/mod_cluster-1.2.6.Final-linux2-x64-so.tar.gz</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-warning">
+        
+            <p>
+    The httpd and it's associated configuration assumes that the server will be installed in /opt/jboss/httpd.<br/>If you do not follow this path structure, then the configurations do not work.            </p>
+                <p>
+    On *nix, you can use the ln command to create a symbolic link to /opt/jboss/httpd and configure as needed            </p>
+                <p>
+    Sample as listed below            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code> /bin/ln &ndash;s /opt/app/myapp/httpd /opt/jboss/httpd </code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="84836504_LoadBalancedHAStandaloneCluster-Howto-Configuration"  >
+        <h3>Configuration</h3>
+    
+            <p>
+    The main configuration for the server would be under the     <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$SERVER_ROOT/httpd/httpd/conf</code></pre>
+        </div>
+    </div>
+            </p>
+                <p>
+    Ensure the Listen directive is setup appropriately.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Listen 135.101.232.143:8081</code></pre>
+        </div>
+    </div>
+            <p>
+    At the end of the file ensure that the mod_cluster directive are appropriately setup            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;IfModule manager_module&gt;
+  Listen 135.101.232.143:6666
+  ManagerBalancerName mycluster
+  &lt;VirtualHost 135.101.232.143:6666&gt;
+    &lt;Location /&gt;
+     Order allow,deny
+     Deny from none
+     Allow from 135.101.232.
+    &lt;/Location&gt;
+
+    KeepAliveTimeout 300
+    MaxKeepAliveRequests 0
+    #ServerAdvertise on http://@IP@:6666
+    AdvertiseFrequency 5
+    #AdvertiseSecurityKey secret
+    #AdvertiseGroup @ADVIP@:23364
+    EnableMCPMReceive
+
+    &lt;Location /mod_cluster_manager&gt;
+       SetHandler mod_cluster-manager
+       Order allow,deny
+       #Deny from all
+       Allow from all
+    &lt;/Location&gt;
+&nbsp;ProxyPass / balancer://mycluster/
+
+
+  &lt;/VirtualHost&gt;
+&lt;/IfModule&gt;
+</code></pre>
+        </div>
+    </div>
+            <p>
+    Save and exit.            </p>
+                <p>
+    Now, execute Apache via the following command            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/opt/app/jboss/httpd/sbin/apachectl -k start </code></pre>
+        </div>
+    </div>
+            <p>
+    Verify by opening the url: http://&lt;IP&gt;:6666/mod_cluster_manager in your browser            </p>
+                <p>
+    You should see something similar to this:            </p>
+                <p>
+        <img src="images/author/download/attachments/84836504/-58835523.png" alt="images/author/download/attachments/84836504/-58835523.png" />
+                </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

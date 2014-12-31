@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>EE Concurrency Utilities</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>EE Concurrency Utilities</h1>
+        </div>
+        
+        <div id="80150850" class="content prepend-top">
+            <p>
+    EE Concurrency Utilities (JSR 236) were introduced with Java EE 7, to ease the task of writing multithreaded Java EE applications. Instances of these utilities are managed by WildFly, and the related configuration provided by the EE subsystem.            </p>
+        <div class="section-2"  id="80150850_EEConcurrencyUtilitiesConfiguration-ContextServices"  >
+        <h2>Context Services</h2>
+    
+            <p>
+    The Context Service is a concurrency utility which creates contextual proxies from existent objects. WildFly Context Services are also used to propagate the context from a Java EE application invocation thread, to the threads internally used by the other EE Concurrency Utilities. Context Service instances may be created using the subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;context-services&gt;
+    &lt;context-service
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/context/default&quot;
+	use-transaction-setup-provider=&quot;true&quot; /&gt;
+  &lt;/context-services&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">name</tt> attribute is mandatory, and it's value should be a unique name within all Context Services.            </p>
+                <p>
+    The <tt class=" ">jndi-name</tt> attribute is also mandatory, and defines where in the JNDI the Context Service should be placed.            </p>
+                <p>
+    The optional <tt class=" ">use-trasaction-setup-provider</tt> attribute indicates if the contextual proxies built by the Context Service should suspend transactions in context, when invoking the proxy objects, and its value defaults to true.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Context Service instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/context-service=other:add(jndi-name=java\:jboss\/ee\/concurrency\/other)
+/subsystem=ee/context-service=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="80150850_EEConcurrencyUtilitiesConfiguration-ManagedThreadFactories"  >
+        <h2>Managed Thread Factories</h2>
+    
+            <p>
+    The Managed Thread Factory allows Java EE applications to create new threads. WildFly Managed Thread Factory instances may also, optionally, use a Context Service instance to propagate the Java EE application thread&rsquo;s context to the new threads. Instance creation is done through the EE subsystem, by editing the subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;managed-thread-factories&gt;
+    &lt;managed-thread-factory
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/factory/default&quot;
+	context-service=&quot;default&quot;
+	priority=&quot;1&quot; /&gt;
+  &lt;/managed-thread-factories&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The&nbsp;<tt class=" ">name</tt>&nbsp;attribute is mandatory, and it's value should be a unique name within all Managed Thread Factories.            </p>
+                <p>
+    The&nbsp;<tt class=" ">jndi-name</tt>&nbsp;attribute is also mandatory, and defines where in the JNDI the Managed Thread Factory should be placed.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">context-service</tt>&nbsp;references an existent Context Service by its <tt class=" ">name</tt>. If specified then thread created by the factory will propagate the invocation context, present when creating the thread.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">priority</tt>&nbsp;indicates the priority for new threads created by the factory, and defaults to <tt class=" ">5</tt>.            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Managed Thread Factory instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/managed-thread-factory=other:add(jndi-name=java\:jboss\/ee\/factory\/other)
+/subsystem=ee/managed-thread-factory=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="80150850_EEConcurrencyUtilitiesConfiguration-ManagedExecutorServices"  >
+        <h2>Managed Executor Services</h2>
+    
+            <p>
+    The Managed Executor Service is the Java EE adaptation of Java SE Executor Service, providing to Java EE applications the functionality of asynchronous task execution. WildFly is responsible to manage the lifecycle of Managed Executor Service instances, which are specified through the EE subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;managed-executor-services&gt;
+    &lt;managed-executor-service
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/executor/default&quot;
+	context-service=&quot;default&quot;
+	thread-factory=&quot;default&quot;
+	hung-task-threshold=&quot;60000&quot;
+	core-threads=&quot;5&quot;
+	max-threads=&quot;25&quot;
+	keepalive-time=&quot;5000&quot;
+	queue-length=&quot;1000000&quot;
+	reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+  &lt;/managed-executor-services&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The&nbsp;<tt class=" ">name</tt>&nbsp;attribute is mandatory, and it's value should be a unique name within all Managed Executor Services.            </p>
+                <p>
+    The&nbsp;<tt class=" ">jndi-name</tt>&nbsp;attribute is also mandatory, and defines where in the JNDI the Managed Executor Service should be placed.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">context-service</tt>&nbsp;references an existent Context Service by its&nbsp;<tt class=" ">name</tt>. If specified then the referenced Context Service will capture the invocation context present when submitting a task to the executor, which will then be used when executing the task.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">thread-factory</tt>&nbsp;references an existent Managed Thread Factory by its&nbsp;<tt class=" ">name</tt>, to handle the creation of internal threads. If not specified then a Managed Thread Factory with default configuration will be created and used internally.            </p>
+                <p>
+    The mandatory&nbsp;<tt class=" ">core-threads</tt>&nbsp;provides the number of threads to keep in the executor's pool, even if they are idle. A value of&nbsp;<tt class=" ">0</tt>&nbsp;means there is no limit.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">queue-length</tt>&nbsp;indicates the number of tasks that can be stored in the input queue. The default value is <tt class=" ">0</tt>, which means the queue capacity is unlimited.            </p>
+                <p>
+    The executor&rsquo;s task queue is based on the values of the attributes&nbsp;<tt class=" ">core-threads</tt> and <tt class=" ">queue-length</tt>:            </p>
+    <ul class=" "><li class=" ">            <p>
+    If <tt class=" ">queue-length</tt> is <tt class=" ">0</tt>, or <tt class=" ">queue-length</tt> is <tt class=" ">Integer.MAX_VALUE (2147483647)</tt> and <tt class=" ">core-threads</tt> is <tt class=" ">0</tt>, direct handoff queuing strategy will be used and a synchronous queue will be created.            </p>
+    </li><li class=" ">            <p>
+    If <tt class=" ">queue-length</tt> is <tt class=" ">Integer.MAX_VALUE</tt> but <tt class=" ">core-threads</tt> is not <tt class=" ">0</tt>, an unbounded queue will be used.            </p>
+    </li><li class=" ">            <p>
+    For any other valid value for <tt class=" ">queue-length</tt>, a bounded queue wil be created.            </p>
+    </li></ul>            <p>
+    The optional&nbsp;<tt class=" ">hung-task-threshold</tt>&nbsp;defines a threshold value, in milliseconds, to hung a possibly blocked task. A value of&nbsp;<tt class=" ">0</tt>&nbsp;will never hung a task, and is the default.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">long-running-tasks</tt>&nbsp;is a hint to optimize the execution of long running tasks, and defaults to <tt class=" ">false</tt>.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">max-threads</tt>&nbsp;defines the the maximum number of threads used by the executor, which defaults to Integer.MAX_VALUE&nbsp;(2147483647).            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">keepalive-time</tt>&nbsp;defines the time, in milliseconds, that an internal thread may be idle. The attribute default value is <tt class=" ">60000</tt>.            </p>
+                <p>
+    The optional&nbsp;reject-policy defines the policy to use when a task is rejected by the executor. The attribute value may be the default <tt class=" ">ABORT</tt>, which means an exception should be thrown, or <tt class=" ">RETRY_ABORT</tt>, which means the executor will try to submit it once more, before throwing an exception.&nbsp;            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Managed Executor Service instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/managed-executor-service=other:add(jndi-name=java\:jboss\/ee\/executor\/other, core-threads=2)
+/subsystem=ee/managed-executor-service=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="80150850_EEConcurrencyUtilitiesConfiguration-ManagedScheduledExecutorServices"  >
+        <h2>Managed Scheduled Executor Services</h2>
+    
+            <p>
+    The Managed Scheduled  Executor Service is the Java EE adaptation of Java SE Scheduled Executor Service, providing to Java EE applications the functionality of scheduling task execution. WildFly is responsible to manage the lifecycle of Managed Scheduled  Executor Service instances, which are specified through the EE subsystem XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;managed-scheduled-executor-services&gt;
+    &lt;managed-scheduled-executor-service
+	name=&quot;default&quot;
+	jndi-name=&quot;java:jboss/ee/concurrency/scheduler/default&quot;
+	context-service=&quot;default&quot;
+	thread-factory=&quot;default&quot;
+	hung-task-threshold=&quot;60000&quot;
+	core-threads=&quot;5&quot;
+	keepalive-time=&quot;5000&quot;
+	reject-policy=&quot;RETRY_ABORT&quot; /&gt;
+  &lt;/managed-scheduled-executor-services&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The&nbsp;<tt class=" ">name</tt>&nbsp;attribute is mandatory, and it's value should be a unique name within all Managed Scheduled Executor Services.            </p>
+                <p>
+    The&nbsp;<tt class=" ">jndi-name</tt>&nbsp;attribute is also mandatory, and defines where in the JNDI the Managed Scheduled Executor Service should be placed.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">context-service</tt>&nbsp;references an existent Context Service by its&nbsp;<tt class=" ">name</tt>. If specified then the referenced Context Service will capture the invocation context present when submitting a task to the executor, which will then be used when executing the task.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">thread-factory</tt>&nbsp;references an existent Managed Thread Factory by its&nbsp;<tt class=" ">name</tt>, to handle the creation of internal threads. If not specified then a Managed Thread Factory with default configuration will be created and used internally.            </p>
+                <p>
+    The mandatory&nbsp;<tt class=" ">core-threads</tt>&nbsp;provides the number of threads to keep in the executor's pool, even if they are idle. A value of&nbsp;<tt class=" ">0</tt>&nbsp;means there is no limit.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">hung-task-threshold</tt>&nbsp;defines a threshold value, in milliseconds, to hung a possibly blocked task. A value of&nbsp;<tt class=" ">0</tt>&nbsp;will never hung a task, and is the default.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">long-running-tasks</tt>&nbsp;is a hint to optimize the execution of long running tasks, and defaults to&nbsp;<tt class=" ">false</tt>.            </p>
+                <p>
+    The optional&nbsp;<tt class=" ">keepalive-time</tt>&nbsp;defines the time, in milliseconds, that an internal thread may be idle. The attribute default value is&nbsp;<tt class=" ">60000</tt>.            </p>
+                <p>
+    The optional&nbsp;reject-policy defines the policy to use when a task is rejected by the executor. The attribute value may be the default&nbsp;<tt class=" ">ABORT</tt>, which means an exception should be thrown, or<tt class=" ">RETRY_ABORT</tt>, which means the executor will try to submit it once more, before throwing an exception.&nbsp;            </p>
+                <p>
+    Management clients, such as the WildFly CLI, may also be used to configure Managed Scheduled Executor Service instances. An example to <tt class=" ">add</tt> and <tt class=" ">remove</tt> one named <tt class=" ">other</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=ee/managed-scheduled-executor-service=other:add(jndi-name=java\:jboss\/ee\/scheduler\/other, core-threads=2)
+/subsystem=ee/managed-scheduled-executor-service=other:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

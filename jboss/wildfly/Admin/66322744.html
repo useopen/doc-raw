@@ -1,0 +1,939 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>The native management API</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>The native management API</h1>
+        </div>
+        
+        <div id="66322744" class="content prepend-top">
+            <p>
+    A standalone WildFly process, or a managed domain Domain Controller or slave Host Controller process can be configured to listen for remote management requests using its &quot;native management interface&quot;:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;native-interface interface=&quot;management&quot; port=&quot;9999&quot; security-realm=&quot;ManagementRealm&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    <sub class=" ">(See standalone/configuration/standalone.xml or domain/configuration/host.xml)</sub>            </p>
+                <p>
+    The CLI tool that comes with the application server uses this interface, and user can develop custom clients that use it as well. In this section we'll cover the basics on how to develop such a client. We'll also cover details on the format of low-level management operation requests and responses &ndash; information that should prove useful for users of the CLI tool as well.            </p>
+        <div class="section-2"  id="66322744_ThenativemanagementAPI-NativeManagementClientDependencies"  >
+        <h2>Native Management Client Dependencies</h2>
+    
+            <p>
+    The native management interface uses an open protocol based on the JBoss Remoting library. JBoss Remoting is used to establish a communication channel from the client to the process being managed. Once the communication channel is established the primary traffic over the channel is management requests initiated by the client and asynchronous responses from the target process.            </p>
+                <p>
+    A custom Java-based client should have the maven artifact <tt class=" ">org.jboss.as:jboss-as-controller-client</tt> and its dependencies on the classpath. The other dependencies are:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Maven Artifact            </td>
+                <td rowspan="1" colspan="1">
+    Purpose            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.remoting:jboss-remoting</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Remote communication            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss:jboss-dmr</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <a href="66322745.html">Detyped representation of the management model</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.as:jboss-as-protocol</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Wire protocol for remote WildFly&nbsp;management            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.sasl:jboss-sasl</tt>            </td>
+                <td rowspan="1" colspan="1">
+    SASL authentication            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.xnio:xnio-api</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Non-blocking IO            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.xnio:xnio-nio</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Non-blocking IO            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.logging:jboss-logging</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Logging            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.threads:jboss-threads</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Thread management            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.marshalling:jboss-marshalling</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Marshalling and unmarshalling data to/from streams            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The client API is entirely within the <tt class=" ">org.jboss.as:jboss-as-controller-client</tt> artifact; the other dependencies are part of the internal implementation of <tt class=" ">org.jboss.as:jboss-as-controller-client</tt> and are not compile-time dependencies of any custom client based on it.            </p>
+                <p>
+    The management protocol is an open protocol, so a completely custom client could be developed without using these libraries (e.g. using Python or some other language.)            </p>
+        </div>
+    
+    <div class="section-2"  id="66322744_ThenativemanagementAPI-Workingwitha%7B%7BModelControllerClient%7D%7D"  >
+        <h2>Working with a  ModelControllerClient</h2>
+    
+            <p>
+    The <tt class=" ">org.jboss.as.controller.client.ModelControllerClient</tt> class is the main class a custom client would use to manage a WildFly server instance or a Domain Controller or slave Host Controller.            </p>
+                <p>
+    The custom client must have maven artifact <tt class=" ">org.jboss.as:jboss-as-controller-client</tt> and its dependencies on the classpath.            </p>
+        <div class="section-3"  id="66322744_ThenativemanagementAPI-Creatingthe%7B%7BModelControllerClient%7D%7D"  >
+        <h3>Creating the  ModelControllerClient</h3>
+    
+            <p>
+    To create a management client that can connect to your target process's native management socket, simply:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelControllerClient client = ModelControllerClient.Factory.create(InetAddress.getByName(&quot;localhost&quot;), 9999);</code></pre>
+        </div>
+    </div>
+            <p>
+    The address and port are what is configured in the target process' <tt class=" ">&lt;management&gt;&lt;management-interfaces&gt;&lt;native-interface.../&gt;</tt> element.            </p>
+                <p>
+    Typically, however, the native management interface will be secured, requiring clients to authenticate. On the client side, the custom client will need to provide the user's authentication credentials, obtained in whatever manner is appropriate for the client (e.g. from a dialog box in a GUI-based client.) Access to these credentials is provided by passing in an implementation of the <tt class=" ">javax.security.auth.callback.CallbackHandler</tt> interface. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>static ModelControllerClient createClient(final InetAddress host, final int port,
+                  final String username, final char[] password, final String securityRealmName) {
+
+    final CallbackHandler callbackHandler = new CallbackHandler() {
+
+        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+            for (Callback current : callbacks) {
+                if (current instanceof NameCallback) {
+                    NameCallback ncb = (NameCallback) current;
+                    ncb.setName(username);
+                } else if (current instanceof PasswordCallback) {
+                    PasswordCallback pcb = (PasswordCallback) current;
+                    pcb.setPassword(password.toCharArray());
+                } else if (current instanceof RealmCallback) {
+                    RealmCallback rcb = (RealmCallback) current;
+                    rcb.setText(rcb.getDefaultText());
+                } else {
+                    throw new UnsupportedCallbackException(current);
+                }
+            }
+        }
+    };
+
+    return ModelControllerClient.Factory.create(host, port, callbackHandler);
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322744_ThenativemanagementAPI-Creatinganoperationrequestobject"  >
+        <h3>Creating an operation request object</h3>
+    
+            <p>
+    Management requests are formulated using the <tt class=" ">org.jboss.dmr.ModelNode</tt> class from the <tt class=" ">jboss-dmr</tt> library. The <tt class=" ">jboss-dmr</tt> library allows the complete WildFly management model to be expressed using a very small number of Java types. See <a href="66322745.html">Detyped management and the jboss-dmr library</a> for full details on using this library.            </p>
+                <p>
+    Let's show an example of creating an operation request object that can be used to <a href="66322742.html#66322742_Globaloperations-readresourcedescription">read the resource description</a> for the web subsystem's HTTP connector:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode op = new ModelNode();
+op.get(&quot;operation&quot;).set(&quot;read-resource-description&quot;);
+
+ModelNode address = op.get(&quot;address&quot;);
+address.add(&quot;subsystem&quot;, &quot;web&quot;);
+address.add(&quot;connector&quot;, &quot;http&quot;);
+
+op.get(&quot;recursive&quot;).set(true);
+op.get(&quot;operations&quot;).set(true);</code></pre>
+        </div>
+    </div>
+            <p>
+    What we've done here is created a ModelNode of type <tt class=" ">ModelType.OBJECT</tt> with the following fields:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">operation</tt> &ndash; the name of the operation to invoke. All operation requests <strong class=" ">must</strong> include this field and its value must be a String.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">address</tt> &ndash; the address of the resource to invoke the operation against. This field's must be of <tt class=" ">ModelType.LIST</tt> with each element in the list being a <tt class=" ">ModelType.PROPERTY</tt>. If this field is omitted the operation will target the root resource. The operation can be targeted at any address in the management model; here we are targeting it at the resource for the web subsystem's http connector.            </p>
+    </li></ul>            <p>
+    In this case, the request includes two optional parameters:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">recursive</tt> &ndash; true means you want the description of child resources under this resource. Default is false            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">operations</tt> &ndash; true means you want the description of operations exposed by the resource to be included. Default is false.            </p>
+    </li></ul>            <p>
+    Different operations take different parameters, and some take no parameters at all.            </p>
+                <p>
+    See <a href="66322744.html#66322744_ThenativemanagementAPI-requestformat">Format of a Detyped Operation Request</a> for full details on the structure of a ModelNode that will represent an operation request.            </p>
+                <p>
+    The example above produces an operation request ModelNode equivalent to what the CLI produces internally when it parses and executes the following low-level CLI command:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[localhost:9999 /] /subsystem=web/connector=http:read-resource-description(recursive=true,operations=true)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322744_ThenativemanagementAPI-Executetheoperationandmanipulatetheresult%3A"  >
+        <h3>Execute the operation and manipulate the result:</h3>
+    
+            <p>
+    The <tt class=" ">execute</tt> method sends the operation request ModelNode to the process being managed and returns a ModelNode the contains the process' response:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode returnVal = client.execute(op);
+System.out.println(returnVal.get(&quot;result&quot;).toString());</code></pre>
+        </div>
+    </div>
+            <p>
+    See <a href="66322744.html#66322744_ThenativemanagementAPI-responseformat">Format of a Detyped Operation Response</a> for general details on the structure of the &quot;returnVal&quot; ModelNode.            </p>
+                <p>
+    The <tt class=" ">execute</tt> operation shown above will block the calling thread until the response is received from the process being managed. <tt class=" ">ModelControllerClient</tt> also exposes and API allowing asynchronous invocation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Future&lt;ModelNode&gt; future = client.executeAsync(op);
+. . .  // do other stuff
+ModelNode returnVal = future.get();
+System.out.println(returnVal.get(&quot;result&quot;).toString());</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322744_ThenativemanagementAPI-Closethe%7B%7BModelControllerClient%7D%7D"  >
+        <h3>Close the  ModelControllerClient</h3>
+    
+            <p>
+    A <tt class=" ">ModelControllerClient</tt> can be reused for multiple requests. Creating a new <tt class=" ">ModelControllerClient</tt> for each request is an anti-pattern. However, when the <tt class=" ">ModelControllerClient</tt> is no longer needed, it should always be explicitly closed, allowing it to close down any connections to the process it was managing and release other resources:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>client.close();</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322744_ThenativemanagementAPI-requestformat"><a name="66322744_ThenativemanagementAPI-requestformat"></a></span>
+            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322744_ThenativemanagementAPI-FormatofaDetypedOperationRequest"  >
+        <h2>Format of a Detyped Operation Request</h2>
+    
+            <p>
+    The basic method a user of the WildFly 8 programmatic management API would use is very simple:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode execute(ModelNode operation) throws IOException;</code></pre>
+        </div>
+    </div>
+            <p>
+    where the return value is the detyped representation of the response, and <tt class=" ">operation</tt> is the detyped representation of the operation being invoked.            </p>
+                <p>
+    The purpose of this section is to document the structure of <tt class=" ">operation</tt>.            </p>
+                <p>
+    See <a href="66322744.html#66322744_ThenativemanagementAPI-responseformat">Format of a Detyped Operation Response</a> for a discussion of the format of the response.            </p>
+        <div class="section-3"  id="66322744_ThenativemanagementAPI-SimpleOperations"  >
+        <h3>Simple Operations</h3>
+    
+            <p>
+    A text representation of simple operation would look like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+    &quot;address&quot; =&gt; [
+        (&quot;profile&quot; =&gt; &quot;production&quot;),
+        (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+        (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool1&quot;)
+    ],
+    &quot;name&quot; =&gt; &quot;count&quot;,
+    &quot;value&quot; =&gt; 20
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Java code to produce that output would be:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode op = new ModelNode();
+op.get(&quot;operation&quot;).set(&quot;write-attribute&quot;);
+ModelNode addr = op.get(&quot;address&quot;);
+addr.add(&quot;profile&quot;, &quot;production&quot;);
+addr.add(&quot;subsystem&quot;, &quot;threads&quot;);
+addr.add(&quot;bounded-queue-thread-pool&quot;, &quot;pool1&quot;);
+op.get(&quot;name&quot;).set(&quot;count&quot;);
+op.get(&quot;value&quot;).set(20);
+System.out.println(op);</code></pre>
+        </div>
+    </div>
+            <p>
+    The order in which the outermost elements appear in the request is not relevant. The required elements are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">operation</tt> &ndash; String &ndash; The name of the operation being invoked.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">address</tt> &ndash; the address of the managed resource against which the request should be executed. If not set, the address is the root resource. The address is an ordered list of key-value pairs describing where the resource resides in the overall management resource tree. Management resources are organized in a tree, so the order in which elements in the address occur is important.            </p>
+    </li></ul>            <p>
+    The other key/value pairs are parameter names and their values. The names and values should match what is specified in the <a href="66322746.html#66322746_DescriptionoftheManagementModel-operationdescription">operation's description</a>.            </p>
+                <p>
+    Parameters may have any name, except for the reserved words <tt class=" ">operation</tt>, <tt class=" ">address</tt> and <tt class=" ">operation-headers</tt>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322744_ThenativemanagementAPI-OperationHeaders"  >
+        <h3>Operation Headers</h3>
+    
+            <p>
+    Besides the special operation and address values discussed above, operation requests can also include special &quot;header&quot; values that help control how the operation executes. These headers are created under the special reserved word <tt class=" ">operation-headers</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode op = new ModelNode();
+op.get(&quot;operation&quot;).set(&quot;write-attribute&quot;);
+ModelNode addr = op.get(&quot;address&quot;);
+addr.add(&quot;base&quot;, &quot;domain&quot;);
+addr.add(&quot;profile&quot;, &quot;production&quot;);
+addr.add(&quot;subsystem&quot;, &quot;threads&quot;);
+addr.add(&quot;bounded-queue-thread-pool&quot;, &quot;pool1&quot;);
+op.get(&quot;name&quot;).set(&quot;count&quot;);
+op.get(&quot;value&quot;).set(20);
+op.get(&quot;operation-headers&quot;, &quot;rollback-on-runtime-failure&quot;).set(false);
+System.out.println(op);</code></pre>
+        </div>
+    </div>
+            <p>
+    This produces:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+    &quot;address&quot; =&gt; [
+        (&quot;profile&quot; =&gt; &quot;production&quot;),
+        (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+        (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool1&quot;)
+    ],
+    &quot;name&quot; =&gt; &quot;count&quot;,
+    &quot;value&quot; =&gt; 20,
+    &quot;operation-headers&quot; =&gt; {
+        &quot;rollback-on-runtime-failure =&gt; false
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The following operation headers are supported:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">rollback-on-runtime-failure</tt> &ndash; boolean, optional, defaults to true. Whether an operation that successfully updates the persistent configuration model should be reverted if it fails to apply to the runtime. Operations that affect the persistent configuration are applied in two stages &ndash; first to the configuration model and then to the actual running services. If there is an error applying to the configuration model the operation will be aborted with no configuration change and no change to running services will be attempted. However, operations are allowed to change the configuration model even if there is a failure to apply the change to the running services &ndash; if and only if this <tt class=" ">rollback-on-runtime-failure</tt> header is set to <tt class=" ">false</tt>.  So, this header only deals with what happens if there is a problem applying an operation to the running state of a server (e.g. actually increasing the size of a runtime thread pool.)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">rollout-plan</tt> &ndash; only relevant to requests made to a Domain Controller or Host Controller. See &quot;<a href="66322744.html#66322744_ThenativemanagementAPI-rolloutplan">Operations with a Rollout Plan</a>&quot; for details.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">allow-resource-service-restart</tt> &ndash; boolean, optional, defaults to false. Whether an operation that requires restarting some runtime services in order to take effect should do so. See discussion of <tt class=" ">resource-services</tt> in the <a href="66322746.html#66322746_DescriptionoftheManagementModel-applyingruntimeupdates">&quot;Applying Updates to Runtime Services&quot; section of the Description of the Management Model section</a> for further details.            </p>
+    </li></ul>            <p>
+        <span id="66322744_ThenativemanagementAPI-compositeoperations"><a name="66322744_ThenativemanagementAPI-compositeoperations"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322744_ThenativemanagementAPI-CompositeOperations"  >
+        <h3>Composite Operations</h3>
+    
+            <p>
+    The root resource for a Domain or Host Controller or an individual server will expose an operation named &quot;<tt class=" ">composite</tt>&quot;.   This operation executes a list of other operations as an atomic unit (although the atomicity requirement can be <a href="66322744.html#66322744_ThenativemanagementAPI-rollbackonruntimefailure">relaxed</a>.  The structure of the request for the &quot;<tt class=" ">composite</tt>&quot; operation has the same fundamental structure as a simple operation (i.e. operation name, address, params as key value pairs).            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;operation&quot; =&gt; &quot;composite&quot;,
+    &quot;address&quot; =&gt; [],
+    &quot;steps&quot; =&gt; [
+         {
+              &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+              &quot;address&quot; =&gt; [
+                   (&quot;profile&quot; =&gt; &quot;production&quot;),
+                   (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+                   (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool1&quot;)
+              ],
+              &quot;count&quot; =&gt; &quot;count&quot;,
+              &quot;value&quot; =&gt; 20
+         },
+         {
+              &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+              &quot;address&quot; =&gt; [
+                   (&quot;profile&quot; =&gt; &quot;production&quot;),
+                   (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+                   (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool2&quot;)
+              ],
+              &quot;name&quot; =&gt; &quot;count&quot;,
+              &quot;value&quot; =&gt; 10
+         }
+    ],
+    &quot;operation-headers&quot; =&gt; {
+        &quot;rollback-on-runtime-failure =&gt; false
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The &quot;composite&quot; operation takes a single parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">steps</tt> &ndash; a list, where each item in the list has the same structure as a simple operation request. In the example above each of the two steps is modifying the thread pool configuration for a different pool. There need not be any particular relationship between the steps. Note that the <tt class=" ">rollback-on-runtime-failure</tt> and <tt class=" ">rollout-plan</tt> operation headers are not supported for the individual steps in a composite operation.            </p>
+    </li></ul>            <p>
+        <span id="66322744_ThenativemanagementAPI-rollbackonruntimefailure"><a name="66322744_ThenativemanagementAPI-rollbackonruntimefailure"></a></span>
+<br/>The <tt class=" ">rollback-on-runtime-failure</tt> operation header discussed above has a particular meaning when applied to a composite operation, controlling whether steps that successfully execute should be reverted if other steps fail at runtime. Note that if any steps modify the persistent configuration, and any of those steps fail, all steps will be reverted. Partial/incomplete changes to the persistent configuration are not allowed.            </p>
+                <p>
+        <span id="66322744_ThenativemanagementAPI-rolloutplan"><a name="66322744_ThenativemanagementAPI-rolloutplan"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322744_ThenativemanagementAPI-OperationswithaRolloutPlan"  >
+        <h3>Operations with a Rollout Plan</h3>
+    
+            <p>
+    Operations targeted at domain or host level resources can potentially impact multiple servers. Such operations can include a &quot;rollout plan&quot; detailing the sequence in which the operation should be applied to servers as well as policies for detailing whether the operation should be reverted if it fails to execute successfully on some servers.            </p>
+                <p>
+    If the operation includes a rollout plan, the structure is as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+    &quot;address&quot; =&gt; [
+        (&quot;profile&quot; =&gt; &quot;production&quot;),
+        (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+        (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool1&quot;)
+    ],
+    &quot;name&quot; =&gt; &quot;count&quot;,
+    &quot;value&quot; =&gt; 20,
+    &quot;operation-headers&quot; =&gt; {
+        &quot;rollout-plan&quot; =&gt; {
+            &quot;in-series&quot; =&gt; [
+                {
+                    &quot;concurrent-groups&quot; =&gt; {
+                        &quot;groupA&quot; =&gt; {
+                            &quot;rolling-to-servers&quot; =&gt; true,
+                            &quot;max-failure-percentage&quot; =&gt; 20
+                        },
+                        &quot;groupB&quot; =&gt; undefined
+                    }
+                },
+                {
+                   &quot;server-group&quot; =&gt; {
+                        &quot;groupC&quot; =&gt; {
+                            &quot;rolling-to-servers&quot; =&gt; false,
+                            &quot;max-failed-servers&quot; =&gt; 1
+                        }
+                    }
+                },
+                {
+                    &quot;concurrent-groups&quot; =&gt; {
+                        &quot;groupD&quot; =&gt; {
+                            &quot;rolling-to-servers&quot; =&gt; true,
+                            &quot;max-failure-percentage&quot; =&gt; 20
+                        },
+                        &quot;groupE&quot; =&gt; undefined
+                    }
+                }
+            ],
+            &quot;rollback-across-groups&quot; =&gt; true
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see, the rollout plan is another structure in the operation-headers section. The root node of the structure allows two children:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">in-series</tt> &ndash; a list &ndash; A list of activities that are to be performed in series, with each activity reaching completion before the next step is executed. Each activity involves the application of the operation to the servers in one or more server groups. See below for details on each element in the list.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">rollback-across-groups</tt> &ndash; boolean &ndash; indicates whether the need to rollback the operation on all the servers in one server group should trigger a rollback across all the server groups. This is an optional setting, and defaults to <tt class=" ">false</tt>.            </p>
+    </li></ul>            <p>
+    Each element in the list under the <tt class=" ">in-series</tt> node must have one or the other of the following structures:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">concurrent-groups</tt> &ndash; a map of server group names to policies controlling how the operation should be applied to that server group. For each server group in the map, the operation may be applied concurrently. See below for details on the per-server-group policy configuration.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">server-group</tt> &ndash; a single key/value mapping of a server group name to a policy controlling how the operation should be applied to that server group. See below for details on the policy configuration. (Note: there is no difference in plan execution between this and a &quot;<tt class=" ">concurrent-groups</tt>&quot; map with a single entry.)            </p>
+    </li></ul>            <p>
+    The policy controlling how the operation is applied to the servers within a server group has the following elements, each of which is optional:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">rolling-to-servers</tt> &ndash; boolean &ndash; If true, the operation will be applied to each server in the group in series. If false or not specified, the operation will be applied to the servers in the group concurrently.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max-failed-servers</tt> &ndash; int &ndash; Maximum number of servers in the group that can fail to apply the operation before it should be reverted on all servers in the group. The default value if not specified is zero; i.e. failure on any server triggers rollback across the group.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max-failure-percentage</tt> &ndash; int between 0 and 100 &ndash; Maximum percentage of the total number of servers in the group that can fail to apply the operation before it should be reverted on all servers in the group. The default value if not specified is zero; i.e. failure on any server triggers rollback across the group.            </p>
+    </li></ul>            <p>
+    If both <tt class=" ">max-failed-servers</tt> and <tt class=" ">max-failure-percentage</tt> are set, <tt class=" ">max-failure-percentage</tt> takes precedence.            </p>
+                <p>
+    Looking at the (contrived) example above, application of the operation to the servers in the domain would be done in 3 phases. If the policy for any server group triggers a rollback of the operation across the server group, all other server groups will be rolled back as well. The 3 phases are:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Server groups groupA and groupB will have the operation applied concurrently. The operation will be applied to the servers in groupA in series, while all servers in groupB will handle the operation concurrently. If more than 20% of the servers in groupA fail to apply the operation, it will be rolled back across that group. If any servers in groupB fail to apply the operation it will be rolled back across that group.            </p>
+    </li><li class=" ">            <p>
+    Once all servers in groupA and groupB are complete, the operation will be applied to the servers in groupC. Those servers will handle the operation concurrently. If more than one server in groupC fails to apply the operation it will be rolled back across that group.            </p>
+    </li><li class=" ">            <p>
+    Once all servers in groupC are complete, server groups groupD and groupE will have the operation applied concurrently. The operation will be applied to the servers in groupD in series, while all servers in groupE will handle the operation concurrently. If more than 20% of the servers in groupD fail to apply the operation, it will be rolled back across that group. If any servers in groupE fail to apply the operation it will be rolled back across that group.            </p>
+    </li></ol>    <div class="section-4"  id="66322744_ThenativemanagementAPI-DefaultRolloutPlan"  >
+        <h4>Default Rollout Plan</h4>
+    
+            <p>
+    All operations that impact multiple servers will be executed with a rollout plan. However, actually specifying the rollout plan in the operation request is not required. If no <tt class=" ">rollout-plan</tt> operation header is specified, a default plan will be generated. The plan will have the following characteristics:            </p>
+    <ul class=" "><li class=" ">            <p>
+    There will only be a single high level phase. All server groups affected by the operation will have the operation applied concurrently.            </p>
+    </li><li class=" ">            <p>
+    Within each server group, the operation will be applied to all servers concurrently.            </p>
+    </li><li class=" ">            <p>
+    Failure on any server in a server group will cause rollback across the group.            </p>
+    </li><li class=" ">            <p>
+    Failure of any server group will result in rollback of all other server groups.            </p>
+    </li></ul>            <p>
+        <span id="66322744_ThenativemanagementAPI-responseformat"><a name="66322744_ThenativemanagementAPI-responseformat"></a></span>
+            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322744_ThenativemanagementAPI-FormatofaDetypedOperationResponse"  >
+        <h2>Format of a Detyped Operation Response</h2>
+    
+            <p>
+    As noted previously, the basic method a user of the WildFly 8 programmatic management API would use is very simple:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode execute(ModelNode operation) throws IOException;</code></pre>
+        </div>
+    </div>
+            <p>
+    where the return value is the detyped representation of the response, and <tt class=" ">operation</tt> is the detyped representation of the operating being invoked.            </p>
+                <p>
+    The purpose of this section is to document the structure of the return value.            </p>
+                <p>
+    For the format of the request, see <a href="66322744.html#66322744_ThenativemanagementAPI-requestformat">Format of a Detyped Operation Request</a>.            </p>
+        <div class="section-3"  id="66322744_ThenativemanagementAPI-SimpleResponses"  >
+        <h3>Simple Responses</h3>
+    
+            <p>
+    Simple responses are provided by the following types of operations:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Non-composite operations that target a single server. (See below for more on composite operations).            </p>
+    </li><li class=" ">            <p>
+    Non-composite operations that target a Domain Controller or slave Host Controller and don't require the responder to apply the operation on multiple servers and aggregate their results (e.g. a simple read of a domain configuration property.)            </p>
+    </li></ul>            <p>
+    The response will always include a simple boolean outcome field, with one of three possible values:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">success</tt> &ndash; the operation executed successfully            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">failed</tt> &ndash; the operation failed            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">cancelled</tt> &ndash; the execution of the operation was cancelled. (This would be an unusual outcome for a simple operation which would generally very rapidly reach a point in its execution where it couldn't be cancelled.)            </p>
+    </li></ul>            <p>
+    The other fields in the response will depend on whether the operation was successful.            </p>
+                <p>
+    The response for a failed operation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;failure-description&quot; =&gt; &quot;[JBAS-12345] Some failure message&quot;
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A response for a successful operation will include an additional field:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">result</tt> &ndash; the return value, or <tt class=" ">undefined</tt> for void operations or those that return null            </p>
+    </li></ul>            <p>
+    A non-void result:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;name&quot; =&gt; &quot;Brian&quot;,
+        &quot;age&quot; =&gt; 22
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A void result:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; undefined
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The response for a cancelled operation has no other fields:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;cancelled&quot;
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322744_ThenativemanagementAPI-ResponseHeaders"  >
+        <h3>Response Headers</h3>
+    
+            <p>
+    Besides the standard <tt class=" ">outcome</tt>, <tt class=" ">result</tt> and <tt class=" ">failure-description</tt> fields described above, the response may also include various headers that provide more information about the affect of the operation or about the overall state of the server. The headers will be child element under a field named <tt class=" ">response-headers</tt>. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; undefined,
+    &quot;response-headers&quot; =&gt; {
+        &quot;operation-requires-reload&quot; =&gt; true,
+        &quot;process-state&quot; =&gt; &quot;reload-required&quot;
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A response header is typically related to whether an operation could be applied to the targeted runtime without requiring a restart of some or all services, or even of the target process itself. Please see the <a href="66322746.html#66322746_DescriptionoftheManagementModel-applyingruntimeupdates">&quot;Applying Updates to Runtime Services&quot; section of the Description of the Management Model section</a> for a discussion of the basic concepts related to what happens if an operation requires a service restart to be applied.            </p>
+                <p>
+    The current possible response headers are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">operation-requires-reload</tt> &ndash; boolean &ndash; indicates that the specific operation that has generated this response requires a restart of all services in the process in order to take effect in the runtime. This would typically only have a value of 'true'; the absence of the header is the same as a value of 'false.'            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">operation-requires-restart</tt> &ndash; boolean &ndash; indicates that the specific operation that has generated this response requires a full process restart in order to take effect in the runtime. This would typically only have a value of 'true'; the absence of the header is the same as a value of 'false.'            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">process-state</tt> &ndash; enumeration &ndash; Provides information about the overall state of the target process. One of the following values:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">starting</tt> &ndash; the process is starting            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">running</tt> &ndash; the process is in a normal running state. The <tt class=" ">process-state</tt> header would typically not be seen with this value; the absence of the header is the same as a value of 'running'.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">reload-required</tt> &ndash; some operation (not necessarily this one) has executed that requires a restart of all services in order for a configuration change to take effect in the runtime.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">restart-required</tt> &ndash; some operation (not necessarily this one) has executed that requires a full process restart in order for a configuration change to take effect in the runtime.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">stopping</tt> &ndash; the process is stopping            </p>
+    </li></ul></li></ul>    </div>
+    
+    <div class="section-3"  id="66322744_ThenativemanagementAPI-BasicCompositeOperationResponses"  >
+        <h3>Basic Composite Operation Responses</h3>
+    
+            <p>
+    A composite operation is one that incorporates more than one simple operation in a list and executes them atomically. See the <a href="66322744.html#66322744_ThenativemanagementAPI-compositeoperations">&quot;Composite Operations&quot; section</a> for more information.            </p>
+                <p>
+    Basic composite responses are provided by the following types of operations:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Composite operations that target a single server.            </p>
+    </li><li class=" ">            <p>
+    Composite operations that target a Domain Controller or a slave Host Controller and don't require the responder to apply the operation on multiple servers and aggregate their results (e.g. a list of simple reads of domain configuration properties.)            </p>
+    </li></ul>            <p>
+    The high level format of a basic composite operation response is largely the same as that of a simple operation response, although there is an important semantic difference. For a composite operation, the meaning of the outcome flag is controlled by the value of the operation request's <tt class=" ">rollback-on-runtime-failure</tt> header field. If that field was <tt class=" ">false</tt> (default is true), the outcome flag will be success if all steps were successfully applied to the persistent configuration even if <strong class=" ">none</strong> of the composite operation's steps was successfully applied to the runtime.            </p>
+                <p>
+    What's distinctive about a composite operation response is the <tt class=" ">result</tt> field. First, even if the operation was not successful, the <tt class=" ">result</tt> field will usually be present. (It won't be present if there was some sort of immediate failure that prevented the responder from even attempting to execute the individual operations.)  Second, the content of the <tt class=" ">result</tt> field will be a map. Each entry in the map will record the result of an element in the <tt class=" ">steps</tt> parameter of the composite operation request. The key for each item in the map will be the string &quot;<tt class=" ">step-X</tt>&quot; where &quot;X&quot; is the 1-based index of the step's position in the request's <tt class=" ">steps</tt> list. So each individual operation in the composite operation will have its result recorded.            </p>
+                <p>
+    The individual operation results will have the same basic format as the simple operation results described above. However, there are some differences from the simple operation case when the individual operation's <tt class=" ">outcome</tt> flag is <tt class=" ">failed</tt>.  These relate to the fact that in a composite operation, individual operations can be rolled back or not even attempted.            </p>
+                <p>
+    If an individual operation was not even attempted (because the overall operation was cancelled or, more likely, a prior operation failed):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;cancelled&quot;
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    An individual operation that failed and was rolled back:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;failure-description&quot; =&gt; &quot;[JBAS-12345] Some failure message&quot;,
+    &quot;rolled-back&quot; =&gt; true
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    An individual operation that itself succeeded but was rolled back due to failure of another operation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;name&quot; =&gt; &quot;Brian&quot;,
+        &quot;age&quot; =&gt; 22
+    },
+    &quot;rolled-back&quot; =&gt; true
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    An operation that failed and was rolled back:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;failure-description&quot; =&gt; &quot;[JBAS-12345] Some failure message&quot;,
+    &quot;rolled-back&quot; =&gt; true
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Here's an example of the response for a successful 2 step composite operation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        {
+            &quot;outcome&quot; =&gt; &quot;success&quot;,
+            &quot;result&quot; =&gt; {
+                &quot;name&quot; =&gt; &quot;Brian&quot;,
+                &quot;age&quot; =&gt; 22
+            }
+        },
+        {
+            &quot;outcome&quot; =&gt; &quot;success&quot;,
+            &quot;result&quot; =&gt; undefined
+        }
+    ]
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    And for a failed 3 step composite operation, where the first step succeeded and the second failed, triggering cancellation of the 3rd and rollback of the others:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;failure-description&quot; =&gt; &quot;[JBAS-99999] Composite operation failed; see individual operation results for details&quot;,
+    &quot;result&quot; =&gt; [
+        {
+            &quot;outcome&quot; =&gt; &quot;failed&quot;,
+            &quot;result&quot; =&gt; {
+                &quot;name&quot; =&gt; &quot;Brian&quot;,
+                &quot;age&quot; =&gt; 22
+            },
+            &quot;rolled-back&quot; =&gt; true
+        },
+        {
+            &quot;outcome&quot; =&gt; &quot;failed&quot;,
+            &quot;failure-description&quot; =&gt; &quot;[JBAS-12345] Some failure message&quot;,
+            &quot;rolled-back&quot; =&gt; true
+        },
+        {
+            &quot;outcome&quot; =&gt; &quot;cancelled&quot;
+        }
+    ]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322744_ThenativemanagementAPI-MultiServerResponses"  >
+        <h3>Multi-Server Responses</h3>
+    
+            <p>
+    Multi-server responses are provided by operations that target a Domain Controller or slave Host Controller and require the responder to apply the operation on multiple servers and aggregate their results (e.g. nearly all domain or host configuration updates.)            </p>
+                <p>
+    Multi-server operations are executed in several stages.            </p>
+                <p>
+    First, the operation may need to be applied against the authoritative configuration model maintained by the Domain Controller (for <tt class=" ">domain.xml</tt> confgurations) or a Host Controller (for a <tt class=" ">host.xml</tt> configuration). If there is a failure at this stage, the operation is automatically rolled back, with a response like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;domain-failure-description&quot; =&gt; &quot;[JBAS-33333] Failed to apply X to the domain model&quot;
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    If the operation was addressed to the domain model, in the next stage the Domain Controller will ask each slave Host Controller to apply it to its local copy of the domain model. If any Host Controller fails to do so, the Domain Controller will tell all Host Controllers to revert the change, and it will revert the change locally as well. The response to the client will look like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;host-failure-descriptions&quot; =&gt; {
+        &quot;hostA&quot; =&gt; &quot;[DOM-3333] Failed to apply to the domain model&quot;,
+        &quot;hostB&quot; =&gt; &quot;[DOM-3333] Failed to apply to the domain model&quot;
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    If the preceding stages succeed, the operation will be pushed to all affected servers. If the operation is successful on all servers, the response will look like this (this example operation has a void response, hence the result for each server is undefined):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; undefined,
+    &quot;server-groups&quot; =&gt; {
+        &quot;groupA&quot; =&gt; {
+            &quot;serverA-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            },
+            &quot;serverA-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            }
+        },
+        &quot;groupB&quot; =&gt; {
+            &quot;serverB-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            },
+            &quot;serverB-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            }
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The operation need not succeed on all servers in order to get an <tt class=" ">&quot;outcome&quot; =&gt; &quot;success&quot;</tt> result. All that is required is that it succeed on at least one server without the rollback policies in the rollout plan triggering a rollback on that server. An example response in such a situation would look like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; undefined,
+    &quot;server-groups&quot; =&gt; {
+        &quot;groupA&quot; =&gt; {
+            &quot;serverA-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            },
+            &quot;serverA-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            }
+        },
+        &quot;groupB&quot; =&gt; {
+            &quot;serverB-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            },
+            &quot;serverB-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            },
+            &quot;serverB-3&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host3&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+                    &quot;failure-description&quot; =&gt; &quot;[DOM-4556] Something didn't work right&quot;,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            }
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally, if the operation fails or is rolled back on all servers, an example response would look like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;server-groups&quot; =&gt; {
+        &quot;groupA&quot; =&gt; {
+            &quot;serverA-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            },
+            &quot;serverA-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            }
+        },
+        &quot;groupB&quot; =&gt; {
+            &quot;serverB-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+                    &quot;result&quot; =&gt; undefined,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            },
+            &quot;serverB-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+                    &quot;result&quot; =&gt; undefined,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            },
+            &quot;serverB-3&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host3&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+                    &quot;failure-description&quot; =&gt; &quot;[DOM-4556] Something didn't work right&quot;,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            }
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

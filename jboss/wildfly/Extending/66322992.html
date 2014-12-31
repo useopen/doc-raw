@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Integrate with WildFly 8</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Integrate with WildFly 8</h1>
+        </div>
+        
+        <div id="66322992" class="content prepend-top">
+            <p>
+    Now that we have all the code needed for our subsystem, we can build our project by running <tt class=" ">mvn install</tt>            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[kabir ~/sourcecontrol/temp/archetype-test/acme-subsystem]
+$mvn install
+[INFO] Scanning for projects...
+[...]
+main:
+   [delete] Deleting: /Users/kabir/sourcecontrol/temp/archetype-test/acme-subsystem/null1004283288
+   [delete] Deleting directory /Users/kabir/sourcecontrol/temp/archetype-test/acme-subsystem/target/module
+     [copy] Copying 1 file to /Users/kabir/sourcecontrol/temp/archetype-test/acme-subsystem/target/module/com/acme/corp/tracker/main
+     [copy] Copying 1 file to /Users/kabir/sourcecontrol/temp/archetype-test/acme-subsystem/target/module/com/acme/corp/tracker/main
+     [echo] Module com.acme.corp.tracker has been created in the target/module directory. Copy to your JBoss AS 7 installation.
+[INFO] Executed tasks
+[INFO]
+[INFO] --- maven-install-plugin:2.3.1:install (default-install) @ acme-subsystem ---
+[INFO] Installing /Users/kabir/sourcecontrol/temp/archetype-test/acme-subsystem/target/acme-subsystem.jar to /Users/kabir/.m2/repository/com/acme/corp/acme-subsystem/1.0-SNAPSHOT/acme-subsystem-1.0-SNAPSHOT.jar
+[INFO] Installing /Users/kabir/sourcecontrol/temp/archetype-test/acme-subsystem/pom.xml to /Users/kabir/.m2/repository/com/acme/corp/acme-subsystem/1.0-SNAPSHOT/acme-subsystem-1.0-SNAPSHOT.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 5.851s
+[INFO] Finished at: Mon Jul 11 23:24:58 BST 2011
+[INFO] Final Memory: 7M/81M
+[INFO] ------------------------------------------------------------------------</code></pre>
+        </div>
+    </div>
+            <p>
+    This will have built our project and assembled a module for us that can be used for installing it into WildFly 8. If you go to the <tt class=" ">target/module</tt> folder where you built the project you will see the module            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ls target/module/com/acme/corp/tracker/main/
+acme-subsystem.jar  module.xml</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">module.xml</tt> comes from <tt class=" ">src/main/resources/module/main/module.xml</tt> and is used to define your module. It says that it contains the <tt class=" ">acme-subsystem.jar</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;module xmlns=&quot;urn:jboss:module:1.0&quot; name=&quot;com.acme.corp.tracker&quot;&gt;
+    &lt;resources&gt;
+        &lt;resource-root path=&quot;acme-subsystem.jar&quot;/&gt;
+    &lt;/resources&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    And has a default set of dependencies needed by every subsystem created. If your subsystem requires additional module dependencies you can add them here before building and installing.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>    &lt;dependencies&gt;
+        &lt;module name=&quot;javax.api&quot;/&gt;
+        &lt;module name=&quot;org.jboss.staxmapper&quot;/&gt;
+        &lt;module name=&quot;org.jboss.as.controller&quot;/&gt;
+        &lt;module name=&quot;org.jboss.as.server&quot;/&gt;
+        &lt;module name=&quot;org.jboss.modules&quot;/&gt;
+        &lt;module name=&quot;org.jboss.msc&quot;/&gt;
+        &lt;module name=&quot;org.jboss.logging&quot;/&gt;
+        &lt;module name=&quot;org.jboss.vfs&quot;/&gt;
+    &lt;/dependencies&gt;
+&lt;/module&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Note that the name of the module corresponds to the directory structure containing it. Now copy the <tt class=" ">target/module/com/acme/corp/tracker/main/</tt> directory and its contents to <tt class=" ">$WFLY/modules/com/acme/corp/tracker/main/</tt> (where <tt class=" ">$WFLY</tt> is the root of your WildFly install).            </p>
+                <p>
+    Next we need to modify <tt class=" ">$WFLY/standalone/configuration/standalone.xml</tt>. First we need to add our new module to the <tt class=" ">&lt;extensions&gt;</tt> section:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>    &lt;extensions&gt;
+        ...
+        &lt;extension module=&quot;org.jboss.as.weld&quot;/&gt;
+        &lt;extension module=&quot;com.acme.corp.tracker&quot;/&gt;
+    &lt;/extensions&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    And then we have to add our subsystem to the <tt class=" ">&lt;profile&gt;</tt> section:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>    &lt;profile&gt;
+    ...
+
+        &lt;subsystem xmlns=&quot;urn:com.acme.corp.tracker:1.0&quot;&gt;
+            &lt;deployment-types&gt;
+                &lt;deployment-type suffix=&quot;sar&quot; tick=&quot;10000&quot;/&gt;
+                &lt;deployment-type suffix=&quot;war&quot; tick=&quot;10000&quot;/&gt;
+            &lt;/deployment-types&gt;
+        &lt;/subsystem&gt;
+    ...
+    &lt;/profile&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Adding this to a managed domain works exactly the same apart from in this case you need to modify <tt class=" ">$AS7/domain/configuration/domain.xml</tt>.            </p>
+                <p>
+    Now start up WildFly 8 by running <tt class=" ">$WFLY/bin/standalone.sh</tt> and you should see messages like these after the server has started, which means our subsystem has been added and our <tt class=" ">TrackerService</tt> is working:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>15:27:33,838 INFO  [org.jboss.as] (Controller Boot Thread) JBoss AS 7.0.0.Final &quot;Lightning&quot; started in 2861ms - Started 94 of 149 services (55 services are passive or on-demand)
+15:27:42,966 INFO  [stdout] (Thread-8) Current deployments deployed while sar tracking active:
+15:27:42,966 INFO  [stdout] (Thread-8) []
+15:27:42,967 INFO  [stdout] (Thread-8) Cool: 0
+15:27:42,967 INFO  [stdout] (Thread-9) Current deployments deployed while war tracking active:
+15:27:42,967 INFO  [stdout] (Thread-9) []
+15:27:42,967 INFO  [stdout] (Thread-9) Cool: 0
+15:27:52,967 INFO  [stdout] (Thread-8) Current deployments deployed while sar tracking active:
+15:27:52,967 INFO  [stdout] (Thread-8) []
+15:27:52,967 INFO  [stdout] (Thread-8) Cool: 0</code></pre>
+        </div>
+    </div>
+            <p>
+    If you run the command line interface you can execute some commands to see more about the subsystem. For example            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=tracker/:read-resource-description(recursive=true, operations=true)</code></pre>
+        </div>
+    </div>
+            <p>
+    will return a lot of information, including what we provided in the <tt class=" ">DescriptionProvider</tt>s we created to document our subsystem.            </p>
+                <p>
+    To see the current subsystem state you can execute            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=tracker/:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;type&quot; =&gt; {
+        &quot;war&quot; =&gt; {&quot;tick&quot; =&gt; 10000L},
+        &quot;sar&quot; =&gt; {&quot;tick&quot; =&gt; 10000L}
+    }}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    We can remove both the deployment types which removes them from the model:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=tracker/type=sar:remove
+{&quot;outcome&quot; =&gt; &quot;success&quot;}
+[standalone@localhost:9999 /] /subsystem=tracker/type=war:remove
+{&quot;outcome&quot; =&gt; &quot;success&quot;}
+[standalone@localhost:9999 /] /subsystem=tracker/:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;type&quot; =&gt; undefined}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    You should now see the output from the <tt class=" ">TrackerService</tt> instances having stopped.            </p>
+                <p>
+    Now, let's add the war tracker again:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=tracker/type=war:add
+{&quot;outcome&quot; =&gt; &quot;success&quot;}
+[standalone@localhost:9999 /] /subsystem=tracker/:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;type&quot; =&gt; {&quot;war&quot; =&gt; {&quot;tick&quot; =&gt; 10000L}}}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    and the WildFly 8 console should show the messages coming from the war <tt class=" ">TrackerService</tt> again.            </p>
+                <p>
+    Now let us deploy something. You can find two maven projects for test wars already built at <a href="attachments/66879657/1/test1.zip">test1.zip</a> and <a href="attachments/66879658/1/test2.zip">test2.zip</a>. If you download them and extract them to <tt class=" ">/Downloads/test1</tt> and <tt class=" ">/Downloads/test2</tt>, you can see that <tt class=" ">/Downloads/test1/target/test1.war</tt> contains a <tt class=" ">META-INF/cool.txt</tt> while <tt class=" ">/Downloads/test2/target/test2.war</tt> does not contain that file. From CLI deploy <tt class=" ">test1.war</tt> first:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] deploy ~/Downloads/test1/target/test1.war
+'test1.war' deployed successfully.</code></pre>
+        </div>
+    </div>
+            <p>
+    And you should now see the output from the war <tt class=" ">TrackerService</tt> list the deployments:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>15:35:03,712 INFO  [org.jboss.as.server.deployment] (MSC service thread 1-2) Starting deployment of &quot;test1.war&quot;
+15:35:03,988 INFO  [org.jboss.web] (MSC service thread 1-1) registering web context: /test1
+15:35:03,996 INFO  [org.jboss.as.server.controller] (pool-2-thread-9) Deployed &quot;test1.war&quot;
+15:35:13,056 INFO  [stdout] (Thread-9) Current deployments deployed while war tracking active:
+15:35:13,056 INFO  [stdout] (Thread-9) [test1.war]
+15:35:13,057 INFO  [stdout] (Thread-9) Cool: 1</code></pre>
+        </div>
+    </div>
+            <p>
+    So our <tt class=" ">test1.war</tt> got picked up as a 'cool' deployment. Now if we deploy <tt class=" ">test2.war</tt>            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] deploy ~/sourcecontrol/temp/archetype-test/test2/target/test2.war
+'test2.war' deployed successfully.</code></pre>
+        </div>
+    </div>
+            <p>
+    You will see that deployment get picked up as well but since there is no <tt class=" ">META-INF/cool.txt</tt> it is not marked as a 'cool' deployment:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>15:37:05,634 INFO  [org.jboss.as.server.deployment] (MSC service thread 1-4) Starting deployment of &quot;test2.war&quot;
+15:37:05,699 INFO  [org.jboss.web] (MSC service thread 1-1) registering web context: /test2
+15:37:05,982 INFO  [org.jboss.as.server.controller] (pool-2-thread-15) Deployed &quot;test2.war&quot;
+15:37:13,075 INFO  [stdout] (Thread-9) Current deployments deployed while war tracking active:
+15:37:13,075 INFO  [stdout] (Thread-9) [test1.war, test2.war]
+15:37:13,076 INFO  [stdout] (Thread-9) Cool: 1</code></pre>
+        </div>
+    </div>
+            <p>
+    An undeploy            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] undeploy test1.war
+Successfully undeployed test1.war.</code></pre>
+        </div>
+    </div>
+            <p>
+    is also reflected in the <tt class=" ">TrackerService</tt> output:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>15:38:47,901 INFO  [org.jboss.as.server.controller] (pool-2-thread-21) Undeployed &quot;test1.war&quot;
+15:38:47,934 INFO  [org.jboss.as.server.deployment] (MSC service thread 1-3) Stopped deployment test1.war in 40ms
+15:38:53,091 INFO  [stdout] (Thread-9) Current deployments deployed while war tracking active:
+15:38:53,092 INFO  [stdout] (Thread-9) [test2.war]
+15:38:53,092 INFO  [stdout] (Thread-9) Cool: 0</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally, we registered a write attribute handler for the <tt class=" ">tick</tt> property of the <tt class=" ">type</tt> so we can change the frequency            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=tracker/type=war:write-attribute(name=tick,value=1000)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+            <p>
+    You should now see the output from the <tt class=" ">TrackerService</tt> happen every second            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>15:39:43,100 INFO  [stdout] (Thread-9) Current deployments deployed while war tracking active:
+15:39:43,100 INFO  [stdout] (Thread-9) [test2.war]
+15:39:43,101 INFO  [stdout] (Thread-9) Cool: 0
+15:39:44,101 INFO  [stdout] (Thread-9) Current deployments deployed while war tracking active:
+15:39:44,102 INFO  [stdout] (Thread-9) [test2.war]
+15:39:44,105 INFO  [stdout] (Thread-9) Cool: 0
+15:39:45,106 INFO  [stdout] (Thread-9) Current deployments deployed while war tracking active:
+15:39:45,106 INFO  [stdout] (Thread-9) [test2.war]</code></pre>
+        </div>
+    </div>
+            <p>
+    If you open <tt class=" ">$WFLY/standalone/configuration/standalone.xml</tt> you can see that our subsystem entry reflects the current state of the subsystem:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>        &lt;subsystem xmlns=&quot;urn:com.acme.corp.tracker:1.0&quot;&gt;
+            &lt;deployment-types&gt;
+                &lt;deployment-type suffix=&quot;war&quot; tick=&quot;1000&quot;/&gt;
+            &lt;/deployment-types&gt;
+        &lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+        </div>
+    </div>
+</body>
+</html>

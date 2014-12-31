@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Discovery</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Discovery</h1>
+        </div>
+        
+        <div id="66486734" class="content prepend-top">
+            <p>
+    Apache CXF includes support for <i class=" ">Web Services Dynamic Discovery</i> (<a href="http://docs.oasis-open.org/ws-dd/discovery/1.1/os/wsdd-discovery-1.1-spec-os.html">WS-Discovery</a>), which is a protocol to enable dynamic discovery of services available on the local network. The protocol implies using a <tt class=" ">UDP</tt> based multicast transport to announce new services and probe for existing services. A managed mode where a discovery proxy is used to reduce the amount of required multicast traffic is also covered by the protocol.            </p>
+                <p>
+    JBossWS integrates the <i class=" ">WS-Discovery</i> <a href="http://cxf.apache.org/docs/ws-discovery.html">functionalities</a> provided by Apache CXF into the application server.            </p>
+        <div class="section-2"  id="66486734_WS-Discovery-EnablingWSDiscovery"  >
+        <h2>Enabling WS-Discovery</h2>
+    
+            <p>
+    Apache CXF enables <i class=" ">WS-Discovery</i> depending on the availability of its runtime component; given that's always shipped in the application server, JBossWS integration requires using the&nbsp;<tt class=" ">cxf.ws-discovery.enabled</tt> <a href="https://docs.jboss.org/author/display/WFLY8/Advanced+User+Guide#AdvancedUserGuide-Configurationthroughdeploymentdescriptor">property</a> usage for enabling <i class=" ">WS-Discovery</i> for a given deployment. By default <i class=" ">WS-Discovery</i> is disabled on the application server. Below is an example of <i class=" ">jboss-webservices.xml</i> descriptor to be used for enabling <i class=" ">WS-Discovery</i>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;webservices xmlns=&quot;http://www.jboss.com/xml/ns/javaee&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+  version=&quot;1.2&quot; xsi:schemaLocation=&quot;http://www.jboss.com/xml/ns/javaee&quot;&gt;
+
+  &lt;property&gt;
+    &lt;name&gt;cxf.ws-discovery.enabled&lt;/name&gt;
+    &lt;value&gt;true&lt;/value&gt;
+  &lt;/property&gt;
+
+&lt;/webservices&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    By default, a <i class=" ">WS-Discovery</i> service endpoint (SOAP-over-UDP bound) will be started the first time a WS-Discovery enabled deployment is processed on the application server. Every ws endpoint belonging to <i class=" ">WS-Discovery</i> enabled deployments will be automatically registered into such a <i class=" ">WS-Discovery</i> service endpoint (<tt class=" ">Hello</tt> messages). The service will reply to <tt class=" ">Probe</tt> and <tt class=" ">Resolve</tt> messages received on <tt class=" ">UDP</tt> port <tt class=" ">3702</tt> (including multicast messages sent to <tt class=" ">IPv4</tt> address <tt class=" ">239.255.255.250</tt>,&nbsp;as per <a href="http://docs.oasis-open.org/ws-dd/discovery/1.1/os/wsdd-discovery-1.1-spec-os.html#_Toc234231816">specification</a>). Endpoints will eventually be automatically unregistered using <tt class=" ">Bye</tt> messages upon undeployment.            </p>
+        </div>
+    
+    <div class="section-2"  id="66486734_WS-Discovery-Probingservices"  >
+        <h2>Probing services</h2>
+    
+            <p>
+    Apache CXF comes with a <i class=" ">WS-Discovery</i> API that can be used to probe / resolve services. When running in-container, a JBoss module <a href="66322824.html">dependency</a> to the <tt class=" ">org.apache.cxf.impl</tt> module is to be set to have access to <i class=" ">WS-Discovery</i> client functionalities.            </p>
+                <p>
+    The <a href="http://svn.apache.org/viewvc/cxf/tags/cxf-2.7.5/services/ws-discovery/ws-discovery-api/src/main/java/org/apache/cxf/ws/discovery/WSDiscoveryClient.java?revision=1481139&amp;view=markup">org.apache.cxf.ws.discovery.WSDiscoveryClient</a> class provides the <i class=" ">probe</i> and <i class=" ">resolve</i> methods which also accepts filters on scopes. Users can rely on them for locating available endpoints on the network. Please have a look at the JBossWS testsuite which includes a <a href="http://anonsvn.jboss.org/repos/jbossws/stack/cxf/tags/jbossws-cxf-4.2.0.Beta1/modules/testsuite/cxf-tests/src/test/java/org/jboss/test/ws/jaxws/samples/wsdd/WSDiscoveryTestCase.java">sample</a> on CXF WS-Discovery usage.            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

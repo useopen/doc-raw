@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Simple configuration subsystems</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Simple configuration subsystems</h1>
+        </div>
+        
+        <div id="66322726" class="content prepend-top">
+            <p>
+    The following subsystems currently have no configuration beyond its root element in the configuration            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:ejb3:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:jaxrs:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:remoting:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:sar:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:threads:1.0&quot;/&gt;
+&lt;subsystem xmlns=&quot;urn:jboss:domain:weld:1.0&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The presence of each of these turns on a piece of functionality:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">EJB3</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Enables the deployment and functionality of EJB 3.1 applications.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">JAXRS</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Enables the deployment and functionality of JAX-RS applications. This is implemented by the RestEasy project            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">Remoting</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Turns on the remoting subsystem, which is used for the management communication and will be what underlies remote JNDI lookups and remote EJB calls in a future release.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">Sar</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Enables the deployment of .SAR archives containing MBean services, as supported by previous versions of&nbsp;WildFly            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">Threads</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This subsystem is being deprecated and will not be part of the next release            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">Weld</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Enables the deployment and functionality of CDI applications            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>General configuration concepts</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>General configuration concepts</h1>
+        </div>
+        
+        <div id="66322692" class="content prepend-top">
+            <p>
+    For both a managed domain or a standalone server, a number of common configuration concepts apply:            </p>
+                <p>
+        <span id="66322692_Generalconfigurationconcepts-extensions"><a name="66322692_Generalconfigurationconcepts-extensions"></a></span>
+            </p>
+        <div class="section-2"  id="66322692_Generalconfigurationconcepts-Extensions"  >
+        <h2>Extensions</h2>
+    
+            <p>
+    An  extension is a module that extends the core capabilities of the server.  The WildFly 8 core is very simple and lightweight; most of the capabilities  people associate with an application server are provided via extensions.  An extension is packaged as a module in the <tt class=" ">modules</tt> folder. The user indicates that they want a particular extension to be available by including an <tt class=" ">&lt;extension/&gt;</tt> element naming its module in the <tt class=" ">domain.xml</tt> or <tt class=" ">standalone.xml</tt> file.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;extensions&gt;
+&nbsp;&nbsp;&nbsp; [...]
+&nbsp;&nbsp;&nbsp; &lt;extension module=&quot;org.jboss.as.transactions&quot;/&gt;
+&nbsp;&nbsp;&nbsp; &lt;extension module=&quot;org.jboss.as.webservices&quot; /&gt;
+&nbsp;&nbsp;&nbsp; &lt;extension module=&quot;org.jboss.as.weld&quot; /&gt;
+&lt;/extensions&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322692_Generalconfigurationconcepts-profiles"><a name="66322692_Generalconfigurationconcepts-profiles"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-2"  id="66322692_Generalconfigurationconcepts-ProfilesandSubsystems"  >
+        <h2>Profiles and Subsystems</h2>
+    
+            <p>
+    The most significant part of the configuration in <tt class=" ">domain.xml</tt> and <tt class=" ">standalone.xml</tt> is the configuration of one (in <tt class=" ">standalone.xml</tt>) or more (in <tt class=" ">domain.xml</tt>)   &quot;profiles&quot;. A profile is a named set of subsystem configurations. A   subsystem is an added set of capabilities added to the core server by an   extension (see &quot;Extensions&quot; above). A subsystem provides servlet   handling capabilities; a subsystem provides an EJB container; a   subsystem provides JTA, etc. A profile is a named list of subsystems,   along with the details of each subsystem's configuration. A profile with   a large number of subsystems results in a server with a large set of   capabilities. A profile with a small, focused set of subsystems will   have fewer capabilities but a smaller footprint.            </p>
+                <p>
+    The content of an individual profile configuration looks largely the same in <tt class=" ">domain.xml</tt> and <tt class=" ">standalone.xml</tt>.  The only difference is <tt class=" ">standalone.xml</tt> is only allowed to have a single  profile element (the profile the server will run), while <tt class=" ">domain.xml</tt> can have many profiles, each of which can be mapped to one or more groups of servers.            </p>
+                <p>
+    The contents of individual subsystem configurations look exactly the same between <tt class=" ">domain.xml</tt> and <tt class=" ">standalone.xml</tt>.            </p>
+                <p>
+        <span id="66322692_Generalconfigurationconcepts-paths"><a name="66322692_Generalconfigurationconcepts-paths"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-2"  id="66322692_Generalconfigurationconcepts-Paths"  >
+        <h2>Paths</h2>
+    
+            <p>
+    A logical name for a filesystem path. The <tt class=" ">domain.xml</tt>, <tt class=" ">host.xml</tt> and <tt class=" ">standalone.xml</tt> configurations all include a section where paths can be declared. Other  sections of the configuration can then reference those paths by their  logical name, rather than having to include the full details of the path  (which may vary on different machines). For example, the logging  subsystem configuration includes a reference to the  &quot;<tt class=" ">jboss.server.log.dir</tt>&quot; path that points to the server's &quot;<tt class=" ">log</tt>&quot; directory.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;file relative-to=&quot;jboss.server.log.dir&quot; path=&quot;server.log&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    WildFly 8 automatically provides a number of standard paths without any need  for the user to configure them in a configuration file:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">jboss.home</tt> - the root directory of the WildFly distribution            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">user.home</tt> - user's home directory            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">user.dir</tt> - user's current working directory            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">java.home</tt> - java installation directory            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.server.base.dir</tt> - root directory for an individual server instance            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.server.data.dir</tt> - directory the server will use for persistent data file storage            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.server.log.dir</tt> - directory the server will use for log file storage            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.server.tmp.dir</tt> - directory the server will use for temporary file storage            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jboss.domain.servers.dir</tt> - directory under which a host controller will create the working area  for individual server instances (managed domain mode only)            </p>
+    </li></ul>            <p>
+    Users can add their own paths or override all except the first 5 of the above by adding a <tt class=" ">&lt;path/&gt;</tt> element to their configuration file.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;path name=&quot;example&quot; path=&quot;example&quot; relative-to=&quot;jboss.server.data.dir&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    &nbsp;The attributes are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> -- the name of the path.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">path</tt> -- the actual filesystem path. Treated as an absolute path, unless the 'relative-to' attribute is specified, in which case the value is treated as relative to that path.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">relative-to</tt> -- (optional) the name of another previously named path, or of one of the standard paths provided by the system.            </p>
+    </li></ul>            <p>
+    A <tt class=" ">&lt;path/&gt;</tt> element in a <tt class=" ">domain.xml</tt> need not include anything more than the <tt class=" ">name</tt> attribute; i.e. it need not include any information indicating what the actual filesystem path is:&nbsp;            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;path name=&quot;x&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Such  a configuration simply says, &quot;There is a path named 'x' that other  parts of the <tt class=" ">domain.xml</tt> configuration can reference. The actual  filesystem location pointed to by 'x' is host-specific and will be  specified in each machine's <tt class=" ">host.xml</tt> file.&quot; If this approach is used,  there must be a path element in each machine's <tt class=" ">host.xml</tt> that specifies  what the actual filesystem path is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;path name=&quot;x&quot; path=&quot;/var/x&quot; /&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    A <tt class=" ">&lt;path/&gt;</tt> element in a <tt class=" ">standalone.xml</tt> must include the specification of the actual filesystem path.            </p>
+                <p>
+        <span id="66322692_Generalconfigurationconcepts-interfaces"><a name="66322692_Generalconfigurationconcepts-interfaces"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-2"  id="66322692_Generalconfigurationconcepts-Interfaces"  >
+        <h2>Interfaces</h2>
+    
+            <p>
+    A logical name for a network interface/IP address/host name to which sockets can be bound. The <tt class=" ">domain.xml</tt>, <tt class=" ">host.xml</tt> and <tt class=" ">standalone.xml</tt> configurations all include a section where interfaces can be declared.  Other sections of the configuration can then reference those interfaces  by their logical name, rather than having to include the full details of  the interface (which may vary on different machines). An  interface configuration includes the logical name of the  interface as  well as information specifying the criteria to use for  resolving the  actual physical address to use. See&nbsp;<a href="https://docs.jboss.org/author/display/AS7/Interfaces+and+ports">Interfaces and ports</a> for further details.            </p>
+                <p>
+    An <tt class=" ">&lt;interface/&gt;</tt> element in a <tt class=" ">domain.xml</tt> need not include anything more than the <tt class=" ">name</tt> attribute; i.e. it need not include any information indicating what the actual IP address associated with the name is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interface name=&quot;internal&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Such  a configuration simply says, &quot;There is an interface named 'internal'  that other parts of the domain.xml configuration can reference. The  actual IP address pointed to by 'internal' is host-specific and will be  specified in each machine's host.xml file.&quot; If this approach is used,  there must be an interface element in each machine's <tt class=" ">host.xml</tt> that  specifies the criteria for determining the IP address:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;interface name=&quot;internal&quot;&gt;
+&nbsp;&nbsp; &lt;nic name=&quot;eth1&quot;/&gt;
+&lt;/interface&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    An <tt class=" ">&lt;interface/&gt;</tt> element in a <tt class=" ">standalone.xml</tt> must include the criteria for determining the IP address.            </p>
+                <p>
+        <span id="66322692_Generalconfigurationconcepts-socketbindings"><a name="66322692_Generalconfigurationconcepts-socketbindings"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-2"  id="66322692_Generalconfigurationconcepts-SocketBindingsandSocketBindingGroups"  >
+        <h2>Socket Bindings and Socket Binding Groups</h2>
+    
+            <p>
+    A socket binding is a named configuration for a socket.            </p>
+                <p>
+    The <tt class=" ">domain.xml</tt> and <tt class=" ">standalone.xml</tt> configurations both include a section where named socket configurations  can be declared. Other sections of the configuration can then reference  those sockets by their logical name, rather than having to include the  full details of the socket configuration (which may vary on different  machines). See <a href="66322697.html">Interfaces and ports</a> for full details.            </p>
+                <p>
+        <span id="66322692_Generalconfigurationconcepts-systemproperties"><a name="66322692_Generalconfigurationconcepts-systemproperties"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-2"  id="66322692_Generalconfigurationconcepts-SystemProperties"  >
+        <h2>System Properties</h2>
+    
+            <p>
+    System property values can be set in a number of places in <tt class=" ">domain.xml</tt>, <tt class=" ">host.xml</tt> and <tt class=" ">standalone.xml</tt>.  The values in <tt class=" ">standalone.xml</tt> are set as part of the server boot  process. Values in <tt class=" ">domain.xml</tt> and <tt class=" ">host.xml</tt> are applied to servers when  they are launched.            </p>
+                <p>
+    When a system property is configured in <tt class=" ">domain.xml</tt> or <tt class=" ">host.xml</tt>, the servers it ends up being applied to depends on where it is set. Setting a system property in a child element directly under the <tt class=" ">domain.xml</tt> root results in the property being set on all servers. Setting it in a <tt class=" ">&lt;system-property/&gt;</tt> element inside a <tt class=" ">&lt;server-group/&gt;</tt> element in domain.xml results in the property being set on all servers in the group. Setting it in a child element directly under the <tt class=" ">host.xml</tt> root results in the property being set on all servers controlled by that host's Host Controller. Finally, setting it in a <tt class=" ">&lt;system-property/&gt;</tt> element inside a <tt class=" ">&lt;server/&gt;</tt> element in <tt class=" ">host.xml</tt> result in the property being set on that server. The same property can be configured in multiple locations, with a value in a <tt class=" ">&lt;server/&gt;</tt> element taking precedence over a value specified directly under the <tt class=" ">host.xml</tt> root element, the value in a <tt class=" ">host.xml</tt> taking precedence over anything from <tt class=" ">domain.xml</tt>, and a value in a <tt class=" ">&lt;server-group/&gt;</tt> element taking precedence over a value specified directly under the <tt class=" ">domain.xml</tt> root element.            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

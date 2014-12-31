@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>HTTP Proxy</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>HTTP Proxy</h1>
+        </div>
+        
+        <div id="66322820" class="content prepend-top">
+            <p>
+    The HTTP Proxy related functionalities of JBoss Web Services are provided by the Apache CXF http transport layer.            </p>
+                <p>
+    The suggested configuration mechanism when running JBoss Web Services is explained below; for further information please refer to the <a href="http://cxf.apache.org/docs/client-http-transport-including-ssl-support.html">Apache CXF documentation</a>.            </p>
+        <div class="section-2"  id="66322820_HTTPProxy-Configuration"  >
+        <h2>Configuration</h2>
+    
+            <p>
+    The HTTP proxy configuration for a given JAX-WS client can be set in the following ways:            </p>
+    <ul class=" "><li class=" ">            <p>
+    through the <tt class=" ">http.proxyHost</tt> and <tt class=" ">http.proxyPort</tt> system properties, or            </p>
+    </li><li class=" ">            <p>
+    leveraging the <tt class=" ">org.apache.cxf.transport.http.HTTPConduit</tt> options            </p>
+    </li></ul>            <p>
+    The former is a JVM level configuration; for instance, assuming the http proxy is currently running at <a href="http://localhost:9934">http://localhost:9934</a>, here is the setup:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>System.getProperties().setProperty(&quot;http.proxyHost&quot;, &quot;localhost&quot;);
+System.getProperties().setProperty(&quot;http.proxyPort&quot;, 9934);</code></pre>
+        </div>
+    </div>
+            <p>
+    The latter is a client stub/port level configuration: the setup is performed on the <tt class=" ">HTTPConduit</tt> object that's part of the Apache CXF <tt class=" ">Client</tt> abstraction.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import org.apache.cxf.configuration.security.ProxyAuthorizationPolicy;
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.frontend.ClientProxy;
+import org.apache.cxf.transport.http.HTTPConduit;
+import org.apache.cxf.transports.http.configuration.HTTPClientPolicy;
+import org.apache.cxf.transports.http.configuration.ProxyServerType;
+...
+
+Service service = Service.create(wsdlURL, new QName(&quot;http://org.jboss.ws/jaxws/cxf/httpproxy&quot;, &quot;HelloWorldService&quot;));
+HelloWorld port = (HelloWorld) service.getPort(new QName(&quot;http://org.jboss.ws/jaxws/cxf/httpproxy&quot;, &quot;HelloWorldImplPort&quot;), HelloWorld.class);
+
+Client client = ClientProxy.getClient(port);
+HTTPConduit conduit = (HTTPConduit)client.getConduit();
+ProxyAuthorizationPolicy policy = new ProxyAuthorizationPolicy();
+policy.setAuthorizationType(&quot;Basic&quot;);
+policy.setUserName(PROXY_USER);
+policy.setPassword(PROXY_PWD);
+conduit.setProxyAuthorization(policy);
+
+port.echo(&quot;Foo&quot;);</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">ProxyAuthorizationPolicy</tt> also allows for setting the authotization type as well as the username / password to be used.            </p>
+                <p>
+    Speaking of authorization and authentication, please note that the JDK already features the <tt class=" ">java.net.Authenticator</tt> facility, which is used whenever opening a connection to a given URL requiring a http proxy. Users might want to set a custom Authenticator for instance when needing to read WSDL contracts before actually calling into the JBoss Web Services / Apache CXF code; here is an example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import java.net.Authenticator;
+import java.net.PasswordAuthentication;
+...
+public class ProxyAuthenticator extends Authenticator
+{
+   private String user, password;
+
+   public ProxyAuthenticator(String user, String password)
+   {
+      this.user = user;
+      this.password = password;
+   }
+
+   protected PasswordAuthentication getPasswordAuthentication()
+   {
+      return new PasswordAuthentication(user, password.toCharArray());
+   }
+}
+
+...
+
+Authenticator.setDefault(new ProxyAuthenticator(PROXY_USER, PROXY_PWD));</code></pre>
+        </div>
+    </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

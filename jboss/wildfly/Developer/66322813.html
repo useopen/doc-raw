@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>wsprovide</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>wsprovide</h1>
+        </div>
+        
+        <div id="66322813" class="content prepend-top">
+            <p>
+    <i class=" ">wsprovide</i> is a command line tool, Maven plugin and Ant task that generates portable  JAX-WS artifacts for a service endpoint implementation. It also has the  option to &quot;provide&quot; the abstract contract for offline usage.            </p>
+        <div class="section-2"  id="66322813_wsprovide-CommandLineTool"  >
+        <h2>Command Line Tool</h2>
+    
+            <p>
+    The command line tool has the following usage:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>usage: wsprovide [options] &lt;endpoint class name&gt;
+options:
+  -h, --help                  Show this help message
+  -k, --keep                  Keep/Generate Java source
+  -w, --wsdl                  Enable WSDL file generation
+  -a, --address The generated port soap:address in wsdl
+  -c. --classpath=&lt;path&gt;      The classpath that contains the endpoint
+  -o, --output=&lt;directory&gt;    The directory to put generated artifacts
+  -r, --resource=&lt;directory&gt;  The directory to put resource artifacts
+  -s, --source=&lt;directory&gt;    The directory to put Java source
+  -e, --extension             Enable SOAP 1.2 binding extension
+  -q, --quiet                 Be somewhat more quiet
+  -t, --show-traces           Show full exception stack traces</code></pre>
+        </div>
+    </div>
+    <div class="section-3"  id="66322813_wsprovide-Examples"  >
+        <h3>Examples</h3>
+    
+            <p>
+    Generating wrapper classes for portable artifacts in the &quot;generated&quot; directory:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>wsprovide -o generated foo.Endpoint</code></pre>
+        </div>
+    </div>
+            <p>
+    Generating wrapper classes and WSDL in the &quot;generated&quot; directory            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>wsprovide -o generated -w foo.Endpoint</code></pre>
+        </div>
+    </div>
+            <p>
+    Using an endpoint that references other jars            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>wsprovide -o generated -c application1.jar:application2.jar foo.Endpoint</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322813_wsprovide-MavenPlugin"  >
+        <h2>Maven Plugin</h2>
+    
+            <p>
+    The <i class=" ">wsprovide</i> tools is included in the <strong class=" ">org.jboss.ws.plugins:maven-jaxws-tools-plugin</strong> plugin. The plugin has two goals for running the tool, <i class=" ">wsprovide</i> and <i class=" ">wsprovide-test</i>, which basically do the same during different Maven build phases (the former triggers the sources generation during <i class=" ">process-classes</i> phase, the latter during the <i class=" ">process-test-classes</i> one).            </p>
+                <p>
+    The <i class=" ">wsprovide</i> plugin has the following parameters:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+                <td rowspan="1" colspan="1">
+    Default            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    testClasspathElements            </td>
+                <td rowspan="1" colspan="1">
+    Each classpathElement provides a<br/>library file to be added to classpath            </td>
+                <td rowspan="1" colspan="1">
+    ${project.compileClasspathElements}<br/>or<br/>${project.testClasspathElements}            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    outputDirectory            </td>
+                <td rowspan="1" colspan="1">
+    The output directory for generated artifacts.            </td>
+                <td rowspan="1" colspan="1">
+    ${project.build.outputDirectory}<br/>or<br/>${project.build.testOutputDirectory}            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    resourceDirectory            </td>
+                <td rowspan="1" colspan="1">
+    The output directory for resource artifacts (WSDL/XSD).            </td>
+                <td rowspan="1" colspan="1">
+    ${project.build.directory}/wsprovide/resources            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    sourceDirectory            </td>
+                <td rowspan="1" colspan="1">
+    The output directory for Java source.            </td>
+                <td rowspan="1" colspan="1">
+    ${project.build.directory}/wsprovide/java            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    extension            </td>
+                <td rowspan="1" colspan="1">
+    Enable SOAP 1.2 binding extension.            </td>
+                <td rowspan="1" colspan="1">
+    false            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    generateWsdl            </td>
+                <td rowspan="1" colspan="1">
+    Whether or not to generate WSDL.            </td>
+                <td rowspan="1" colspan="1">
+    false            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    verbose            </td>
+                <td rowspan="1" colspan="1">
+    Enables more informational output about command progress.            </td>
+                <td rowspan="1" colspan="1">
+    false            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    portSoapAddress            </td>
+                <td rowspan="1" colspan="1">
+    The generated port soap:address in the WSDL            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <strong class=" ">endpointClass</strong>            </td>
+                <td rowspan="1" colspan="1">
+    <strong class=" ">Service Endpoint Implementation.</strong>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    <div class="section-3"  id="66322813_wsprovide-Examples2"  >
+        <h3>Examples</h3>
+    
+            <p>
+    You can use <i class=" ">wsprovide</i> in your own project build simply referencing the <i class=" ">maven-jaxws-tools-plugin</i> in the configured plugins in your <i class=" ">pom.xml</i> file.            </p>
+                <p>
+    The following example makes the plugin provide the wsdl file and artifact sources for the specified endpoint class:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.jboss.ws.plugins&lt;/groupId&gt;
+      &lt;artifactId&gt;maven-jaxws-tools-plugin&lt;/artifactId&gt;
+      &lt;version&gt;1.1.0.GA&lt;/version&gt;
+      &lt;configuration&gt;
+        &lt;verbose&gt;true&lt;/verbose&gt;
+        &lt;endpointClass&gt;org.jboss.test.ws.plugins.tools.wsprovide.TestEndpoint&lt;/endpointClass&gt;
+        &lt;generateWsdl&gt;true&lt;/generateWsdl&gt;
+      &lt;/configuration&gt;
+      &lt;executions&gt;
+        &lt;execution&gt;
+          &lt;goals&gt;
+            &lt;goal&gt;wsprovide&lt;/goal&gt;
+          &lt;/goals&gt;
+        &lt;/execution&gt;
+      &lt;/executions&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The following example does the same, but is meant for use in your own testsuite:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;build&gt;
+  &lt;plugins&gt;
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.jboss.ws.plugins&lt;/groupId&gt;
+      &lt;artifactId&gt;maven-jaxws-tools-plugin&lt;/artifactId&gt;
+      &lt;version&gt;1.1.0.GA&lt;/version&gt;
+      &lt;configuration&gt;
+        &lt;verbose&gt;true&lt;/verbose&gt;
+        &lt;endpointClass&gt;org.jboss.test.ws.plugins.tools.wsprovide.TestEndpoint2&lt;/endpointClass&gt;
+        &lt;generateWsdl&gt;true&lt;/generateWsdl&gt;
+      &lt;/configuration&gt;
+      &lt;executions&gt;
+        &lt;execution&gt;
+          &lt;goals&gt;
+            &lt;goal&gt;wsprovide-test&lt;/goal&gt;
+          &lt;/goals&gt;
+        &lt;/execution&gt;
+      &lt;/executions&gt;
+    &lt;/plugin&gt;
+  &lt;/plugins&gt;
+&lt;/build&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Plugin stack dependencyThe plugin itself does not have an explicit dependency to a JBossWS stack, as it's meant for being used with implementations of any supported version of the&nbsp;<i class=" ">JBossWS SPI</i>. So the user is expected to set a dependency in his own<tt class=" ">pom.xml</tt>&nbsp;to the desired&nbsp;<i class=" ">JBossWS</i>&nbsp;stack version. The plugin will rely on the that for using the proper tooling.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;dependencies&gt;
+  &lt;dependency&gt;
+    &lt;groupId&gt;org.jboss.ws.cxf&lt;/groupId&gt;
+    &lt;artifactId&gt;jbossws-cxf-client&lt;/artifactId&gt;
+    &lt;version&gt;4.0.0.GA&lt;/version&gt;
+  &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-tip">
+        
+            <p>
+    Be careful when using this plugin with the Maven War Plugin as that include any project dependency into the generated application war archive. You might want to set&nbsp;<tt class=" ">&lt;scope&gt;provided&lt;/scope&gt;</tt>&nbsp;for the&nbsp;<i class=" ">JBossWS</i>&nbsp;stack dependency to avoid that.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322813_wsprovide-AntTask"  >
+        <h2>Ant Task</h2>
+    
+            <p>
+    The wsprovide ant task (<i class=" ">org.jboss.ws.tools.ant.WSProvideTask</i>) has the following attributes:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+                <td rowspan="1" colspan="1">
+    Default            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    fork            </td>
+                <td rowspan="1" colspan="1">
+    Whether or not to run the generation task in a separate VM.            </td>
+                <td rowspan="1" colspan="1">
+    true            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    keep            </td>
+                <td rowspan="1" colspan="1">
+    Keep/Enable Java source code generation.            </td>
+                <td rowspan="1" colspan="1">
+    false            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    destdir            </td>
+                <td rowspan="1" colspan="1">
+    The output directory for generated artifacts.            </td>
+                <td rowspan="1" colspan="1">
+    &quot;output&quot;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    resourcedestdir            </td>
+                <td rowspan="1" colspan="1">
+    The output directory for resource artifacts (WSDL/XSD).            </td>
+                <td rowspan="1" colspan="1">
+    value of destdir            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    sourcedestdir            </td>
+                <td rowspan="1" colspan="1">
+    The output directory for Java source.            </td>
+                <td rowspan="1" colspan="1">
+    value of destdir            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    extension            </td>
+                <td rowspan="1" colspan="1">
+    Enable SOAP 1.2 binding extension.            </td>
+                <td rowspan="1" colspan="1">
+    false            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    genwsdl            </td>
+                <td rowspan="1" colspan="1">
+    Whether or not to generate WSDL.            </td>
+                <td rowspan="1" colspan="1">
+    false            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    address            </td>
+                <td rowspan="1" colspan="1">
+    The generated port soap:address in wsdl.            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    verbose            </td>
+                <td rowspan="1" colspan="1">
+    Enables more informational output about command progress.            </td>
+                <td rowspan="1" colspan="1">
+    false            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <strong class=" ">sei</strong>            </td>
+                <td rowspan="1" colspan="1">
+    <strong class=" ">Service Endpoint Implementation.</strong>            </td>
+                <td rowspan="1" colspan="1">
+    &nbsp;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    classpath            </td>
+                <td rowspan="1" colspan="1">
+    The classpath that contains the service endpoint implementation.            </td>
+                <td rowspan="1" colspan="1">
+    &quot;.&quot;            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    <div class="section-3"  id="66322813_wsprovide-Examples3"  >
+        <h3>Examples</h3>
+    
+            <p>
+    Executing wsprovide in verbose mode with separate output directories for source, resources, and classes:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;target name=&quot;test-wsproivde&quot; depends=&quot;init&quot;&gt;
+  &lt;taskdef name=&quot;wsprovide&quot; classname=&quot;org.jboss.ws.tools.ant.WSProvideTask&quot;&gt;
+    &lt;classpath refid=&quot;core.classpath&quot;/&gt;
+  &lt;/taskdef&gt;
+  &lt;wsprovide
+    fork=&quot;false&quot;
+    keep=&quot;true&quot;
+    destdir=&quot;out&quot;
+    resourcedestdir=&quot;out-resource&quot;
+    sourcedestdir=&quot;out-source&quot;
+    genwsdl=&quot;true&quot;
+    verbose=&quot;true&quot;
+    sei=&quot;org.jboss.test.ws.jaxws.jsr181.soapbinding.DocWrappedServiceImpl&quot;&gt;
+    &lt;classpath&gt;
+      &lt;pathelement path=&quot;${tests.output.dir}/classes&quot;/&gt;
+    &lt;/classpath&gt;
+  &lt;/wsprovide&gt;
+&lt;/target&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

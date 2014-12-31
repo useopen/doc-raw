@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Detyped management and the jboss-dmr library</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Detyped management and the jboss-dmr library</h1>
+        </div>
+        
+        <div id="66322745" class="content prepend-top">
+            <p>
+    The management model exposed by WildFly 8 is very large and complex. There are dozens, probably hundreds of logical concepts involved &ndash; hosts, server groups, servers, subsystems, datasources, web connectors, and on and on &ndash; each of which in a classic objected oriented API design could be represented by a Java <i class=" ">type</i> (i.e. a Java class or interface.) However, a primary goal in the development of WildFly's native management API was to ensure that clients built to use the API had as few compile-time and run-time dependencies on JBoss-provided classes as possible, and that the API exposed by those libraries be powerful but also simple and stable. A management client running with the management libraries created for an earlier version of WildFly should still work if used to manage a later version domain. The management client libraries needed to be <i class=" ">forward compatible</i>.            </p>
+                <p>
+    It is highly unlikely that an API that consists of hundreds of Java types could be kept forward compatible. Instead, the WildFly 8 management API is a <i class=" ">detyped</i> API. A detyped API is like decaffeinated coffee &ndash; it still has a little bit of caffeine, but not enough to keep you awake at night.  WildFly's management API still has a few Java types in it (it's impossible for a Java library to have no types!) but not enough to keep you (or us) up at night worrying that your management clients won't be forward compatible.            </p>
+                <p>
+    A detyped API works by making it possible to build up arbitrarily complex data structures using a small number of Java types. All of the parameter values and return values in the API are expressed using those few types. Ideally, most of the types are basic JDK types, like <tt class=" ">java.lang.String</tt>, <tt class=" ">java.lang.Integer</tt>, etc. In addition to the basic JDK types, WildFly 8's detyped management API uses a small library called <strong class=" ">jboss-dmr</strong>. The purpose of this section is to provide a basic overview of the jboss-dmr library.            </p>
+                <p>
+    Even if you don't use jboss-dmr directly (probably the case for all but a few users), some of the information in this section may be useful. When you invoke operations using the application server's Command Line Interface, the return values are just the text representation of of a jboss-dmr <tt class=" ">ModelNode</tt>. If your CLI commands require complex parameter values, you may yourself end up writing the text representation of a <tt class=" ">ModelNode</tt>. And if you use the HTTP management API, all response bodies as well as the request body for any POST will be a JSON representation of a <tt class=" ">ModelNode</tt>.            </p>
+                <p>
+    The source code for jboss-dmr is available on <a href="https://github.com/jbossas/jboss-dmr">Github</a>. The maven coordinates for a jboss-dmr release are <tt class=" ">org.jboss.jboss-dmr:jboss-dmr</tt>.            </p>
+        <div class="section-2"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-ModelNodeandModelType"  >
+        <h2>ModelNode and ModelType</h2>
+    
+            <p>
+    The public API exposed by jboss-dmr is very simple: just three classes, one of which is an enum!            </p>
+                <p>
+    The primary class is <tt class=" ">org.jboss.dmr.ModelNode</tt>. A <tt class=" ">ModelNode</tt> is essentially just a wrapper around some <i class=" ">value</i>; the value is typically some basic JDK type. A <tt class=" ">ModelNode</tt> exposes a <tt class=" ">getType()</tt> method. This method returns a value of type <tt class=" ">org.jboss.dmr.ModelType</tt>, which is an enum of all the valid types of values. And that's 95% of the public API; a class and an enum. (We'll get to the third class, <tt class=" ">Property</tt>, below.)            </p>
+        <div class="section-3"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-Basic%7B%7BModelNode%7D%7Dmanipulation"  >
+        <h3>Basic  ModelNode  manipulation</h3>
+    
+            <p>
+    To illustrate how to work with <tt class=" ">ModelNode</tt> s, we'll use the <a href="http://www.beanshell.org">Beanshell</a> scripting library. We won't get into many details of beanshell here; it's a simple and intuitive tool and hopefully the following examples are as well.            </p>
+                <p>
+    We'll start by launching a beanshell interpreter, with the jboss-dmr library available on the classpath. Then we'll tell beanshell to import all the jboss-dmr classes so they are available for use:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ java -cp bsh-2.0b4.jar:jboss-dmr-1.0.0.Final.jar bsh.Interpreter
+BeanShell 2.0b4 - by Pat Niemeyer (pat@pat.net)
+bsh % import org.jboss.dmr.*;
+bsh %</code></pre>
+        </div>
+    </div>
+            <p>
+    Next, create a <tt class=" ">ModelNode</tt> and use the beanshell <tt class=" ">print</tt> function to output what type it is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode node = new ModelNode();
+bsh % print(node.getType());
+UNDEFINED</code></pre>
+        </div>
+    </div>
+            <p>
+    A new <tt class=" ">ModelNode</tt> has no value stored, so its type is <tt class=" ">ModelType.UNDEFINED</tt>.            </p>
+                <p>
+    Use one of the overloaded <tt class=" ">set</tt> method variants to assign a node's value:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(1);
+bsh % print(node.getType());
+INT
+bsh % node.set(true);
+bsh % print(node.getType());
+BOOLEAN
+bsh % node.set(&quot;Hello, world&quot;);
+bsh % print(node.getType());
+STRING</code></pre>
+        </div>
+    </div>
+            <p>
+    Use one of the <tt class=" ">asXXX()</tt> methods to retrieve the value:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(2);
+bsh % print(node.asInt());
+2
+bsh % node.set(&quot;A string&quot;);
+bsh % print(node.asString());
+A string</code></pre>
+        </div>
+    </div>
+            <p>
+    <tt class=" ">ModelNode</tt> will attempt to perform type conversions when you invoke the <tt class=" ">asXXX</tt> methods:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(1);
+bsh % print(node.asString());
+1
+bsh % print(node.asBoolean());
+true
+bsh % node.set(0);
+bsh % print(node.asBoolean());
+false
+bsh % node.set(&quot;true&quot;);
+bsh % print(node.asBoolean());
+true</code></pre>
+        </div>
+    </div>
+            <p>
+    Not all type conversions are possible:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(&quot;A string&quot;);
+bsh % print(node.asInt());
+// Error: // Uncaught Exception: Method Invocation node.asInt : at Line: 20 : in file: &lt;unknown file&gt; : node .asInt ( )
+
+Target exception: java.lang.NumberFormatException: For input string: &quot;A string&quot;
+
+java.lang.NumberFormatException: For input string: &quot;A string&quot;
+	at java.lang.NumberFormatException.forInputString(NumberFormatException.java:48)
+	at java.lang.Integer.parseInt(Integer.java:449)
+	at java.lang.Integer.parseInt(Integer.java:499)
+	at org.jboss.dmr.StringModelValue.asInt(StringModelValue.java:61)
+	at org.jboss.dmr.ModelNode.asInt(ModelNode.java:117)
+        ....</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">ModelNode.getType()</tt> method can be used to ensure a node has an expected value type before attempting a type conversion.            </p>
+                <p>
+    One <tt class=" ">set</tt> variant takes another <tt class=" ">ModelNode</tt> as its argument. The value of the passed in node is copied, so there is no shared state between the two model nodes:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(&quot;A string&quot;);
+bsh % ModelNode another = new ModelNode();
+bsh % another.set(node);
+bsh % print(another.asString());
+A string
+bsh % node.set(&quot;changed&quot;);
+bsh % print(node.asString());
+changed
+bsh % print(another.asString());
+A string</code></pre>
+        </div>
+    </div>
+            <p>
+    A <tt class=" ">ModelNode</tt> can be cloned. Again, there is no shared state between the original node and its clone:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode clone = another.clone();
+bsh % print(clone.asString());
+A string
+bsh % another.set(42);
+bsh % print(another.asString());
+42
+bsh % print(clone.asString());
+A string</code></pre>
+        </div>
+    </div>
+            <p>
+    Use the <tt class=" ">protect()</tt> method to make a <tt class=" ">ModelNode</tt> immutable:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % clone.protect();
+bsh % clone.set(&quot;A different string&quot;);
+// Error: // Uncaught Exception: Method Invocation clone.set : at Line: 15 : in file: &lt;unknown file&gt; : clone .set ( &quot;A different string&quot; )
+
+Target exception: java.lang.UnsupportedOperationException
+
+java.lang.UnsupportedOperationException
+	at org.jboss.dmr.ModelNode.checkProtect(ModelNode.java:1441)
+	at org.jboss.dmr.ModelNode.set(ModelNode.java:351)
+        ....</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322745_Detypedmanagementandthejboss-dmrlibrary-typeLIST"><a name="66322745_Detypedmanagementandthejboss-dmrlibrary-typeLIST"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-Lists"  >
+        <h3>Lists</h3>
+    
+            <p>
+    The above examples aren't particularly interesting; if all we can do with a <tt class=" ">ModelNode</tt> is wrap a simple Java primitive, what use is that? However, a <tt class=" ">ModelNode</tt>'s value can be more complex than a simple primitive, and using these more complex types we can build complex data structures. The first more complex type is <tt class=" ">ModelType.LIST</tt>.            </p>
+                <p>
+    Use the <tt class=" ">add</tt> methods to initialize a node's value as a list and add to the list:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode list = new ModelNode();
+bsh % list.add(5);
+bsh % list.add(10);
+bsh % print(list.getType());
+LIST</code></pre>
+        </div>
+    </div>
+            <p>
+    Use <tt class=" ">asInt()</tt> to find the size of the list:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(list.asInt());
+2</code></pre>
+        </div>
+    </div>
+            <p>
+    Use the overloaded <tt class=" ">get</tt> method variant that takes an int param to retrieve an item. The item is returned as a <tt class=" ">ModelNode</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode child = list.get(1);
+bsh % print(child.asInt());
+10</code></pre>
+        </div>
+    </div>
+            <p>
+    Elements in a list need not all be of the same type:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % list.add(&quot;A string&quot;);
+bsh % print(list.get(1).getType());
+INT
+bsh % print(list.get(2).getType());
+STRING</code></pre>
+        </div>
+    </div>
+            <p>
+    <strong class=" ">Here's one of the trickiest things about jboss-dmr:</strong> <i class=" ">The</i> <tt class=" ">get</tt> <i class=" ">methods actually mutate state; they are not &quot;read-only&quot;</i>. For example, calling <tt class=" ">get</tt> with an index that does not exist yet in the list will actually create a child of type <tt class=" ">ModelType.UNDEFINED</tt> at that index (and will create UNDEFINED children for any intervening indices.)            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode four = list.get(4);
+bsh % print(four.getType());
+UNDEFINED
+bsh % print(list.asInt());
+6</code></pre>
+        </div>
+    </div>
+            <p>
+    Since the <tt class=" ">get</tt> call always returns a <tt class=" ">ModelNode</tt> and never <tt class=" ">null</tt> it is safe to manipulate the return value:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % list.get(5).set(30);
+bsh % print(list.get(5).asInt());
+30</code></pre>
+        </div>
+    </div>
+            <p>
+    That's not so interesting in the above example, but later on with node of type <tt class=" ">ModelType.OBJECT</tt> we'll see how that kind of method chaining can let you build up fairly complex data structures with a minimum of code.            </p>
+                <p>
+    Use the <tt class=" ">asList()</tt> method to get a <tt class=" ">List&lt;ModelNode&gt;</tt> of the children:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % for (ModelNode element : list.asList()) {
+print(element.getType());
+}
+INT
+INT
+STRING
+UNDEFINED
+UNDEFINED
+INT</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">asString()</tt> and <tt class=" ">toString()</tt> methods provide slightly differently formatted text representations of a <tt class=" ">ModelType.LIST</tt> node:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(list.asString());
+[5,10,&quot;A string&quot;,undefined,undefined,30]
+bsh % print(list.toString());
+[
+    5,
+    10,
+    &quot;A string&quot;,
+    undefined,
+    undefined,
+    30
+]</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally, if you've previously used <tt class=" ">set</tt> to assign a node's value to some non-list type, you cannot use the <tt class=" ">add</tt> method:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.add(5);
+// Error: // Uncaught Exception: Method Invocation node.add : at Line: 18 : in file: &lt;unknown file&gt; : node .add ( 5 )
+
+Target exception: java.lang.IllegalArgumentException
+
+java.lang.IllegalArgumentException
+	at org.jboss.dmr.ModelValue.addChild(ModelValue.java:120)
+	at org.jboss.dmr.ModelNode.add(ModelNode.java:1007)
+	at org.jboss.dmr.ModelNode.add(ModelNode.java:761)
+        ...</code></pre>
+        </div>
+    </div>
+            <p>
+    You can, however, use the <tt class=" ">setEmptyList()</tt> method to change the node's type, and then use <tt class=" ">add</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.setEmptyList();
+bsh % node.add(5);
+bsh % print(node.toString());
+[5]</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322745_Detypedmanagementandthejboss-dmrlibrary-typePROPERTY"><a name="66322745_Detypedmanagementandthejboss-dmrlibrary-typePROPERTY"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-Properties"  >
+        <h3>Properties</h3>
+    
+            <p>
+    The third public class in the jboss-dmr library is <tt class=" ">org.jboss.dmr.Property</tt>. A <tt class=" ">Property</tt> is a <tt class=" ">String =&gt; ModelNode</tt> tuple.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % Property prop = new Property(&quot;stuff&quot;, list);
+bsh % print(prop.toString());
+org.jboss.dmr.Property@79a5f739
+bsh % print(prop.getName());
+stuff
+bsh % print(prop.getValue());
+[
+    5,
+    10,
+    &quot;A string&quot;,
+    undefined,
+    undefined,
+    30
+]</code></pre>
+        </div>
+    </div>
+            <p>
+    The property can be passed to <tt class=" ">ModelNode.set</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(prop);
+bsh % print(node.getType());
+PROPERTY</code></pre>
+        </div>
+    </div>
+            <p>
+    The text format for a node of <tt class=" ">ModelType.PROPERTY</tt> is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(node.toString());
+(&quot;stuff&quot; =&gt; [
+    5,
+    10,
+    &quot;A string&quot;,
+    undefined,
+    undefined,
+    30
+])</code></pre>
+        </div>
+    </div>
+            <p>
+    Directly instantiating a <tt class=" ">Property</tt> via its constructor is not common. More typically one of the two argument <tt class=" ">ModelNode.add</tt> or <tt class=" ">ModelNode.set</tt> variants is used. The first argument is the property name:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode simpleProp = new ModelNode();
+bsh % simpleProp.set(&quot;enabled&quot;, true);
+bsh % print(simpleProp.toString());
+(&quot;enabled&quot; =&gt; true)
+bsh % print(simpleProp.getType());
+PROPERTY
+bsh % ModelNode propList = new ModelNode();
+bsh % propList.add(&quot;min&quot;, 1);
+bsh % propList.add(&quot;max&quot;, 10);
+bsh % print(propList.toString());
+[
+    (&quot;min&quot; =&gt; 1),
+    (&quot;max&quot; =&gt; 10)
+]
+bsh % print(propList.getType());
+LIST
+bsh % print(propList.get(0).getType());
+PROPERTY</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">asPropertyList()</tt> method provides easy access to a <tt class=" ">List&lt;Property&gt;</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % for (Property prop : propList.asPropertyList()) {
+print(prop.getName() + &quot; = &quot; + prop.getValue());
+}
+min = 1
+max = 10</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322745_Detypedmanagementandthejboss-dmrlibrary-typeOBJECT"><a name="66322745_Detypedmanagementandthejboss-dmrlibrary-typeOBJECT"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-3"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-ModelType.OBJECT"  >
+        <h3>ModelType.OBJECT</h3>
+    
+            <p>
+    The most powerful and most commonly used complex value type in jboss-dmr is <tt class=" ">ModelType.OBJECT</tt>. A <tt class=" ">ModelNode</tt> whose value is <tt class=" ">ModelType.OBJECT</tt> internally maintains a <tt class=" ">Map&lt;String, ModelNode</tt>.            </p>
+                <p>
+    Use the <tt class=" ">get</tt> method variant that takes a string argument to add an entry to the map. If no entry exists under the given name, a new entry is added with a the value being a <tt class=" ">ModelType.UNDEFINED</tt> node. The node is returned:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode range = new ModelNode();
+bsh % ModelNode min = range.get(&quot;min&quot;);
+bsh % print(range.toString());
+{&quot;min&quot; =&gt; undefined}
+bsh % min.set(2);
+bsh % print(range.toString());
+{&quot;min&quot; =&gt; 2}</code></pre>
+        </div>
+    </div>
+            <p>
+    Again <strong class=" ">it is important to remember that the</strong> <tt class=" ">get</tt> <strong class=" ">operation may mutate the state of a model node by adding a new entry.</strong> <i class=" ">It is not a read-only operation.</i>            </p>
+                <p>
+    Since <tt class=" ">get</tt> will never return <tt class=" ">null</tt>, a common pattern is to use method chaining to create the key/value pair:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % range.get(&quot;max&quot;).set(10);
+bsh % print(range.toString());
+{
+    &quot;min&quot; =&gt; 2,
+    &quot;max&quot; =&gt; 10
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A call to <tt class=" ">get</tt> passing an already existing key will of course return the same model node as was returned the first time <tt class=" ">get</tt> was called with that key:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(min == range.get(&quot;min&quot;));
+true</code></pre>
+        </div>
+    </div>
+            <p>
+    Multiple parameters can be passed to <tt class=" ">get</tt>. This is a simple way to traverse a tree made up of <tt class=" ">ModelType.OBJECT</tt> nodes. Again, <tt class=" ">get</tt> may mutate the node on which it is invoked; e.g. it will actually create the tree if nodes do not exist. This next example uses a workaround to get beanshell to handle the overloaded <tt class=" ">get</tt> method that takes a variable number of arguments:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % String[] varargs = { &quot;US&quot;, &quot;Missouri&quot;, &quot;St. Louis&quot; };
+bsh % salesTerritories.get(varargs).set(&quot;Brian&quot;);
+bsh % print(salesTerritories.toString());
+{&quot;US&quot; =&gt; {&quot;Missouri&quot; =&gt; {&quot;St. Louis&quot; =&gt; &quot;Brian&quot;}}}</code></pre>
+        </div>
+    </div>
+            <p>
+    The normal syntax would be:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>salesTerritories.get(&quot;US&quot;, &quot;Missouri&quot;, &quot;St. Louis&quot;).set(&quot;Brian&quot;);</code></pre>
+        </div>
+    </div>
+            <p>
+    The key/value pairs in the map can be accessed as a <tt class=" ">List&lt;Property</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % for (Property prop : range.asPropertyList()) {
+print(prop.getName() + &quot; = &quot; + prop.getValue());
+}
+min = 2</code></pre>
+        </div>
+    </div>
+            <p>
+    The semantics of the backing map in a node of <tt class=" ">ModelType.OBJECT</tt> are those of a <tt class=" ">LinkedHashMap</tt>. The map remembers the order in which key/value pairs are added. This is relevant when iterating over the pairs after calling <tt class=" ">asPropertyList()</tt> and for controlling the order in which key/value pairs appear in the output from <tt class=" ">toString()</tt>.            </p>
+                <p>
+    Since the <tt class=" ">get</tt> method will actually mutate the state of a node if the given key does not exist, <tt class=" ">ModelNode</tt> provides a couple methods to let you check whether the entry is there. The <tt class=" ">has</tt> method simply does that:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(range.has(&quot;unit&quot;));
+false
+bsh % print(range.has(&quot;min&quot;));
+true</code></pre>
+        </div>
+    </div>
+            <p>
+    Very often, the need is to not only know whether the key/value pair exists, but whether the value is defined (i.e. not <tt class=" ">ModelType.UNDEFINED</tt>. This kind of check is analogous to checking whether a field in a Java class has a null value. The <tt class=" ">hasDefined</tt> lets you do this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(range.hasDefined(&quot;unit&quot;));
+false
+bsh % // Establish an undefined child 'unit';
+bsh % range.get(&quot;unit&quot;);
+bsh % print(range.toString());
+{
+    &quot;min&quot; =&gt; 2,
+    &quot;max&quot; =&gt; 10,
+    &quot;unit&quot; =&gt; undefined
+}
+bsh % print(range.hasDefined(&quot;unit&quot;));
+false
+bsh % range.get(&quot;unit&quot;).set(&quot;meters&quot;);
+bsh % print(range.hasDefined(&quot;unit&quot;));
+true</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-ModelType.EXPRESSION"  >
+        <h3>ModelType.EXPRESSION</h3>
+    
+            <p>
+    A value of type <tt class=" ">ModelType.EXPRESSION</tt> is stored as a string, but can later be <i class=" ">resolved</i> to different value. The string has a special syntax that should be familiar to those who have used the system property substitution feature in previous JBoss AS releases.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[&lt;prefix&gt;][${&lt;system-property-name&gt;[:&lt;default-value&gt;]}][&lt;suffix&gt;]*</code></pre>
+        </div>
+    </div>
+            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>${queue.length}
+http://${host}
+http://${host:localhost}:${port:8080}/index.html</code></pre>
+        </div>
+    </div>
+            <p>
+    Use the <tt class=" ">setExpression</tt> method to set a node's value to type expression:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode expression = new ModelNode();
+bsh % expression.setExpression(&quot;${queue.length}&quot;);
+bsh % print(expression.getType());
+EXPRESSION</code></pre>
+        </div>
+    </div>
+            <p>
+    Calling <tt class=" ">asString()</tt> returns the same string that was input:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(expression.asString());
+${queue.length}</code></pre>
+        </div>
+    </div>
+            <p>
+    However, calling <tt class=" ">toString()</tt> tells you that this node's value is not of <tt class=" ">ModelType.STRING</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(expression.toString());
+expression &quot;${queue.length}&quot;</code></pre>
+        </div>
+    </div>
+            <p>
+    When the <tt class=" ">resolve</tt> operation is called, the string is parsed and any embedded system properties are resolved against the JVM's current system property values. A new <tt class=" ">ModelNode</tt> is returned whose value is the resolved string:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % System.setProperty(&quot;queue.length&quot;, &quot;10&quot;);
+bsh % ModelNode resolved = expression.resolve();
+bsh % print(resolved.asInt());
+10</code></pre>
+        </div>
+    </div>
+            <p>
+    Note that the type of the <tt class=" ">ModelNode</tt> returned by <tt class=" ">resolve()</tt> is <tt class=" ">ModelType.STRING</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(resolved.getType());
+STRING</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">resolved.asInt()</tt> call in the previous example only worked because the string &quot;10&quot; happens to be convertible into the int 10.            </p>
+                <p>
+    Calling <tt class=" ">resolve()</tt> has no effect on the value of the node on which the method is invoked:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % resolved = expression.resolve();
+bsh % print(resolved.toString());
+&quot;10&quot;
+bsh % print(expression.toString());
+expression &quot;${queue.length}&quot;</code></pre>
+        </div>
+    </div>
+            <p>
+    If an expression cannot be resolved, <tt class=" ">resolve</tt> just uses the original string. The string can include more than one system property substitution:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % expression.setExpression(&quot;http://${host}:${port}/index.html&quot;);
+bsh % resolved = expression.resolve();
+bsh % print(resolved.asString());
+http://${host}:${port}/index.html</code></pre>
+        </div>
+    </div>
+            <p>
+    The expression can optionally include a default value, separated from the name of the system property by a colon:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % expression.setExpression(&quot;http://${host:localhost}:${port:8080}/index.html&quot;);
+bsh % resolved = expression.resolve();
+bsh % print(resolved.asString());
+http://localhost:8080/index.html</code></pre>
+        </div>
+    </div>
+            <p>
+    Actually including a system property substitution in the expression is not required:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % expression.setExpression(&quot;no system property&quot;);
+bsh % resolved = expression.resolve();
+bsh % print(resolved.asString());
+no system property
+bsh % print(expression.toString());
+expression &quot;no system property&quot;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">resolve</tt> method works on nodes of other types as well; it returns a copy without attempting any real resolution:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode basic = new ModelNode();
+bsh % basic.set(10);
+bsh % resolved = basic.resolve();
+bsh % print(resolved.getType());
+INT
+bsh % resolved.set(5);
+bsh % print(resolved.asInt());
+5
+bsh % print(basic.asInt());
+10</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-ModelType.TYPE"  >
+        <h3>ModelType.TYPE</h3>
+    
+            <p>
+    You can also pass one of the values of the <tt class=" ">ModelType</tt> enum to <tt class=" ">set</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode type = new ModelNode();
+bsh % type.set(ModelType.LIST);
+bsh % print(type.getType());
+TYPE
+bsh % print(type.toString());
+LIST</code></pre>
+        </div>
+    </div>
+            <p>
+    This is useful when using a <tt class=" ">ModelNode</tt> data structure to describe another <tt class=" ">ModelNode</tt> data structure.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-Fulllistof%7B%7BModelNode%7D%7Dtypes"  >
+        <h3>Full list of  ModelNode  types</h3>
+    
+            <p>
+    BIG_DECIMAL<br/>BIG_INTEGER<br/>BOOLEAN<br/>BYTES<br/>DOUBLE<br/>EXPRESSION<br/>INT<br/>LIST<br/>LONG<br/>OBJECT<br/>PROPERTY<br/>STRING<br/>TYPE<br/>UNDEFINED            </p>
+        </div>
+    
+    <div class="section-3"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-Textrepresentationofa%7B%7BModelNode%7D%7D"  >
+        <h3>Text representation of a  ModelNode</h3>
+    
+    </div>
+    
+    <div class="section-3"  id="66322745_Detypedmanagementandthejboss-dmrlibrary-JSONrepresentationofa%7B%7BModelNode%7D%7D"  >
+        <h3>JSON representation of a  ModelNode</h3>
+    
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

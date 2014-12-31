@@ -1,0 +1,2047 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Management API reference</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Management API reference</h1>
+        </div>
+        
+        <div id="66322741" class="content prepend-top">
+            <p>
+    This section is an in depth reference to the WildFly management API. Readers are encouraged to read the <a href="66322687.html">Management Clients</a> and <a href="66322690.html">Core management concepts</a> sections for fundamental background information, as well as the <a href="66322694.html">Management tasks</a> and <a href="66322740.html">Domain Setup</a> sections for key task oriented information. This section is meant as an in depth reference to delve into some of the key details.            </p>
+        <div class="section-2"  id="66322741_ManagementAPIreference-Globaloperations"  >
+        <h2>Global operations</h2>
+    
+            <p>
+    The WildFly management API includes a number of operations that apply to every resource.            </p>
+        <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Breadresource%7D%7Doperation"  >
+        <h3>The  read-resource  operation</h3>
+    
+            <p>
+    Reads a management resource's attribute values along with either basic or complete information about any child resources. Supports the<br/>following parameters, none of which are required:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">recursive</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include complete information about child resources, recursively.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">recursive-depth</tt> &ndash; (int) &ndash; The depth to which information about child resources should be included if <tt class=" ">recursive</tt> is {{true}. If not set, the depth will be unlimited; i.e. all descendant resources will be included.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">proxies</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include remote resources in a recursive query (i.e. host level resources from slave Host Controllers in a query of the Domain Controller; running server resources in a query of a host).            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-runtime</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include runtime attributes (i.e. those whose value does not come from the persistent configuration) in the response.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-defaults</tt> &ndash; (boolean, default is <tt class=" ">true</tt>) &ndash; whether to include in the result default values not set by users. Many attributes have a default value that will be used in the runtime if the users have not provided an explicit value. If this parameter is <tt class=" ">false</tt> the value for such attributes in the result will be <tt class=" ">undefined</tt>. If <tt class=" ">true</tt> the result will include the default value for such parameters.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Breadattribute%7D%7Doperation"  >
+        <h3>The  read-attribute  operation</h3>
+    
+            <p>
+    Reads the value of an individual attribute. Takes a single, required, parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> &ndash; (string) &ndash; the name of the attribute to read.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-defaults</tt> &ndash; (boolean, default is <tt class=" ">true</tt>) &ndash; whether to include in the result default values not set by users. Many attributes have a default value that will be used in the runtime if the users have not provided an explicit value. If this parameter is <tt class=" ">false</tt> the value for such attributes in the result will be <tt class=" ">undefined</tt>. If <tt class=" ">true</tt> the result will include the default value for such parameters.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Bwriteattribute%7D%7Doperation"  >
+        <h3>The  write-attribute  operation</h3>
+    
+            <p>
+    Writes the value of an individual attribute. Takes two required parameters:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> &ndash; (string) &ndash; the name of the attribute to write.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">value</tt> &ndash; (type depends on the attribute being written) &ndash; the new value.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Bunsetattribute%7D%7Doperation"  >
+        <h3>The  unset-attribute  operation</h3>
+    
+            <p>
+    Sets the value of an individual attribute to the <tt class=" ">undefined</tt> value, if such a value is allowed for the attribute. The operation will fail if the <tt class=" ">undefined</tt> value is not allowed. Takes a single required parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> &ndash; (string) &ndash; the name of the attribute to write.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Breadresourcedescription%7D%7Doperation"  >
+        <h3>The  read-resource-description  operation</h3>
+    
+            <p>
+    Returns the description of a resource's attributes, types of children and, optionally, operations. Supports the<br/>following parameters, none of which are required:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">recursive</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include information about child resources, recursively.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">proxies</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include remote resources in a recursive query (i.e. host level resources from slave Host Controllers in a query of the Domain Controller; running server resources in a query of a host)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">operations</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include descriptions of the resource's operations            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">inherited</tt> &ndash; (boolean, default is <tt class=" ">true</tt>) &ndash; if <tt class=" ">operations</tt> is <tt class=" ">true</tt>, whether to include descriptions of operations inherited from higher level resources. The global operations described in this section are themselves inherited from the root resource, so the primary effect of setting <tt class=" ">inherited</tt> to <tt class=" ">false</tt> is to exclude the descriptions of the global operations from the output.            </p>
+    </li></ul>            <p>
+    See <a href="66322746.html">Description of the Management Model</a> for details on the result of this operation.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Breadoperationnames%7D%7Doperation"  >
+        <h3>The  read-operation-names  operation</h3>
+    
+            <p>
+    Returns a list of the names of all the operations the resource supports. Takes no parameters.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Breadoperationdescription%7D%7Doperation"  >
+        <h3>The  read-operation-description  operation</h3>
+    
+            <p>
+    Returns the description of an operation, along with details of its parameter types and its return value. Takes a single, required, parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> &ndash; (string) &ndash; the name of the operation            </p>
+    </li></ul>            <p>
+    See <a href="66322746.html">Description of the Management Model</a> for details on the result of this operation.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Breadchildrentypes%7D%7Doperation"  >
+        <h3>The  read-children-types  operation</h3>
+    
+            <p>
+    Returns a list of the <a href="66322693.html#66322693_Managementresources-Address">types of child resources</a> the resource supports. Takes no parameters.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Breadchildrennames%7D%7Doperation"  >
+        <h3>The  read-children-names  operation</h3>
+    
+            <p>
+    Returns a list of the names of all child resources of a given <a href="66322693.html#66322693_Managementresources-Address">type</a>.  Takes a single, required, parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">child-type</tt> &ndash; (string) &ndash; the name of the type            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-The%7B%7Breadchildrenresources%7D%7Doperation"  >
+        <h3>The  read-children-resources  operation</h3>
+    
+            <p>
+    Returns information about all of a resource's children that are of a given <a href="66322693.html#66322693_Managementresources-Address">type</a>. For each child resource, the returned information is equivalent to executing the <tt class=" ">read-resource</tt> operation on that resource. Takes the following parameters, of which only {{child-type} is required:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">child-type</tt> &ndash; (string) &ndash; the name of the type of child resource            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">recursive</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include complete information about child resources, recursively.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">recursive-depth</tt> &ndash; (int) &ndash; The depth to which information about child resources should be included if <tt class=" ">recursive</tt> is {{true}. If not set, the depth will be unlimited; i.e. all descendant resources will be included.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">proxies</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include remote resources in a recursive query (i.e. host level resources from slave Host Controllers in a query of the Domain Controller; running server resources in a query of a host)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-runtime</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include runtime attributes (i.e. those whose value does not come from the persistent configuration) in the response.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-defaults</tt> &ndash; (boolean, default is <tt class=" ">true</tt>) &ndash; whether to include in the result default values not set by users. Many attributes have a default value that will be used in the runtime if the users have not provided an explicit value. If this parameter is <tt class=" ">false</tt> the value for such attributes in the result will be <tt class=" ">undefined</tt>. If <tt class=" ">true</tt> the result will include the default value for such parameters.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-StandardOperations"  >
+        <h3>Standard Operations</h3>
+    
+            <p>
+    Besides the global operations described above, by convention nearly every resource should expose an <tt class=" ">add</tt> operation and a <tt class=" ">remove</tt> operation. Exceptions to this convention are the root resource, and resources that do not store persistent configuration and are created dynamically at runtime (e.g. resources representing the JVM's platform mbeans or resources representing aspects of the running state of a deployment.)            </p>
+        <div class="section-4"  id="66322741_ManagementAPIreference-The%7B%7Badd%7D%7Doperation"  >
+        <h4>The  add  operation</h4>
+    
+            <p>
+    The operation that creates a new resource must be named <tt class=" ">add</tt>. The operation may take zero or more parameters; what those parameters are depends on the resource being created.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-The%7B%7Bremove%7D%7Doperation"  >
+        <h4>The  remove  operation</h4>
+    
+            <p>
+    The operation that removes an existing resource must be named <tt class=" ">remove</tt>. The operation should take no parameters.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322741_ManagementAPIreference-Detypedmanagementandthejbossdmrlibrary"  >
+        <h2>Detyped management and the jboss-dmr library</h2>
+    
+            <p>
+    The management model exposed by WildFly 8 is very large and complex. There are dozens, probably hundreds of logical concepts involved &ndash; hosts, server groups, servers, subsystems, datasources, web connectors, and on and on &ndash; each of which in a classic objected oriented API design could be represented by a Java <i class=" ">type</i> (i.e. a Java class or interface.) However, a primary goal in the development of WildFly's native management API was to ensure that clients built to use the API had as few compile-time and run-time dependencies on JBoss-provided classes as possible, and that the API exposed by those libraries be powerful but also simple and stable. A management client running with the management libraries created for an earlier version of WildFly should still work if used to manage a later version domain. The management client libraries needed to be <i class=" ">forward compatible</i>.            </p>
+                <p>
+    It is highly unlikely that an API that consists of hundreds of Java types could be kept forward compatible. Instead, the WildFly 8 management API is a <i class=" ">detyped</i> API. A detyped API is like decaffeinated coffee &ndash; it still has a little bit of caffeine, but not enough to keep you awake at night.  WildFly's management API still has a few Java types in it (it's impossible for a Java library to have no types!) but not enough to keep you (or us) up at night worrying that your management clients won't be forward compatible.            </p>
+                <p>
+    A detyped API works by making it possible to build up arbitrarily complex data structures using a small number of Java types. All of the parameter values and return values in the API are expressed using those few types. Ideally, most of the types are basic JDK types, like <tt class=" ">java.lang.String</tt>, <tt class=" ">java.lang.Integer</tt>, etc. In addition to the basic JDK types, WildFly 8's detyped management API uses a small library called <strong class=" ">jboss-dmr</strong>. The purpose of this section is to provide a basic overview of the jboss-dmr library.            </p>
+                <p>
+    Even if you don't use jboss-dmr directly (probably the case for all but a few users), some of the information in this section may be useful. When you invoke operations using the application server's Command Line Interface, the return values are just the text representation of of a jboss-dmr <tt class=" ">ModelNode</tt>. If your CLI commands require complex parameter values, you may yourself end up writing the text representation of a <tt class=" ">ModelNode</tt>. And if you use the HTTP management API, all response bodies as well as the request body for any POST will be a JSON representation of a <tt class=" ">ModelNode</tt>.            </p>
+                <p>
+    The source code for jboss-dmr is available on <a href="https://github.com/jbossas/jboss-dmr">Github</a>. The maven coordinates for a jboss-dmr release are <tt class=" ">org.jboss.jboss-dmr:jboss-dmr</tt>.            </p>
+        <div class="section-3"  id="66322741_ManagementAPIreference-ModelNodeandModelType"  >
+        <h3>ModelNode and ModelType</h3>
+    
+            <p>
+    The public API exposed by jboss-dmr is very simple: just three classes, one of which is an enum!            </p>
+                <p>
+    The primary class is <tt class=" ">org.jboss.dmr.ModelNode</tt>. A <tt class=" ">ModelNode</tt> is essentially just a wrapper around some <i class=" ">value</i>; the value is typically some basic JDK type. A <tt class=" ">ModelNode</tt> exposes a <tt class=" ">getType()</tt> method. This method returns a value of type <tt class=" ">org.jboss.dmr.ModelType</tt>, which is an enum of all the valid types of values. And that's 95% of the public API; a class and an enum. (We'll get to the third class, <tt class=" ">Property</tt>, below.)            </p>
+        <div class="section-4"  id="66322741_ManagementAPIreference-Basic%7B%7BModelNode%7D%7Dmanipulation"  >
+        <h4>Basic  ModelNode  manipulation</h4>
+    
+            <p>
+    To illustrate how to work with <tt class=" ">ModelNode</tt> s, we'll use the <a href="http://www.beanshell.org">Beanshell</a> scripting library. We won't get into many details of beanshell here; it's a simple and intuitive tool and hopefully the following examples are as well.            </p>
+                <p>
+    We'll start by launching a beanshell interpreter, with the jboss-dmr library available on the classpath. Then we'll tell beanshell to import all the jboss-dmr classes so they are available for use:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ java -cp bsh-2.0b4.jar:jboss-dmr-1.0.0.Final.jar bsh.Interpreter
+BeanShell 2.0b4 - by Pat Niemeyer (pat@pat.net)
+bsh % import org.jboss.dmr.*;
+bsh %</code></pre>
+        </div>
+    </div>
+            <p>
+    Next, create a <tt class=" ">ModelNode</tt> and use the beanshell <tt class=" ">print</tt> function to output what type it is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode node = new ModelNode();
+bsh % print(node.getType());
+UNDEFINED</code></pre>
+        </div>
+    </div>
+            <p>
+    A new <tt class=" ">ModelNode</tt> has no value stored, so its type is <tt class=" ">ModelType.UNDEFINED</tt>.            </p>
+                <p>
+    Use one of the overloaded <tt class=" ">set</tt> method variants to assign a node's value:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(1);
+bsh % print(node.getType());
+INT
+bsh % node.set(true);
+bsh % print(node.getType());
+BOOLEAN
+bsh % node.set(&quot;Hello, world&quot;);
+bsh % print(node.getType());
+STRING</code></pre>
+        </div>
+    </div>
+            <p>
+    Use one of the <tt class=" ">asXXX()</tt> methods to retrieve the value:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(2);
+bsh % print(node.asInt());
+2
+bsh % node.set(&quot;A string&quot;);
+bsh % print(node.asString());
+A string</code></pre>
+        </div>
+    </div>
+            <p>
+    <tt class=" ">ModelNode</tt> will attempt to perform type conversions when you invoke the <tt class=" ">asXXX</tt> methods:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(1);
+bsh % print(node.asString());
+1
+bsh % print(node.asBoolean());
+true
+bsh % node.set(0);
+bsh % print(node.asBoolean());
+false
+bsh % node.set(&quot;true&quot;);
+bsh % print(node.asBoolean());
+true</code></pre>
+        </div>
+    </div>
+            <p>
+    Not all type conversions are possible:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(&quot;A string&quot;);
+bsh % print(node.asInt());
+// Error: // Uncaught Exception: Method Invocation node.asInt : at Line: 20 : in file: &lt;unknown file&gt; : node .asInt ( )
+
+Target exception: java.lang.NumberFormatException: For input string: &quot;A string&quot;
+
+java.lang.NumberFormatException: For input string: &quot;A string&quot;
+	at java.lang.NumberFormatException.forInputString(NumberFormatException.java:48)
+	at java.lang.Integer.parseInt(Integer.java:449)
+	at java.lang.Integer.parseInt(Integer.java:499)
+	at org.jboss.dmr.StringModelValue.asInt(StringModelValue.java:61)
+	at org.jboss.dmr.ModelNode.asInt(ModelNode.java:117)
+        ....</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">ModelNode.getType()</tt> method can be used to ensure a node has an expected value type before attempting a type conversion.            </p>
+                <p>
+    One <tt class=" ">set</tt> variant takes another <tt class=" ">ModelNode</tt> as its argument. The value of the passed in node is copied, so there is no shared state between the two model nodes:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(&quot;A string&quot;);
+bsh % ModelNode another = new ModelNode();
+bsh % another.set(node);
+bsh % print(another.asString());
+A string
+bsh % node.set(&quot;changed&quot;);
+bsh % print(node.asString());
+changed
+bsh % print(another.asString());
+A string</code></pre>
+        </div>
+    </div>
+            <p>
+    A <tt class=" ">ModelNode</tt> can be cloned. Again, there is no shared state between the original node and its clone:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode clone = another.clone();
+bsh % print(clone.asString());
+A string
+bsh % another.set(42);
+bsh % print(another.asString());
+42
+bsh % print(clone.asString());
+A string</code></pre>
+        </div>
+    </div>
+            <p>
+    Use the <tt class=" ">protect()</tt> method to make a <tt class=" ">ModelNode</tt> immutable:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % clone.protect();
+bsh % clone.set(&quot;A different string&quot;);
+// Error: // Uncaught Exception: Method Invocation clone.set : at Line: 15 : in file: &lt;unknown file&gt; : clone .set ( &quot;A different string&quot; )
+
+Target exception: java.lang.UnsupportedOperationException
+
+java.lang.UnsupportedOperationException
+	at org.jboss.dmr.ModelNode.checkProtect(ModelNode.java:1441)
+	at org.jboss.dmr.ModelNode.set(ModelNode.java:351)
+        ....</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322741_ManagementAPIreference-typeLIST"><a name="66322741_ManagementAPIreference-typeLIST"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-Lists"  >
+        <h4>Lists</h4>
+    
+            <p>
+    The above examples aren't particularly interesting; if all we can do with a <tt class=" ">ModelNode</tt> is wrap a simple Java primitive, what use is that? However, a <tt class=" ">ModelNode</tt>'s value can be more complex than a simple primitive, and using these more complex types we can build complex data structures. The first more complex type is <tt class=" ">ModelType.LIST</tt>.            </p>
+                <p>
+    Use the <tt class=" ">add</tt> methods to initialize a node's value as a list and add to the list:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode list = new ModelNode();
+bsh % list.add(5);
+bsh % list.add(10);
+bsh % print(list.getType());
+LIST</code></pre>
+        </div>
+    </div>
+            <p>
+    Use <tt class=" ">asInt()</tt> to find the size of the list:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(list.asInt());
+2</code></pre>
+        </div>
+    </div>
+            <p>
+    Use the overloaded <tt class=" ">get</tt> method variant that takes an int param to retrieve an item. The item is returned as a <tt class=" ">ModelNode</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode child = list.get(1);
+bsh % print(child.asInt());
+10</code></pre>
+        </div>
+    </div>
+            <p>
+    Elements in a list need not all be of the same type:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % list.add(&quot;A string&quot;);
+bsh % print(list.get(1).getType());
+INT
+bsh % print(list.get(2).getType());
+STRING</code></pre>
+        </div>
+    </div>
+            <p>
+    <strong class=" ">Here's one of the trickiest things about jboss-dmr:</strong> <i class=" ">The</i> <tt class=" ">get</tt> <i class=" ">methods actually mutate state; they are not &quot;read-only&quot;</i>. For example, calling <tt class=" ">get</tt> with an index that does not exist yet in the list will actually create a child of type <tt class=" ">ModelType.UNDEFINED</tt> at that index (and will create UNDEFINED children for any intervening indices.)            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode four = list.get(4);
+bsh % print(four.getType());
+UNDEFINED
+bsh % print(list.asInt());
+6</code></pre>
+        </div>
+    </div>
+            <p>
+    Since the <tt class=" ">get</tt> call always returns a <tt class=" ">ModelNode</tt> and never <tt class=" ">null</tt> it is safe to manipulate the return value:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % list.get(5).set(30);
+bsh % print(list.get(5).asInt());
+30</code></pre>
+        </div>
+    </div>
+            <p>
+    That's not so interesting in the above example, but later on with node of type <tt class=" ">ModelType.OBJECT</tt> we'll see how that kind of method chaining can let you build up fairly complex data structures with a minimum of code.            </p>
+                <p>
+    Use the <tt class=" ">asList()</tt> method to get a <tt class=" ">List&lt;ModelNode&gt;</tt> of the children:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % for (ModelNode element : list.asList()) {
+print(element.getType());
+}
+INT
+INT
+STRING
+UNDEFINED
+UNDEFINED
+INT</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">asString()</tt> and <tt class=" ">toString()</tt> methods provide slightly differently formatted text representations of a <tt class=" ">ModelType.LIST</tt> node:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(list.asString());
+[5,10,&quot;A string&quot;,undefined,undefined,30]
+bsh % print(list.toString());
+[
+    5,
+    10,
+    &quot;A string&quot;,
+    undefined,
+    undefined,
+    30
+]</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally, if you've previously used <tt class=" ">set</tt> to assign a node's value to some non-list type, you cannot use the <tt class=" ">add</tt> method:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.add(5);
+// Error: // Uncaught Exception: Method Invocation node.add : at Line: 18 : in file: &lt;unknown file&gt; : node .add ( 5 )
+
+Target exception: java.lang.IllegalArgumentException
+
+java.lang.IllegalArgumentException
+	at org.jboss.dmr.ModelValue.addChild(ModelValue.java:120)
+	at org.jboss.dmr.ModelNode.add(ModelNode.java:1007)
+	at org.jboss.dmr.ModelNode.add(ModelNode.java:761)
+        ...</code></pre>
+        </div>
+    </div>
+            <p>
+    You can, however, use the <tt class=" ">setEmptyList()</tt> method to change the node's type, and then use <tt class=" ">add</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.setEmptyList();
+bsh % node.add(5);
+bsh % print(node.toString());
+[5]</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322741_ManagementAPIreference-typePROPERTY"><a name="66322741_ManagementAPIreference-typePROPERTY"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-Properties"  >
+        <h4>Properties</h4>
+    
+            <p>
+    The third public class in the jboss-dmr library is <tt class=" ">org.jboss.dmr.Property</tt>. A <tt class=" ">Property</tt> is a <tt class=" ">String =&gt; ModelNode</tt> tuple.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % Property prop = new Property(&quot;stuff&quot;, list);
+bsh % print(prop.toString());
+org.jboss.dmr.Property@79a5f739
+bsh % print(prop.getName());
+stuff
+bsh % print(prop.getValue());
+[
+    5,
+    10,
+    &quot;A string&quot;,
+    undefined,
+    undefined,
+    30
+]</code></pre>
+        </div>
+    </div>
+            <p>
+    The property can be passed to <tt class=" ">ModelNode.set</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % node.set(prop);
+bsh % print(node.getType());
+PROPERTY</code></pre>
+        </div>
+    </div>
+            <p>
+    The text format for a node of <tt class=" ">ModelType.PROPERTY</tt> is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(node.toString());
+(&quot;stuff&quot; =&gt; [
+    5,
+    10,
+    &quot;A string&quot;,
+    undefined,
+    undefined,
+    30
+])</code></pre>
+        </div>
+    </div>
+            <p>
+    Directly instantiating a <tt class=" ">Property</tt> via its constructor is not common. More typically one of the two argument <tt class=" ">ModelNode.add</tt> or <tt class=" ">ModelNode.set</tt> variants is used. The first argument is the property name:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode simpleProp = new ModelNode();
+bsh % simpleProp.set(&quot;enabled&quot;, true);
+bsh % print(simpleProp.toString());
+(&quot;enabled&quot; =&gt; true)
+bsh % print(simpleProp.getType());
+PROPERTY
+bsh % ModelNode propList = new ModelNode();
+bsh % propList.add(&quot;min&quot;, 1);
+bsh % propList.add(&quot;max&quot;, 10);
+bsh % print(propList.toString());
+[
+    (&quot;min&quot; =&gt; 1),
+    (&quot;max&quot; =&gt; 10)
+]
+bsh % print(propList.getType());
+LIST
+bsh % print(propList.get(0).getType());
+PROPERTY</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">asPropertyList()</tt> method provides easy access to a <tt class=" ">List&lt;Property&gt;</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % for (Property prop : propList.asPropertyList()) {
+print(prop.getName() + &quot; = &quot; + prop.getValue());
+}
+min = 1
+max = 10</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322741_ManagementAPIreference-typeOBJECT"><a name="66322741_ManagementAPIreference-typeOBJECT"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-ModelType.OBJECT"  >
+        <h4>ModelType.OBJECT</h4>
+    
+            <p>
+    The most powerful and most commonly used complex value type in jboss-dmr is <tt class=" ">ModelType.OBJECT</tt>. A <tt class=" ">ModelNode</tt> whose value is <tt class=" ">ModelType.OBJECT</tt> internally maintains a <tt class=" ">Map&lt;String, ModelNode</tt>.            </p>
+                <p>
+    Use the <tt class=" ">get</tt> method variant that takes a string argument to add an entry to the map. If no entry exists under the given name, a new entry is added with a the value being a <tt class=" ">ModelType.UNDEFINED</tt> node. The node is returned:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode range = new ModelNode();
+bsh % ModelNode min = range.get(&quot;min&quot;);
+bsh % print(range.toString());
+{&quot;min&quot; =&gt; undefined}
+bsh % min.set(2);
+bsh % print(range.toString());
+{&quot;min&quot; =&gt; 2}</code></pre>
+        </div>
+    </div>
+            <p>
+    Again <strong class=" ">it is important to remember that the</strong> <tt class=" ">get</tt> <strong class=" ">operation may mutate the state of a model node by adding a new entry.</strong> <i class=" ">It is not a read-only operation.</i>            </p>
+                <p>
+    Since <tt class=" ">get</tt> will never return <tt class=" ">null</tt>, a common pattern is to use method chaining to create the key/value pair:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % range.get(&quot;max&quot;).set(10);
+bsh % print(range.toString());
+{
+    &quot;min&quot; =&gt; 2,
+    &quot;max&quot; =&gt; 10
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A call to <tt class=" ">get</tt> passing an already existing key will of course return the same model node as was returned the first time <tt class=" ">get</tt> was called with that key:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(min == range.get(&quot;min&quot;));
+true</code></pre>
+        </div>
+    </div>
+            <p>
+    Multiple parameters can be passed to <tt class=" ">get</tt>. This is a simple way to traverse a tree made up of <tt class=" ">ModelType.OBJECT</tt> nodes. Again, <tt class=" ">get</tt> may mutate the node on which it is invoked; e.g. it will actually create the tree if nodes do not exist. This next example uses a workaround to get beanshell to handle the overloaded <tt class=" ">get</tt> method that takes a variable number of arguments:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % String[] varargs = { &quot;US&quot;, &quot;Missouri&quot;, &quot;St. Louis&quot; };
+bsh % salesTerritories.get(varargs).set(&quot;Brian&quot;);
+bsh % print(salesTerritories.toString());
+{&quot;US&quot; =&gt; {&quot;Missouri&quot; =&gt; {&quot;St. Louis&quot; =&gt; &quot;Brian&quot;}}}</code></pre>
+        </div>
+    </div>
+            <p>
+    The normal syntax would be:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>salesTerritories.get(&quot;US&quot;, &quot;Missouri&quot;, &quot;St. Louis&quot;).set(&quot;Brian&quot;);</code></pre>
+        </div>
+    </div>
+            <p>
+    The key/value pairs in the map can be accessed as a <tt class=" ">List&lt;Property</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % for (Property prop : range.asPropertyList()) {
+print(prop.getName() + &quot; = &quot; + prop.getValue());
+}
+min = 2</code></pre>
+        </div>
+    </div>
+            <p>
+    The semantics of the backing map in a node of <tt class=" ">ModelType.OBJECT</tt> are those of a <tt class=" ">LinkedHashMap</tt>. The map remembers the order in which key/value pairs are added. This is relevant when iterating over the pairs after calling <tt class=" ">asPropertyList()</tt> and for controlling the order in which key/value pairs appear in the output from <tt class=" ">toString()</tt>.            </p>
+                <p>
+    Since the <tt class=" ">get</tt> method will actually mutate the state of a node if the given key does not exist, <tt class=" ">ModelNode</tt> provides a couple methods to let you check whether the entry is there. The <tt class=" ">has</tt> method simply does that:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(range.has(&quot;unit&quot;));
+false
+bsh % print(range.has(&quot;min&quot;));
+true</code></pre>
+        </div>
+    </div>
+            <p>
+    Very often, the need is to not only know whether the key/value pair exists, but whether the value is defined (i.e. not <tt class=" ">ModelType.UNDEFINED</tt>. This kind of check is analogous to checking whether a field in a Java class has a null value. The <tt class=" ">hasDefined</tt> lets you do this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(range.hasDefined(&quot;unit&quot;));
+false
+bsh % // Establish an undefined child 'unit';
+bsh % range.get(&quot;unit&quot;);
+bsh % print(range.toString());
+{
+    &quot;min&quot; =&gt; 2,
+    &quot;max&quot; =&gt; 10,
+    &quot;unit&quot; =&gt; undefined
+}
+bsh % print(range.hasDefined(&quot;unit&quot;));
+false
+bsh % range.get(&quot;unit&quot;).set(&quot;meters&quot;);
+bsh % print(range.hasDefined(&quot;unit&quot;));
+true</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-ModelType.EXPRESSION"  >
+        <h4>ModelType.EXPRESSION</h4>
+    
+            <p>
+    A value of type <tt class=" ">ModelType.EXPRESSION</tt> is stored as a string, but can later be <i class=" ">resolved</i> to different value. The string has a special syntax that should be familiar to those who have used the system property substitution feature in previous JBoss AS releases.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[&lt;prefix&gt;][${&lt;system-property-name&gt;[:&lt;default-value&gt;]}][&lt;suffix&gt;]*</code></pre>
+        </div>
+    </div>
+            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>${queue.length}
+http://${host}
+http://${host:localhost}:${port:8080}/index.html</code></pre>
+        </div>
+    </div>
+            <p>
+    Use the <tt class=" ">setExpression</tt> method to set a node's value to type expression:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode expression = new ModelNode();
+bsh % expression.setExpression(&quot;${queue.length}&quot;);
+bsh % print(expression.getType());
+EXPRESSION</code></pre>
+        </div>
+    </div>
+            <p>
+    Calling <tt class=" ">asString()</tt> returns the same string that was input:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(expression.asString());
+${queue.length}</code></pre>
+        </div>
+    </div>
+            <p>
+    However, calling <tt class=" ">toString()</tt> tells you that this node's value is not of <tt class=" ">ModelType.STRING</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(expression.toString());
+expression &quot;${queue.length}&quot;</code></pre>
+        </div>
+    </div>
+            <p>
+    When the <tt class=" ">resolve</tt> operation is called, the string is parsed and any embedded system properties are resolved against the JVM's current system property values. A new <tt class=" ">ModelNode</tt> is returned whose value is the resolved string:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % System.setProperty(&quot;queue.length&quot;, &quot;10&quot;);
+bsh % ModelNode resolved = expression.resolve();
+bsh % print(resolved.asInt());
+10</code></pre>
+        </div>
+    </div>
+            <p>
+    Note that the type of the <tt class=" ">ModelNode</tt> returned by <tt class=" ">resolve()</tt> is <tt class=" ">ModelType.STRING</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % print(resolved.getType());
+STRING</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">resolved.asInt()</tt> call in the previous example only worked because the string &quot;10&quot; happens to be convertible into the int 10.            </p>
+                <p>
+    Calling <tt class=" ">resolve()</tt> has no effect on the value of the node on which the method is invoked:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % resolved = expression.resolve();
+bsh % print(resolved.toString());
+&quot;10&quot;
+bsh % print(expression.toString());
+expression &quot;${queue.length}&quot;</code></pre>
+        </div>
+    </div>
+            <p>
+    If an expression cannot be resolved, <tt class=" ">resolve</tt> just uses the original string. The string can include more than one system property substitution:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % expression.setExpression(&quot;http://${host}:${port}/index.html&quot;);
+bsh % resolved = expression.resolve();
+bsh % print(resolved.asString());
+http://${host}:${port}/index.html</code></pre>
+        </div>
+    </div>
+            <p>
+    The expression can optionally include a default value, separated from the name of the system property by a colon:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % expression.setExpression(&quot;http://${host:localhost}:${port:8080}/index.html&quot;);
+bsh % resolved = expression.resolve();
+bsh % print(resolved.asString());
+http://localhost:8080/index.html</code></pre>
+        </div>
+    </div>
+            <p>
+    Actually including a system property substitution in the expression is not required:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % expression.setExpression(&quot;no system property&quot;);
+bsh % resolved = expression.resolve();
+bsh % print(resolved.asString());
+no system property
+bsh % print(expression.toString());
+expression &quot;no system property&quot;</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">resolve</tt> method works on nodes of other types as well; it returns a copy without attempting any real resolution:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode basic = new ModelNode();
+bsh % basic.set(10);
+bsh % resolved = basic.resolve();
+bsh % print(resolved.getType());
+INT
+bsh % resolved.set(5);
+bsh % print(resolved.asInt());
+5
+bsh % print(basic.asInt());
+10</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-ModelType.TYPE"  >
+        <h4>ModelType.TYPE</h4>
+    
+            <p>
+    You can also pass one of the values of the <tt class=" ">ModelType</tt> enum to <tt class=" ">set</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>bsh % ModelNode type = new ModelNode();
+bsh % type.set(ModelType.LIST);
+bsh % print(type.getType());
+TYPE
+bsh % print(type.toString());
+LIST</code></pre>
+        </div>
+    </div>
+            <p>
+    This is useful when using a <tt class=" ">ModelNode</tt> data structure to describe another <tt class=" ">ModelNode</tt> data structure.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-Fulllistof%7B%7BModelNode%7D%7Dtypes"  >
+        <h4>Full list of  ModelNode  types</h4>
+    
+            <p>
+    BIG_DECIMAL<br/>BIG_INTEGER<br/>BOOLEAN<br/>BYTES<br/>DOUBLE<br/>EXPRESSION<br/>INT<br/>LIST<br/>LONG<br/>OBJECT<br/>PROPERTY<br/>STRING<br/>TYPE<br/>UNDEFINED            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-Textrepresentationofa%7B%7BModelNode%7D%7D"  >
+        <h4>Text representation of a  ModelNode</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-JSONrepresentationofa%7B%7BModelNode%7D%7D"  >
+        <h4>JSON representation of a  ModelNode</h4>
+    
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322741_ManagementAPIreference-DescriptionoftheManagementModel"  >
+        <h2>Description of the Management Model</h2>
+    
+            <p>
+    A detailed description of the resources, attributes and operations that make up the management model provided by an individual WildFly instance or by any Domain Controller or slave Host Controller process can be queried using the <tt class=" ">read-resource-description</tt>, <tt class=" ">read-operation-names</tt>, <tt class=" ">read-operation-description</tt> and <tt class=" ">read-child-types</tt> operations described in the <a href="66322742.html">Global operations</a> section. In this section we provide details on what's included in those descriptions.            </p>
+        <div class="section-3"  id="66322741_ManagementAPIreference-DescriptionoftheWildFlyManagedResources"  >
+        <h3>Description of the WildFly Managed Resources</h3>
+    
+            <p>
+    All portions of the management model exposed by WildFly 8 are addressable via an ordered list of key/value pairs. For each addressable <i class=" "><a href="66322693.html">Management Resource</a></i>, the following descriptive information will be available:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of this portion of the model            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">attributes</tt> &ndash; Map of String (the attribute name) to complex structure &ndash; the configuration attributes available in this portion of the model. See <a href="66322741.html#66322741_ManagementAPIreference-attributedescription">below</a> for the representation of each attribute.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">operations</tt> &ndash; Map of String (the operation name) to complex structure &ndash; the operations that can be targetted at this address. See <a href="66322741.html#66322741_ManagementAPIreference-operationdescription">below</a> for the representation of each operation.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">children</tt> &ndash; Map of String (the type of child) to complex structure &ndash; the relationship of this portion of the model to other addressable portions of the model. See <a href="66322741.html#66322741_ManagementAPIreference-childrendescription">below</a> for the representation of each child relationship.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">head-comment-allowed</tt> &ndash; boolean &ndash; indicates whether this portion of the model can store an XML comment that would be written in the persistent form of the model (e.g. domain.xml) before the start of the XML element that represents this portion of the model. This item is optional, and if not present defaults to true. (Note: storing XML comments in the in-memory model is not currently supported. This description key is for future use.)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">tail-comment-allowed</tt> &ndash; boolean &ndash; similar to <tt class=" ">head-comment-allowed</tt>, but indicates whether a comment just before the close of the XML element is supported. A tail comment can only be supported if the element has child elements, in which case a comment can be inserted between the final child element and the element's closing tag. This item is optional, and if not present defaults to true. (Note: storing XML comments in the in-memory model is not currently supported. This description key is for future use.)            </p>
+    </li></ul>            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;description =&gt; &quot;A manageable resource&quot;,
+     &quot;tail-comment-allowed&quot; =&gt; false,
+     &quot;attributes&quot; =&gt; {
+          &quot;foo&quot; =&gt; {
+               .... details of attribute foo
+          }
+      },
+     &quot;operations&quot; =&gt; {
+          &quot;start&quot; =&gt; {
+               .... details of the start operation
+          }
+      },
+     &quot;children&quot; =&gt; {
+          &quot;bar&quot; =&gt; {
+               .... details of the relationship with children of type &quot;bar&quot;
+          }
+      }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322741_ManagementAPIreference-attributedescription"><a name="66322741_ManagementAPIreference-attributedescription"></a></span>
+            </p>
+        <div class="section-4"  id="66322741_ManagementAPIreference-DescriptionofanAttribute"  >
+        <h4>Description of an Attribute</h4>
+    
+            <p>
+    An attribute is a portion of the management model that is not directly addressable. Instead, it is conceptually a property of an addressable <a href="66322693.html">management resource</a>. For each attribute in the model, the following descriptive information will be available:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of the attribute            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">type</tt> &ndash; <tt class=" ">org.jboss.dmr.ModelType</tt> &ndash; the type of the attribute value. One of the enum values BIG_DECIMAL, BIG_INTEGER, BOOLEAN, BYTES, DOUBLE, INT, LIST, LONG, OBJECT, PROPERTY, STRING. Most of these are self-explanatory. An OBJECT will be represented in the detyped model as a map of string keys to values of some other legal type, conceptually similar to a <tt class=" ">javax.management.openmbean.CompositeData</tt>. A PROPERTY is a single key/value pair, where the key is a string, and the value is of some other legal type.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">value-type</tt> &ndash; ModelType or complex structure &ndash; Only present if type is LIST or OBJECT. If all elements in the LIST or all the values of the OBJECT type are of the same type, this will be one of the ModelType enums BIG_DECIMAL, BIG_INTEGER, BOOLEAN, BYTES, DOUBLE, INT,  LONG, STRING. Otherwise, <tt class=" ">value-type</tt> will detail the structure of the attribute value, enumerating the value's fields and the type of their value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">expressions-allowed</tt> &ndash; boolean &ndash; indicates whether the value of the attribute may be of type <tt class=" ">ModelType.EXPRESSION</tt>, instead of its standard type (see <tt class=" ">type</tt> and <tt class=" ">value-type</tt> above for discussion of an attribute's standard type.) A value of ModelType.EXPRESSION contains a system-property substitution expression that the server will resolve against the server-side system property map before using the value. For example, an attribute named max-threads may have an expression value of <tt class=" ">${example.pool.max-threads:10</tt>} instead of just 10. Default value if not present is false.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">required</tt> &ndash; boolean &ndash; true if the attribute will always exist in a representation of its portion of the model; false if it may not (implying a null value.) If not present, true is the default.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">storage</tt> &ndash; String &ndash; Either &quot;configuration&quot; or &quot;runtime&quot;. If &quot;configuration&quot;, the attribute's value is stored as part of the persistent configuration (e.g. in domain.xml, host.xml or standalone.xml.) If &quot;runtime&quot; the attribute's value is not stored in the persistent configuration; the value only exists as long as the resource is running.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">access-type</tt> &ndash; String &ndash; One of &quot;read-only&quot;, &quot;read-write&quot; or &quot;metric&quot;. Whether an attribute value can be written, or can only read. A &quot;metric&quot; is a read-only attribute whose value is not stored in the persistent configuration, and whose value may change due to activity on the server. If an attribute is &quot;read-write&quot;, the resource will expose an operation named &quot;write-attribute&quot; whose &quot;name&quot; parameter will accept this attribute's name and whose &quot;value&quot; parameter will accept a valid value for this attribute. That operation will be the standard means of updating this attribute's value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">restart-required</tt> &ndash; String &ndash; One of &quot;no-services&quot;, &quot;all-services&quot;, &quot;resource-services&quot; or &quot;jvm&quot;. Only relevant to attributes whose access-type is read-write. Indicates whether execution of a write-attribute operation whose name parameter specifies this attribute requires a restart of services (or an entire JVM) in order for the change to take effect in the runtime . See discussion of &quot;<a href="66322741.html#66322741_ManagementAPIreference-applyingruntimeupdates">Applying Updates to Runtime Services</a>&quot; below.  Default value is &quot;no-services&quot;.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">alternatives</tt> &ndash; List of string &ndash; Indicates an exclusive relationship between attributes. If this attribute is defined, the other attributes listed in this descriptor's value should be undefined (even if their required descriptor says true; i.e. the presence of this attribute satisfies the requirement.) Default is undefined; i.e. this does not apply to most attributes.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">requires</tt> &ndash; List of string &ndash; Indicates that if this attribute has a value (other than undefined), the other attributes listed in this descriptor's value must also have a value, even if their required descriptor says false. This would typically be used in conjunction with alternatives. For example, attributes &quot;a&quot; and &quot;b&quot; are required, but are alternatives to each other; &quot;c&quot; and &quot;d&quot; are optional. But &quot;b&quot; requires &quot;c&quot; and &quot;d&quot;, so if &quot;b&quot; is used, &quot;c&quot; and &quot;d&quot; must also be defined. Default is undefined; i.e. this does not apply to most attributes.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">head-comment-allowed</tt> &ndash; boolean &ndash; indicates whether the model can store an XML comment that would be written in the persistent form of the model (e.g. domain.xml) before the start of the XML element that represents this attribute. This item is optional, and if not present defaults to false. (This is a different default from what is used for an entire management resource, since model attributes often map to XML attributes, which don't allow comments.) (Note: storing XML comments in the in-memory model is not currently supported. This description key is for future use.)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">tail-comment-allowed</tt> &ndash; boolean &ndash; similar to head-comment-allowed, but indicates whether a comment just before the close of the XML element is supported. A tail comment can only be supported if the element has child elements, in which case a comment can be inserted between the final child element and the element's closing tag. This item is optional, and if not present defaults to false. (This is a different default from what is used for an entire management resource, since model attributes often map to XML attributes, which don't allow comments.) (Note: storing XML comments in the in-memory model is not currently supported. This description key is for future use.)            </p>
+    </li><li class=" ">            <p>
+    arbitrary key/value pairs that further describe the attribute value, e.g. &quot;max&quot; =&gt; 2. See &quot;<a href="66322741.html#66322741_ManagementAPIreference-arbitrarydescriptors">Arbitrary Descriptors</a>&quot; below.            </p>
+    </li></ul>            <p>
+    Some examples:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&quot;foo&quot; =&gt; {
+     &quot;description&quot; =&gt; &quot;The foo&quot;,
+     &quot;type&quot; =&gt; INT,
+     &quot;max&quot; =&gt; 2
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&quot;bar&quot; =&gt; {
+     &quot;description&quot; =&gt; &quot;The bar&quot;,
+     &quot;type&quot; =&gt; OBJECT,
+     &quot;value-type&quot; =&gt; {
+          &quot;size&quot; =&gt; INT,
+          &quot;color&quot; =&gt; STRING
+     }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322741_ManagementAPIreference-operationdescription"><a name="66322741_ManagementAPIreference-operationdescription"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-DescriptionofanOperation"  >
+        <h4>Description of an Operation</h4>
+    
+            <p>
+    A management resource may have operations associated with it. The description of an operation will include the following information:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">operation-name</tt> &ndash; String &ndash; the name of the operation            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of the operation            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">request-properties</tt> &ndash; Map of String to complex structure &ndash; description of the parameters of the operation. Keys are the names of the parameters, values are descriptions of the parameter value types. See <a href="66322741.html#66322741_ManagementAPIreference-paramdescription">below</a> for details on the description of parameter value types.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">reply-properties</tt> &ndash; complex structure, or empty &ndash; description of the return value of the operation, with an empty node meaning void. See <a href="66322741.html#66322741_ManagementAPIreference-paramdescription">below</a> for details on the description of operation return value types.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">restart-required</tt> &ndash; String &ndash; One of &quot;no-services&quot;, &quot;all-services&quot;, &quot;resource-services&quot; or &quot;jvm&quot;. Indicates whether the operation makes a configuration change that requires a restart of services (or an entire JVM) in order for the change to take effect in the runtime. See discussion of &quot;<a href="66322741.html#66322741_ManagementAPIreference-applyingruntimeupdates">Applying Updates to Runtime Services</a>&quot; below.  Default value is &quot;no-services&quot;.            </p>
+    </li></ul>            <p>
+        <span id="66322741_ManagementAPIreference-paramdescription"><a name="66322741_ManagementAPIreference-paramdescription"></a></span>
+            </p>
+        <div class="section-5"  id="66322741_ManagementAPIreference-DescriptionofanOperationParameterorReturnValue"  >
+        <h5>Description of an Operation Parameter or Return Value</h5>
+    
+<ul class=" "><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of the parameter or return value            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">type</tt> &ndash; <tt class=" ">org.jboss.dmr.ModelType</tt> &ndash; the type of the parameter or return value. One of the enum values BIG_DECIMAL, BIG_INTEGER, BOOLEAN, BYTES, DOUBLE, INT, LIST, LONG, OBJECT, PROPERTY, STRING.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">value-type</tt> &ndash; <tt class=" ">ModelType</tt> or complex structure &ndash; Only present if type is LIST or OBJECT. If all elements in the LIST or all the values of the OBJECT type are of the same type, this will be one of the ModelType enums  BIG_DECIMAL, BIG_INTEGER, BOOLEAN, BYTES, DOUBLE, INT, LIST, LONG, PROPERTY, STRING. Otherwise, value-type will detail the structure of the attribute value, enumerating the value's fields and the type of their value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">expressions-allowed</tt> &ndash; boolean &ndash; indicates whether the value of the the parameter or return value may be of type <tt class=" ">ModelType.EXPRESSION</tt>, instead its standard type (see type and value-type above for discussion of the standard type.) A value of ModelType.EXPRESSION contains a system-property substitution expression that the server will resolve against the server-side system property map before using the value. For example, a parameter named max-threads may have an expression value of <tt class=" ">${example.pool.max-threads:10</tt>} instead of just 10. Default value if not present is false.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">required</tt> &ndash; boolean &ndash; Only relevant to parameters. true if the parameter must be present in the request object used to invoke the operation; false if it can omitted. If not present, true is the default.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">nillable</tt> &ndash; boolean &ndash; true if null is a valid value.  If not present, false is the default.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">restart-required</tt> &ndash; String &ndash; One of &quot;no-services&quot;, &quot;all-services&quot;, &quot;resource-services&quot; or &quot;jvm&quot;. Only relevant to attributes whose access-type is read-write. Indicates whether execution of a write-attribute operation whose name parameter specifies this attribute requires a restart of services (or an entire JVM) in order for the change to take effect in the runtime . See discussion of &quot;<a href="66322741.html#66322741_ManagementAPIreference-applyingruntimeupdates">Applying Updates to Runtime Services</a>&quot; below.  Default value is &quot;no-services&quot;.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">alternatives</tt> &ndash; List of string &ndash; Indicates an exclusive relationship between parameters. If this attribute is defined, the other parameters listed in this descriptor's value should be undefined (even if their required descriptor says true; i.e. the presence of this parameter satisfies the requirement.) Default is undefined; i.e. this does not apply to most parameters.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">requires</tt> &ndash; List of string &ndash; Indicates that if this parameter has a value (other than undefined), the other parameters listed in this descriptor's value must also have a value, even if their required descriptor says false. This would typically be used in conjunction with alternatives. For example, parameters &quot;a&quot; and &quot;b&quot; are required, but are alternatives to each other; &quot;c&quot; and &quot;d&quot; are optional. But &quot;b&quot; requires &quot;c&quot; and &quot;d&quot;, so if &quot;b&quot; is used, &quot;c&quot; and &quot;d&quot; must also be defined. Default is undefined; i.e. this does not apply to most parameters.            </p>
+    </li><li class=" ">            <p>
+    arbitrary key/value pairs that further describe the attribute value, e.g. &quot;max&quot; =&gt;2. See &quot;<a href="66322741.html#66322741_ManagementAPIreference-arbitrarydescriptors">Arbitrary Descriptors</a>&quot; below.            </p>
+    </li></ul>            <p>
+        <span id="66322741_ManagementAPIreference-arbitrarydescriptors"><a name="66322741_ManagementAPIreference-arbitrarydescriptors"></a></span>
+            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-ArbitraryDescriptors"  >
+        <h4>Arbitrary Descriptors</h4>
+    
+            <p>
+    The description of an attribute, operation parameter or operation return value type can include arbitrary key/value pairs that provide extra information. Whether a particular key/value pair is present depends on the context, e.g. a pair with key &quot;max&quot; would probably only occur as part of the description of some numeric type.            </p>
+                <p>
+    Following are standard keys and their expected value type. If descriptor authors want to add an arbitrary key/value pair to some descriptor and the semantic matches the meaning of one of the following items, the standard key/value type must be used.            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">min</tt> &ndash; int &ndash; the minimum value of some numeric type. The absence of this item implies there is no minimum value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max</tt> &ndash; int &ndash; the maximum value of some numeric type. The absence of this item implies there is no maximum value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">min-length</tt> &ndash; int &ndash; the minimum length of some string, list or byte[] type. The absence of this item implies a minimum length of zero.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max-length</tt> &ndash; int &ndash; the maximum length of some string, list or byte[]. The absence of this item implies there is no maximum value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">nillable</tt> &ndash; boolean &ndash; whether null or a ModelNode of type <tt class=" ">ModelType.UNDEFINED</tt> is a legal value. The absence of this item implies false; i.e. null/undefined is not a legal value.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">allowed</tt> &ndash; List &ndash; a list of legal values. The type of the elements in the list should match the type of the attribute.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">default</tt> &ndash; the default value for the attribute if not present in the model            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">unit</tt> - The unit of the value, if one is applicable - e.g. ns, ms, s, m, h, KB, MB, TB. See the <tt class=" ">org.jboss.as.controller.client.helpers.MeasurementUnit</tt> in the org.jboss.as:jboss-as-controller-client artifact for a listing of legal measurement units..            </p>
+    </li></ul>            <p>
+    Some examples:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;operation-name&quot; =&gt; &quot;incrementFoo&quot;,
+     &quot;description&quot; =&gt; &quot;Increase the value of the 'foo' attribute by the given amount&quot;,
+     &quot;request-properties&quot; =&gt; {
+          &quot;increment&quot; =&gt; {
+               &quot;type&quot; =&gt; INT,
+               &quot;description&quot; =&gt; &quot;The amount to increment&quot;,
+               &quot;required&quot; =&gt; true
+     }},
+     &quot;reply-properties&quot; =&gt; {
+               &quot;type&quot; =&gt; INT,
+               &quot;description&quot; =&gt; &quot;The new value&quot;,
+     }
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;operation-name&quot; =&gt; &quot;start&quot;,
+     &quot;description&quot; =&gt; &quot;Starts the thing&quot;,
+     &quot;request-properties&quot; =&gt; {},
+     &quot;reply-properties&quot; =&gt; {}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322741_ManagementAPIreference-childdescription"><a name="66322741_ManagementAPIreference-childdescription"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-DescriptionofParent%2FChildRelationships"  >
+        <h4>Description of Parent/Child Relationships</h4>
+    
+            <p>
+    The address used to target an addressable portion of the model must be an ordered list of key value pairs. The effect of this requirement is the addressable portions of the model naturally form a tree structure, with parent nodes in the tree defining what the valid keys are and the children defining what the valid values are. The parent node also defines the cardinality of the relationship. The description of the parent node includes a children element that describes these relationships:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     ....
+     &quot;children&quot; =&gt; {
+          &quot;connector&quot; =&gt; {
+               .... description of the relationship with children of type &quot;connector&quot;
+          },
+          &quot;virtual-host&quot; =&gt; {
+               .... description of the relationship with children of type &quot;virtual-host&quot;
+          }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The description of each relationship will include the following elements:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">description</tt> &ndash; String &ndash; text description of the relationship            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">min-occurs</tt> &ndash; int, either 0 or 1 &ndash; Minimum number of children of this type that must exist in a valid model. If not present, the default value is 0.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max-occurs</tt> &ndash; int &ndash; Maximum number of children of this type that may exist in a valid model. If not present, the default value is Integer.MAX_VALUE, i.e. there is no limit.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">allowed</tt> &ndash; List of strings &ndash; legal values for children names. If not present, there is no restriction on children names.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">model-description</tt> &ndash; either &quot;undefined&quot; or a complex structure &ndash; This is the full description of the child resource (its text description, attributes, operations, children) as detailed above. This may also be &quot;undefined&quot;, i.e. a null value, if the query that asked for the parent node's description did not include the &quot;recursive&quot; param set to true.            </p>
+    </li></ul>            <p>
+    Example with if the recursive flag was set to true:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;description&quot; =&gt; &quot;The connectors used to handle client connections&quot;,
+     &quot;min-occurs&quot; &gt; 1,
+     &quot;model-description&quot; =&gt; {
+          &quot;description&quot; =&gt; &quot;Handles client connections&quot;,
+          &quot;attributes =&gt; {
+               ... details of children as documented above
+          },
+          &quot;operations&quot; =&gt; {
+               .... details of operations as documented above
+          },
+          &quot;children&quot; =&gt; {
+               .... details of the children's children
+          }
+     }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    If the recursive flag was false:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+     &quot;description&quot; =&gt; &quot;The connectors used to handle client connections&quot;,
+     &quot;min-occurs&quot; &gt; 1,
+     &quot;model-description&quot; =&gt; undefined
+}</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322741_ManagementAPIreference-applyingruntimeupdates"><a name="66322741_ManagementAPIreference-applyingruntimeupdates"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-ApplyingUpdatestoRuntimeServices"  >
+        <h4>Applying Updates to Runtime Services</h4>
+    
+            <p>
+    An attribute or operation description may include a &quot;<tt class=" ">restart-required</tt>&quot; descriptor; this section is an explanation of the meaning of that descriptor.            </p>
+                <p>
+    An operation that changes a management resource's persistent configuration usually can also also affect a runtime service associated with the resource. For example, there is a runtime service associated with any host.xml or standalone.xml <tt class=" ">&lt;interface&gt;</tt> element; other services in the runtime depend on that service to provide the <tt class=" ">InetAddress</tt> associated with the interface. In many cases, an update to a resource's persistent configuration can be immediately applied to the associated runtime service. The runtime service's state is updated to reflect the new value(s).            </p>
+                <p>
+    However, in many cases the runtime service's state cannot be updated without restarting the service. Restarting a service can have broad effects. A restart of a service A will trigger a restart of other services B, C and D that depend A, triggering a restart of services that depend on B, C and D, etc. Those service restarts may very well disrupt handling of end-user requests.            </p>
+                <p>
+    Because restarting a service can be disruptive to end-user request handling, the handlers for management operations will not restart any service without some form of explicit instruction from the end user indicating a service restart is desired. In a few cases, simply executing the operation is an indication the user wants services to restart (e.g. a <tt class=" ">/host=master/server-config=server-one:restart</tt> operation in a managed domain, or a <tt class=" ">/:reload</tt> operation on a standalone server.) For all other cases, if an operation (or attribute write) cannot be performed without restarting a service, the metadata describing the operation or attribute will include a &quot;<tt class=" ">restart-required</tt>&quot; descriptor whose value indicates what is necessary for the operation to affect the runtime:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">no-services</tt> &ndash; Applying the operation to the runtime does not require the restart of any services. This value is the default if the restart-required descriptor is not present.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">all-services</tt> &ndash; The operation can only immediately update the persistent configuration; applying the operation to the runtime will require a subsequent restart of all services in the affected VM. Executing the operation will put the server into a &quot;<tt class=" ">reload-required</tt>&quot; state. Until a restart of all services is performed the response to this operation and to any subsequent operation will include a response header &quot;<tt class=" ">process-state&quot; =&gt; &quot;reload-required</tt>&quot;. For a standalone server, a restart of all services can be accomplished by executing the <tt class=" ">/:reload</tt> CLI command. For a server in a managed domain, restarting all services currently requires a full restart of the affected server VM (e.g. <tt class=" ">/host=master/server-config=server-one:restart</tt>).            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">jvm</tt> --The operation can only immediately update the persistent configuration; applying the operation to the runtime will require a full process restart (i.e. stop the JVM and launch a new JVM). Executing the operation will put the server into a &quot;<tt class=" ">restart-required</tt>&quot; state. Until a restart is performed the response to this operation and to any subsequent operation will include a response header &quot;<tt class=" ">process-state&quot; =&gt; &quot;restart-required</tt>&quot;. For a standalone server, a full process restart requires first stopping the server via OS-level operations (Ctrl-C, kill) or via the <tt class=" ">/:shutdown</tt> CLI command, and then starting the server again from the command line. For a server in a managed domain, restarting a server requires executing the <tt class=" ">/host=&lt;host&gt;/server-config=&lt;server&gt;:restart</tt> operation.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">resource-services</tt> &ndash; The operation can only immediately update the persistent configuration; applying the operation to the runtime will require a subsequent restart of some services associated with the resource. If the operation includes the request header <tt class=" ">&quot;allow-resource-service-restart&quot; =&gt; true</tt>, the handler for the operation will go ahead and restart the runtime service. Otherwise executing the operation will put the server into a &quot;<tt class=" ">reload-required</tt>&quot; state. (See the discussion of &quot;<tt class=" ">all-services</tt>&quot; above for more on the &quot;<tt class=" ">reload-required</tt>&quot; state.)            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322741_ManagementAPIreference-ThenativemanagementAPI"  >
+        <h2>The native management API</h2>
+    
+            <p>
+    A standalone WildFly process, or a managed domain Domain Controller or slave Host Controller process can be configured to listen for remote management requests using its &quot;native management interface&quot;:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;native-interface interface=&quot;management&quot; port=&quot;9999&quot; security-realm=&quot;ManagementRealm&quot;/&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    <sub class=" ">(See standalone/configuration/standalone.xml or domain/configuration/host.xml)</sub>            </p>
+                <p>
+    The CLI tool that comes with the application server uses this interface, and user can develop custom clients that use it as well. In this section we'll cover the basics on how to develop such a client. We'll also cover details on the format of low-level management operation requests and responses &ndash; information that should prove useful for users of the CLI tool as well.            </p>
+        <div class="section-3"  id="66322741_ManagementAPIreference-NativeManagementClientDependencies"  >
+        <h3>Native Management Client Dependencies</h3>
+    
+            <p>
+    The native management interface uses an open protocol based on the JBoss Remoting library. JBoss Remoting is used to establish a communication channel from the client to the process being managed. Once the communication channel is established the primary traffic over the channel is management requests initiated by the client and asynchronous responses from the target process.            </p>
+                <p>
+    A custom Java-based client should have the maven artifact <tt class=" ">org.jboss.as:jboss-as-controller-client</tt> and its dependencies on the classpath. The other dependencies are:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Maven Artifact            </td>
+                <td rowspan="1" colspan="1">
+    Purpose            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.remoting:jboss-remoting</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Remote communication            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss:jboss-dmr</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <a href="66322745.html">Detyped representation of the management model</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.as:jboss-as-protocol</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Wire protocol for remote WildFly&nbsp;management            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.sasl:jboss-sasl</tt>            </td>
+                <td rowspan="1" colspan="1">
+    SASL authentication            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.xnio:xnio-api</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Non-blocking IO            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.xnio:xnio-nio</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Non-blocking IO            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.logging:jboss-logging</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Logging            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.threads:jboss-threads</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Thread management            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.marshalling:jboss-marshalling</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Marshalling and unmarshalling data to/from streams            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The client API is entirely within the <tt class=" ">org.jboss.as:jboss-as-controller-client</tt> artifact; the other dependencies are part of the internal implementation of <tt class=" ">org.jboss.as:jboss-as-controller-client</tt> and are not compile-time dependencies of any custom client based on it.            </p>
+                <p>
+    The management protocol is an open protocol, so a completely custom client could be developed without using these libraries (e.g. using Python or some other language.)            </p>
+        </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-Workingwitha%7B%7BModelControllerClient%7D%7D"  >
+        <h3>Working with a  ModelControllerClient</h3>
+    
+            <p>
+    The <tt class=" ">org.jboss.as.controller.client.ModelControllerClient</tt> class is the main class a custom client would use to manage a WildFly server instance or a Domain Controller or slave Host Controller.            </p>
+                <p>
+    The custom client must have maven artifact <tt class=" ">org.jboss.as:jboss-as-controller-client</tt> and its dependencies on the classpath.            </p>
+        <div class="section-4"  id="66322741_ManagementAPIreference-Creatingthe%7B%7BModelControllerClient%7D%7D"  >
+        <h4>Creating the  ModelControllerClient</h4>
+    
+            <p>
+    To create a management client that can connect to your target process's native management socket, simply:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelControllerClient client = ModelControllerClient.Factory.create(InetAddress.getByName(&quot;localhost&quot;), 9999);</code></pre>
+        </div>
+    </div>
+            <p>
+    The address and port are what is configured in the target process' <tt class=" ">&lt;management&gt;&lt;management-interfaces&gt;&lt;native-interface.../&gt;</tt> element.            </p>
+                <p>
+    Typically, however, the native management interface will be secured, requiring clients to authenticate. On the client side, the custom client will need to provide the user's authentication credentials, obtained in whatever manner is appropriate for the client (e.g. from a dialog box in a GUI-based client.) Access to these credentials is provided by passing in an implementation of the <tt class=" ">javax.security.auth.callback.CallbackHandler</tt> interface. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>static ModelControllerClient createClient(final InetAddress host, final int port,
+                  final String username, final char[] password, final String securityRealmName) {
+
+    final CallbackHandler callbackHandler = new CallbackHandler() {
+
+        public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+            for (Callback current : callbacks) {
+                if (current instanceof NameCallback) {
+                    NameCallback ncb = (NameCallback) current;
+                    ncb.setName(username);
+                } else if (current instanceof PasswordCallback) {
+                    PasswordCallback pcb = (PasswordCallback) current;
+                    pcb.setPassword(password.toCharArray());
+                } else if (current instanceof RealmCallback) {
+                    RealmCallback rcb = (RealmCallback) current;
+                    rcb.setText(rcb.getDefaultText());
+                } else {
+                    throw new UnsupportedCallbackException(current);
+                }
+            }
+        }
+    };
+
+    return ModelControllerClient.Factory.create(host, port, callbackHandler);
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-Creatinganoperationrequestobject"  >
+        <h4>Creating an operation request object</h4>
+    
+            <p>
+    Management requests are formulated using the <tt class=" ">org.jboss.dmr.ModelNode</tt> class from the <tt class=" ">jboss-dmr</tt> library. The <tt class=" ">jboss-dmr</tt> library allows the complete WildFly management model to be expressed using a very small number of Java types. See <a href="66322745.html">Detyped management and the jboss-dmr library</a> for full details on using this library.            </p>
+                <p>
+    Let's show an example of creating an operation request object that can be used to <a href="66322742.html#66322742_Globaloperations-readresourcedescription">read the resource description</a> for the web subsystem's HTTP connector:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode op = new ModelNode();
+op.get(&quot;operation&quot;).set(&quot;read-resource-description&quot;);
+
+ModelNode address = op.get(&quot;address&quot;);
+address.add(&quot;subsystem&quot;, &quot;web&quot;);
+address.add(&quot;connector&quot;, &quot;http&quot;);
+
+op.get(&quot;recursive&quot;).set(true);
+op.get(&quot;operations&quot;).set(true);</code></pre>
+        </div>
+    </div>
+            <p>
+    What we've done here is created a ModelNode of type <tt class=" ">ModelType.OBJECT</tt> with the following fields:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">operation</tt> &ndash; the name of the operation to invoke. All operation requests <strong class=" ">must</strong> include this field and its value must be a String.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">address</tt> &ndash; the address of the resource to invoke the operation against. This field's must be of <tt class=" ">ModelType.LIST</tt> with each element in the list being a <tt class=" ">ModelType.PROPERTY</tt>. If this field is omitted the operation will target the root resource. The operation can be targeted at any address in the management model; here we are targeting it at the resource for the web subsystem's http connector.            </p>
+    </li></ul>            <p>
+    In this case, the request includes two optional parameters:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">recursive</tt> &ndash; true means you want the description of child resources under this resource. Default is false            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">operations</tt> &ndash; true means you want the description of operations exposed by the resource to be included. Default is false.            </p>
+    </li></ul>            <p>
+    Different operations take different parameters, and some take no parameters at all.            </p>
+                <p>
+    See <a href="66322741.html#66322741_ManagementAPIreference-requestformat">Format of a Detyped Operation Request</a> for full details on the structure of a ModelNode that will represent an operation request.            </p>
+                <p>
+    The example above produces an operation request ModelNode equivalent to what the CLI produces internally when it parses and executes the following low-level CLI command:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[localhost:9999 /] /subsystem=web/connector=http:read-resource-description(recursive=true,operations=true)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-Executetheoperationandmanipulatetheresult%3A"  >
+        <h4>Execute the operation and manipulate the result:</h4>
+    
+            <p>
+    The <tt class=" ">execute</tt> method sends the operation request ModelNode to the process being managed and returns a ModelNode the contains the process' response:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode returnVal = client.execute(op);
+System.out.println(returnVal.get(&quot;result&quot;).toString());</code></pre>
+        </div>
+    </div>
+            <p>
+    See <a href="66322741.html#66322741_ManagementAPIreference-responseformat">Format of a Detyped Operation Response</a> for general details on the structure of the &quot;returnVal&quot; ModelNode.            </p>
+                <p>
+    The <tt class=" ">execute</tt> operation shown above will block the calling thread until the response is received from the process being managed. <tt class=" ">ModelControllerClient</tt> also exposes and API allowing asynchronous invocation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Future&lt;ModelNode&gt; future = client.executeAsync(op);
+. . .  // do other stuff
+ModelNode returnVal = future.get();
+System.out.println(returnVal.get(&quot;result&quot;).toString());</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-Closethe%7B%7BModelControllerClient%7D%7D"  >
+        <h4>Close the  ModelControllerClient</h4>
+    
+            <p>
+    A <tt class=" ">ModelControllerClient</tt> can be reused for multiple requests. Creating a new <tt class=" ">ModelControllerClient</tt> for each request is an anti-pattern. However, when the <tt class=" ">ModelControllerClient</tt> is no longer needed, it should always be explicitly closed, allowing it to close down any connections to the process it was managing and release other resources:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>client.close();</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322741_ManagementAPIreference-requestformat"><a name="66322741_ManagementAPIreference-requestformat"></a></span>
+            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-FormatofaDetypedOperationRequest"  >
+        <h3>Format of a Detyped Operation Request</h3>
+    
+            <p>
+    The basic method a user of the WildFly 8 programmatic management API would use is very simple:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode execute(ModelNode operation) throws IOException;</code></pre>
+        </div>
+    </div>
+            <p>
+    where the return value is the detyped representation of the response, and <tt class=" ">operation</tt> is the detyped representation of the operation being invoked.            </p>
+                <p>
+    The purpose of this section is to document the structure of <tt class=" ">operation</tt>.            </p>
+                <p>
+    See <a href="66322741.html#66322741_ManagementAPIreference-responseformat">Format of a Detyped Operation Response</a> for a discussion of the format of the response.            </p>
+        <div class="section-4"  id="66322741_ManagementAPIreference-SimpleOperations"  >
+        <h4>Simple Operations</h4>
+    
+            <p>
+    A text representation of simple operation would look like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+    &quot;address&quot; =&gt; [
+        (&quot;profile&quot; =&gt; &quot;production&quot;),
+        (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+        (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool1&quot;)
+    ],
+    &quot;name&quot; =&gt; &quot;count&quot;,
+    &quot;value&quot; =&gt; 20
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Java code to produce that output would be:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode op = new ModelNode();
+op.get(&quot;operation&quot;).set(&quot;write-attribute&quot;);
+ModelNode addr = op.get(&quot;address&quot;);
+addr.add(&quot;profile&quot;, &quot;production&quot;);
+addr.add(&quot;subsystem&quot;, &quot;threads&quot;);
+addr.add(&quot;bounded-queue-thread-pool&quot;, &quot;pool1&quot;);
+op.get(&quot;name&quot;).set(&quot;count&quot;);
+op.get(&quot;value&quot;).set(20);
+System.out.println(op);</code></pre>
+        </div>
+    </div>
+            <p>
+    The order in which the outermost elements appear in the request is not relevant. The required elements are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">operation</tt> &ndash; String &ndash; The name of the operation being invoked.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">address</tt> &ndash; the address of the managed resource against which the request should be executed. If not set, the address is the root resource. The address is an ordered list of key-value pairs describing where the resource resides in the overall management resource tree. Management resources are organized in a tree, so the order in which elements in the address occur is important.            </p>
+    </li></ul>            <p>
+    The other key/value pairs are parameter names and their values. The names and values should match what is specified in the <a href="66322746.html#66322746_DescriptionoftheManagementModel-operationdescription">operation's description</a>.            </p>
+                <p>
+    Parameters may have any name, except for the reserved words <tt class=" ">operation</tt>, <tt class=" ">address</tt> and <tt class=" ">operation-headers</tt>.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-OperationHeaders"  >
+        <h4>Operation Headers</h4>
+    
+            <p>
+    Besides the special operation and address values discussed above, operation requests can also include special &quot;header&quot; values that help control how the operation executes. These headers are created under the special reserved word <tt class=" ">operation-headers</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode op = new ModelNode();
+op.get(&quot;operation&quot;).set(&quot;write-attribute&quot;);
+ModelNode addr = op.get(&quot;address&quot;);
+addr.add(&quot;base&quot;, &quot;domain&quot;);
+addr.add(&quot;profile&quot;, &quot;production&quot;);
+addr.add(&quot;subsystem&quot;, &quot;threads&quot;);
+addr.add(&quot;bounded-queue-thread-pool&quot;, &quot;pool1&quot;);
+op.get(&quot;name&quot;).set(&quot;count&quot;);
+op.get(&quot;value&quot;).set(20);
+op.get(&quot;operation-headers&quot;, &quot;rollback-on-runtime-failure&quot;).set(false);
+System.out.println(op);</code></pre>
+        </div>
+    </div>
+            <p>
+    This produces:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+    &quot;address&quot; =&gt; [
+        (&quot;profile&quot; =&gt; &quot;production&quot;),
+        (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+        (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool1&quot;)
+    ],
+    &quot;name&quot; =&gt; &quot;count&quot;,
+    &quot;value&quot; =&gt; 20,
+    &quot;operation-headers&quot; =&gt; {
+        &quot;rollback-on-runtime-failure =&gt; false
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The following operation headers are supported:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">rollback-on-runtime-failure</tt> &ndash; boolean, optional, defaults to true. Whether an operation that successfully updates the persistent configuration model should be reverted if it fails to apply to the runtime. Operations that affect the persistent configuration are applied in two stages &ndash; first to the configuration model and then to the actual running services. If there is an error applying to the configuration model the operation will be aborted with no configuration change and no change to running services will be attempted. However, operations are allowed to change the configuration model even if there is a failure to apply the change to the running services &ndash; if and only if this <tt class=" ">rollback-on-runtime-failure</tt> header is set to <tt class=" ">false</tt>.  So, this header only deals with what happens if there is a problem applying an operation to the running state of a server (e.g. actually increasing the size of a runtime thread pool.)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">rollout-plan</tt> &ndash; only relevant to requests made to a Domain Controller or Host Controller. See &quot;<a href="66322741.html#66322741_ManagementAPIreference-rolloutplan">Operations with a Rollout Plan</a>&quot; for details.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">allow-resource-service-restart</tt> &ndash; boolean, optional, defaults to false. Whether an operation that requires restarting some runtime services in order to take effect should do so. See discussion of <tt class=" ">resource-services</tt> in the <a href="66322746.html#66322746_DescriptionoftheManagementModel-applyingruntimeupdates">&quot;Applying Updates to Runtime Services&quot; section of the Description of the Management Model section</a> for further details.            </p>
+    </li></ul>            <p>
+        <span id="66322741_ManagementAPIreference-compositeoperations"><a name="66322741_ManagementAPIreference-compositeoperations"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-CompositeOperations"  >
+        <h4>Composite Operations</h4>
+    
+            <p>
+    The root resource for a Domain or Host Controller or an individual server will expose an operation named &quot;<tt class=" ">composite</tt>&quot;.   This operation executes a list of other operations as an atomic unit (although the atomicity requirement can be <a href="66322741.html#66322741_ManagementAPIreference-rollbackonruntimefailure">relaxed</a>.  The structure of the request for the &quot;<tt class=" ">composite</tt>&quot; operation has the same fundamental structure as a simple operation (i.e. operation name, address, params as key value pairs).            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;operation&quot; =&gt; &quot;composite&quot;,
+    &quot;address&quot; =&gt; [],
+    &quot;steps&quot; =&gt; [
+         {
+              &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+              &quot;address&quot; =&gt; [
+                   (&quot;profile&quot; =&gt; &quot;production&quot;),
+                   (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+                   (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool1&quot;)
+              ],
+              &quot;count&quot; =&gt; &quot;count&quot;,
+              &quot;value&quot; =&gt; 20
+         },
+         {
+              &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+              &quot;address&quot; =&gt; [
+                   (&quot;profile&quot; =&gt; &quot;production&quot;),
+                   (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+                   (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool2&quot;)
+              ],
+              &quot;name&quot; =&gt; &quot;count&quot;,
+              &quot;value&quot; =&gt; 10
+         }
+    ],
+    &quot;operation-headers&quot; =&gt; {
+        &quot;rollback-on-runtime-failure =&gt; false
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The &quot;composite&quot; operation takes a single parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">steps</tt> &ndash; a list, where each item in the list has the same structure as a simple operation request. In the example above each of the two steps is modifying the thread pool configuration for a different pool. There need not be any particular relationship between the steps. Note that the <tt class=" ">rollback-on-runtime-failure</tt> and <tt class=" ">rollout-plan</tt> operation headers are not supported for the individual steps in a composite operation.            </p>
+    </li></ul>            <p>
+        <span id="66322741_ManagementAPIreference-rollbackonruntimefailure"><a name="66322741_ManagementAPIreference-rollbackonruntimefailure"></a></span>
+<br/>The <tt class=" ">rollback-on-runtime-failure</tt> operation header discussed above has a particular meaning when applied to a composite operation, controlling whether steps that successfully execute should be reverted if other steps fail at runtime. Note that if any steps modify the persistent configuration, and any of those steps fail, all steps will be reverted. Partial/incomplete changes to the persistent configuration are not allowed.            </p>
+                <p>
+        <span id="66322741_ManagementAPIreference-rolloutplan"><a name="66322741_ManagementAPIreference-rolloutplan"></a></span>
+            </p>
+        </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-OperationswithaRolloutPlan"  >
+        <h4>Operations with a Rollout Plan</h4>
+    
+            <p>
+    Operations targeted at domain or host level resources can potentially impact multiple servers. Such operations can include a &quot;rollout plan&quot; detailing the sequence in which the operation should be applied to servers as well as policies for detailing whether the operation should be reverted if it fails to execute successfully on some servers.            </p>
+                <p>
+    If the operation includes a rollout plan, the structure is as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;operation&quot; =&gt; &quot;write-attribute&quot;,
+    &quot;address&quot; =&gt; [
+        (&quot;profile&quot; =&gt; &quot;production&quot;),
+        (&quot;subsystem&quot; =&gt; &quot;threads&quot;),
+        (&quot;bounded-queue-thread-pool&quot; =&gt; &quot;pool1&quot;)
+    ],
+    &quot;name&quot; =&gt; &quot;count&quot;,
+    &quot;value&quot; =&gt; 20,
+    &quot;operation-headers&quot; =&gt; {
+        &quot;rollout-plan&quot; =&gt; {
+            &quot;in-series&quot; =&gt; [
+                {
+                    &quot;concurrent-groups&quot; =&gt; {
+                        &quot;groupA&quot; =&gt; {
+                            &quot;rolling-to-servers&quot; =&gt; true,
+                            &quot;max-failure-percentage&quot; =&gt; 20
+                        },
+                        &quot;groupB&quot; =&gt; undefined
+                    }
+                },
+                {
+                   &quot;server-group&quot; =&gt; {
+                        &quot;groupC&quot; =&gt; {
+                            &quot;rolling-to-servers&quot; =&gt; false,
+                            &quot;max-failed-servers&quot; =&gt; 1
+                        }
+                    }
+                },
+                {
+                    &quot;concurrent-groups&quot; =&gt; {
+                        &quot;groupD&quot; =&gt; {
+                            &quot;rolling-to-servers&quot; =&gt; true,
+                            &quot;max-failure-percentage&quot; =&gt; 20
+                        },
+                        &quot;groupE&quot; =&gt; undefined
+                    }
+                }
+            ],
+            &quot;rollback-across-groups&quot; =&gt; true
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see, the rollout plan is another structure in the operation-headers section. The root node of the structure allows two children:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">in-series</tt> &ndash; a list &ndash; A list of activities that are to be performed in series, with each activity reaching completion before the next step is executed. Each activity involves the application of the operation to the servers in one or more server groups. See below for details on each element in the list.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">rollback-across-groups</tt> &ndash; boolean &ndash; indicates whether the need to rollback the operation on all the servers in one server group should trigger a rollback across all the server groups. This is an optional setting, and defaults to <tt class=" ">false</tt>.            </p>
+    </li></ul>            <p>
+    Each element in the list under the <tt class=" ">in-series</tt> node must have one or the other of the following structures:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">concurrent-groups</tt> &ndash; a map of server group names to policies controlling how the operation should be applied to that server group. For each server group in the map, the operation may be applied concurrently. See below for details on the per-server-group policy configuration.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">server-group</tt> &ndash; a single key/value mapping of a server group name to a policy controlling how the operation should be applied to that server group. See below for details on the policy configuration. (Note: there is no difference in plan execution between this and a &quot;<tt class=" ">concurrent-groups</tt>&quot; map with a single entry.)            </p>
+    </li></ul>            <p>
+    The policy controlling how the operation is applied to the servers within a server group has the following elements, each of which is optional:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">rolling-to-servers</tt> &ndash; boolean &ndash; If true, the operation will be applied to each server in the group in series. If false or not specified, the operation will be applied to the servers in the group concurrently.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max-failed-servers</tt> &ndash; int &ndash; Maximum number of servers in the group that can fail to apply the operation before it should be reverted on all servers in the group. The default value if not specified is zero; i.e. failure on any server triggers rollback across the group.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">max-failure-percentage</tt> &ndash; int between 0 and 100 &ndash; Maximum percentage of the total number of servers in the group that can fail to apply the operation before it should be reverted on all servers in the group. The default value if not specified is zero; i.e. failure on any server triggers rollback across the group.            </p>
+    </li></ul>            <p>
+    If both <tt class=" ">max-failed-servers</tt> and <tt class=" ">max-failure-percentage</tt> are set, <tt class=" ">max-failure-percentage</tt> takes precedence.            </p>
+                <p>
+    Looking at the (contrived) example above, application of the operation to the servers in the domain would be done in 3 phases. If the policy for any server group triggers a rollback of the operation across the server group, all other server groups will be rolled back as well. The 3 phases are:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Server groups groupA and groupB will have the operation applied concurrently. The operation will be applied to the servers in groupA in series, while all servers in groupB will handle the operation concurrently. If more than 20% of the servers in groupA fail to apply the operation, it will be rolled back across that group. If any servers in groupB fail to apply the operation it will be rolled back across that group.            </p>
+    </li><li class=" ">            <p>
+    Once all servers in groupA and groupB are complete, the operation will be applied to the servers in groupC. Those servers will handle the operation concurrently. If more than one server in groupC fails to apply the operation it will be rolled back across that group.            </p>
+    </li><li class=" ">            <p>
+    Once all servers in groupC are complete, server groups groupD and groupE will have the operation applied concurrently. The operation will be applied to the servers in groupD in series, while all servers in groupE will handle the operation concurrently. If more than 20% of the servers in groupD fail to apply the operation, it will be rolled back across that group. If any servers in groupE fail to apply the operation it will be rolled back across that group.            </p>
+    </li></ol>    <div class="section-5"  id="66322741_ManagementAPIreference-DefaultRolloutPlan"  >
+        <h5>Default Rollout Plan</h5>
+    
+            <p>
+    All operations that impact multiple servers will be executed with a rollout plan. However, actually specifying the rollout plan in the operation request is not required. If no <tt class=" ">rollout-plan</tt> operation header is specified, a default plan will be generated. The plan will have the following characteristics:            </p>
+    <ul class=" "><li class=" ">            <p>
+    There will only be a single high level phase. All server groups affected by the operation will have the operation applied concurrently.            </p>
+    </li><li class=" ">            <p>
+    Within each server group, the operation will be applied to all servers concurrently.            </p>
+    </li><li class=" ">            <p>
+    Failure on any server in a server group will cause rollback across the group.            </p>
+    </li><li class=" ">            <p>
+    Failure of any server group will result in rollback of all other server groups.            </p>
+    </li></ul>            <p>
+        <span id="66322741_ManagementAPIreference-responseformat"><a name="66322741_ManagementAPIreference-responseformat"></a></span>
+            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322741_ManagementAPIreference-FormatofaDetypedOperationResponse"  >
+        <h3>Format of a Detyped Operation Response</h3>
+    
+            <p>
+    As noted previously, the basic method a user of the WildFly 8 programmatic management API would use is very simple:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode execute(ModelNode operation) throws IOException;</code></pre>
+        </div>
+    </div>
+            <p>
+    where the return value is the detyped representation of the response, and <tt class=" ">operation</tt> is the detyped representation of the operating being invoked.            </p>
+                <p>
+    The purpose of this section is to document the structure of the return value.            </p>
+                <p>
+    For the format of the request, see <a href="66322741.html#66322741_ManagementAPIreference-requestformat">Format of a Detyped Operation Request</a>.            </p>
+        <div class="section-4"  id="66322741_ManagementAPIreference-SimpleResponses"  >
+        <h4>Simple Responses</h4>
+    
+            <p>
+    Simple responses are provided by the following types of operations:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Non-composite operations that target a single server. (See below for more on composite operations).            </p>
+    </li><li class=" ">            <p>
+    Non-composite operations that target a Domain Controller or slave Host Controller and don't require the responder to apply the operation on multiple servers and aggregate their results (e.g. a simple read of a domain configuration property.)            </p>
+    </li></ul>            <p>
+    The response will always include a simple boolean outcome field, with one of three possible values:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">success</tt> &ndash; the operation executed successfully            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">failed</tt> &ndash; the operation failed            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">cancelled</tt> &ndash; the execution of the operation was cancelled. (This would be an unusual outcome for a simple operation which would generally very rapidly reach a point in its execution where it couldn't be cancelled.)            </p>
+    </li></ul>            <p>
+    The other fields in the response will depend on whether the operation was successful.            </p>
+                <p>
+    The response for a failed operation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;failure-description&quot; =&gt; &quot;[JBAS-12345] Some failure message&quot;
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A response for a successful operation will include an additional field:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">result</tt> &ndash; the return value, or <tt class=" ">undefined</tt> for void operations or those that return null            </p>
+    </li></ul>            <p>
+    A non-void result:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;name&quot; =&gt; &quot;Brian&quot;,
+        &quot;age&quot; =&gt; 22
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A void result:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; undefined
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The response for a cancelled operation has no other fields:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;cancelled&quot;
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-ResponseHeaders"  >
+        <h4>Response Headers</h4>
+    
+            <p>
+    Besides the standard <tt class=" ">outcome</tt>, <tt class=" ">result</tt> and <tt class=" ">failure-description</tt> fields described above, the response may also include various headers that provide more information about the affect of the operation or about the overall state of the server. The headers will be child element under a field named <tt class=" ">response-headers</tt>. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; undefined,
+    &quot;response-headers&quot; =&gt; {
+        &quot;operation-requires-reload&quot; =&gt; true,
+        &quot;process-state&quot; =&gt; &quot;reload-required&quot;
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    A response header is typically related to whether an operation could be applied to the targeted runtime without requiring a restart of some or all services, or even of the target process itself. Please see the <a href="66322746.html#66322746_DescriptionoftheManagementModel-applyingruntimeupdates">&quot;Applying Updates to Runtime Services&quot; section of the Description of the Management Model section</a> for a discussion of the basic concepts related to what happens if an operation requires a service restart to be applied.            </p>
+                <p>
+    The current possible response headers are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">operation-requires-reload</tt> &ndash; boolean &ndash; indicates that the specific operation that has generated this response requires a restart of all services in the process in order to take effect in the runtime. This would typically only have a value of 'true'; the absence of the header is the same as a value of 'false.'            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">operation-requires-restart</tt> &ndash; boolean &ndash; indicates that the specific operation that has generated this response requires a full process restart in order to take effect in the runtime. This would typically only have a value of 'true'; the absence of the header is the same as a value of 'false.'            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">process-state</tt> &ndash; enumeration &ndash; Provides information about the overall state of the target process. One of the following values:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">starting</tt> &ndash; the process is starting            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">running</tt> &ndash; the process is in a normal running state. The <tt class=" ">process-state</tt> header would typically not be seen with this value; the absence of the header is the same as a value of 'running'.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">reload-required</tt> &ndash; some operation (not necessarily this one) has executed that requires a restart of all services in order for a configuration change to take effect in the runtime.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">restart-required</tt> &ndash; some operation (not necessarily this one) has executed that requires a full process restart in order for a configuration change to take effect in the runtime.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">stopping</tt> &ndash; the process is stopping            </p>
+    </li></ul></li></ul>    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-BasicCompositeOperationResponses"  >
+        <h4>Basic Composite Operation Responses</h4>
+    
+            <p>
+    A composite operation is one that incorporates more than one simple operation in a list and executes them atomically. See the <a href="66322741.html#66322741_ManagementAPIreference-compositeoperations">&quot;Composite Operations&quot; section</a> for more information.            </p>
+                <p>
+    Basic composite responses are provided by the following types of operations:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Composite operations that target a single server.            </p>
+    </li><li class=" ">            <p>
+    Composite operations that target a Domain Controller or a slave Host Controller and don't require the responder to apply the operation on multiple servers and aggregate their results (e.g. a list of simple reads of domain configuration properties.)            </p>
+    </li></ul>            <p>
+    The high level format of a basic composite operation response is largely the same as that of a simple operation response, although there is an important semantic difference. For a composite operation, the meaning of the outcome flag is controlled by the value of the operation request's <tt class=" ">rollback-on-runtime-failure</tt> header field. If that field was <tt class=" ">false</tt> (default is true), the outcome flag will be success if all steps were successfully applied to the persistent configuration even if <strong class=" ">none</strong> of the composite operation's steps was successfully applied to the runtime.            </p>
+                <p>
+    What's distinctive about a composite operation response is the <tt class=" ">result</tt> field. First, even if the operation was not successful, the <tt class=" ">result</tt> field will usually be present. (It won't be present if there was some sort of immediate failure that prevented the responder from even attempting to execute the individual operations.)  Second, the content of the <tt class=" ">result</tt> field will be a map. Each entry in the map will record the result of an element in the <tt class=" ">steps</tt> parameter of the composite operation request. The key for each item in the map will be the string &quot;<tt class=" ">step-X</tt>&quot; where &quot;X&quot; is the 1-based index of the step's position in the request's <tt class=" ">steps</tt> list. So each individual operation in the composite operation will have its result recorded.            </p>
+                <p>
+    The individual operation results will have the same basic format as the simple operation results described above. However, there are some differences from the simple operation case when the individual operation's <tt class=" ">outcome</tt> flag is <tt class=" ">failed</tt>.  These relate to the fact that in a composite operation, individual operations can be rolled back or not even attempted.            </p>
+                <p>
+    If an individual operation was not even attempted (because the overall operation was cancelled or, more likely, a prior operation failed):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;cancelled&quot;
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    An individual operation that failed and was rolled back:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;failure-description&quot; =&gt; &quot;[JBAS-12345] Some failure message&quot;,
+    &quot;rolled-back&quot; =&gt; true
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    An individual operation that itself succeeded but was rolled back due to failure of another operation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;name&quot; =&gt; &quot;Brian&quot;,
+        &quot;age&quot; =&gt; 22
+    },
+    &quot;rolled-back&quot; =&gt; true
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    An operation that failed and was rolled back:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;failure-description&quot; =&gt; &quot;[JBAS-12345] Some failure message&quot;,
+    &quot;rolled-back&quot; =&gt; true
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Here's an example of the response for a successful 2 step composite operation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        {
+            &quot;outcome&quot; =&gt; &quot;success&quot;,
+            &quot;result&quot; =&gt; {
+                &quot;name&quot; =&gt; &quot;Brian&quot;,
+                &quot;age&quot; =&gt; 22
+            }
+        },
+        {
+            &quot;outcome&quot; =&gt; &quot;success&quot;,
+            &quot;result&quot; =&gt; undefined
+        }
+    ]
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    And for a failed 3 step composite operation, where the first step succeeded and the second failed, triggering cancellation of the 3rd and rollback of the others:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;failure-description&quot; =&gt; &quot;[JBAS-99999] Composite operation failed; see individual operation results for details&quot;,
+    &quot;result&quot; =&gt; [
+        {
+            &quot;outcome&quot; =&gt; &quot;failed&quot;,
+            &quot;result&quot; =&gt; {
+                &quot;name&quot; =&gt; &quot;Brian&quot;,
+                &quot;age&quot; =&gt; 22
+            },
+            &quot;rolled-back&quot; =&gt; true
+        },
+        {
+            &quot;outcome&quot; =&gt; &quot;failed&quot;,
+            &quot;failure-description&quot; =&gt; &quot;[JBAS-12345] Some failure message&quot;,
+            &quot;rolled-back&quot; =&gt; true
+        },
+        {
+            &quot;outcome&quot; =&gt; &quot;cancelled&quot;
+        }
+    ]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322741_ManagementAPIreference-MultiServerResponses"  >
+        <h4>Multi-Server Responses</h4>
+    
+            <p>
+    Multi-server responses are provided by operations that target a Domain Controller or slave Host Controller and require the responder to apply the operation on multiple servers and aggregate their results (e.g. nearly all domain or host configuration updates.)            </p>
+                <p>
+    Multi-server operations are executed in several stages.            </p>
+                <p>
+    First, the operation may need to be applied against the authoritative configuration model maintained by the Domain Controller (for <tt class=" ">domain.xml</tt> confgurations) or a Host Controller (for a <tt class=" ">host.xml</tt> configuration). If there is a failure at this stage, the operation is automatically rolled back, with a response like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;domain-failure-description&quot; =&gt; &quot;[JBAS-33333] Failed to apply X to the domain model&quot;
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    If the operation was addressed to the domain model, in the next stage the Domain Controller will ask each slave Host Controller to apply it to its local copy of the domain model. If any Host Controller fails to do so, the Domain Controller will tell all Host Controllers to revert the change, and it will revert the change locally as well. The response to the client will look like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;host-failure-descriptions&quot; =&gt; {
+        &quot;hostA&quot; =&gt; &quot;[DOM-3333] Failed to apply to the domain model&quot;,
+        &quot;hostB&quot; =&gt; &quot;[DOM-3333] Failed to apply to the domain model&quot;
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    If the preceding stages succeed, the operation will be pushed to all affected servers. If the operation is successful on all servers, the response will look like this (this example operation has a void response, hence the result for each server is undefined):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; undefined,
+    &quot;server-groups&quot; =&gt; {
+        &quot;groupA&quot; =&gt; {
+            &quot;serverA-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            },
+            &quot;serverA-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            }
+        },
+        &quot;groupB&quot; =&gt; {
+            &quot;serverB-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            },
+            &quot;serverB-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            }
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The operation need not succeed on all servers in order to get an <tt class=" ">&quot;outcome&quot; =&gt; &quot;success&quot;</tt> result. All that is required is that it succeed on at least one server without the rollback policies in the rollout plan triggering a rollback on that server. An example response in such a situation would look like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; undefined,
+    &quot;server-groups&quot; =&gt; {
+        &quot;groupA&quot; =&gt; {
+            &quot;serverA-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            },
+            &quot;serverA-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            }
+        },
+        &quot;groupB&quot; =&gt; {
+            &quot;serverB-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            },
+            &quot;serverB-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            },
+            &quot;serverB-3&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host3&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+                    &quot;failure-description&quot; =&gt; &quot;[DOM-4556] Something didn't work right&quot;,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            }
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally, if the operation fails or is rolled back on all servers, an example response would look like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>{
+    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+    &quot;server-groups&quot; =&gt; {
+        &quot;groupA&quot; =&gt; {
+            &quot;serverA-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            },
+            &quot;serverA-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;success&quot;,
+                    &quot;result&quot; =&gt; undefined
+                }
+            }
+        },
+        &quot;groupB&quot; =&gt; {
+            &quot;serverB-1&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host1&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+                    &quot;result&quot; =&gt; undefined,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            },
+            &quot;serverB-2&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host2&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+                    &quot;result&quot; =&gt; undefined,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            },
+            &quot;serverB-3&quot; =&gt; {
+                &quot;host&quot; =&gt; &quot;host3&quot;,
+                &quot;response&quot; =&gt; {
+                    &quot;outcome&quot; =&gt; &quot;failed&quot;,
+                    &quot;failure-description&quot; =&gt; &quot;[DOM-4556] Something didn't work right&quot;,
+                    &quot;rolled-back&quot; =&gt; true
+                }
+            }
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

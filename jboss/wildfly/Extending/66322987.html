@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Create the skeleton project</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Create the skeleton project</h1>
+        </div>
+        
+        <div id="66322987" class="content prepend-top">
+            <p>
+    To make your life easier we have provided a maven archetype which will create a skeleton project for implementing subsystems.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>mvn archetype:generate \
+    -DarchetypeArtifactId=wildfly-subsystem \
+    -DarchetypeGroupId=org.wildfly.archetypes \
+    -DarchetypeVersion=8.0.0.Final \
+    -DarchetypeRepository=http://repository.jboss.org/nexus/content/groups/public</code></pre>
+        </div>
+    </div>
+            <p>
+    Maven will download the archetype and it's dependencies, and ask you some questions:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ mvn archetype:generate \
+    -DarchetypeArtifactId=wildfly-subsystem \
+    -DarchetypeGroupId=org.wildfly.archetypes \
+    -DarchetypeVersion=8.0.0.Final \       &nbsp;
+    -DarchetypeRepository=http://repository.jboss.org/nexus/content/groups/public
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Maven Stub Project (No POM) 1
+[INFO] ------------------------------------------------------------------------
+[INFO]
+
+.........
+
+Define value for property 'groupId': : com.acme.corp
+Define value for property 'artifactId': : acme-subsystem
+Define value for property 'version':  1.0-SNAPSHOT: :
+Define value for property 'package':  com.acme.corp: : com.acme.corp.tracker
+Define value for property 'module': : com.acme.corp.tracker
+[INFO] Using property: name = WildFly subsystem project
+Confirm properties configuration:
+groupId: com.acme.corp
+artifactId: acme-subsystem
+version: 1.0-SNAPSHOT
+package: com.acme.corp.tracker
+module: com.acme.corp.tracker
+name: WildFly subsystem project
+ Y: : Y
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 1:42.563s
+[INFO] Finished at: Fri Jul 08 14:30:09 BST 2011
+[INFO] Final Memory: 7M/81M
+[INFO] ------------------------------------------------------------------------
+$</code></pre>
+        </div>
+    </div>
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+        <span style="color: #000000;">
+&nbsp;    </span>
+            </td>
+                <td rowspan="1" colspan="1">
+        <span style="color: #000000;">
+Instruction    </span>
+            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+1    </span>
+            </td>
+                <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+Enter the&nbsp;    </span>
+    <span style="color: #333333;">
+<tt class=" ">groupId</tt>    </span>
+    <span style="color: #333333;">
+&nbsp;you wish to use    </span>
+            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+2    </span>
+            </td>
+                <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+Enter the&nbsp;    </span>
+    <span style="color: #333333;">
+<tt class=" ">artifactId</tt>    </span>
+    <span style="color: #333333;">
+&nbsp;you wish to use    </span>
+            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+3    </span>
+            </td>
+                <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+Enter the version you wish to use, or just hit&nbsp;    </span>
+    <span style="color: #333333;">
+<tt class=" ">Enter</tt>    </span>
+    <span style="color: #333333;">
+&nbsp;if you wish to accept the default&nbsp;    </span>
+    <span style="color: #333333;">
+<tt class=" ">1.0-SNAPSHOT</tt>    </span>
+            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+4    </span>
+            </td>
+                <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+Enter the java package you wish to use, or just hit&nbsp;    </span>
+    <span style="color: #333333;">
+<tt class=" ">Enter</tt>    </span>
+    <span style="color: #333333;">
+&nbsp;if you wish to accept the default (which is copied from&nbsp;    </span>
+    <span style="color: #333333;">
+<tt class=" ">groupId</tt>    </span>
+    <span style="color: #333333;">
+).    </span>
+            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+5    </span>
+            </td>
+                <td rowspan="1" colspan="1">
+    Enter the module name you wish to use for your extension.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    6            </td>
+                <td rowspan="1" colspan="1">
+        <span style="color: #333333;">
+Finally, if you are happy with your choices, hit&nbsp;    </span>
+    <span style="color: #333333;">
+<tt class=" ">Enter</tt>    </span>
+    <span style="color: #333333;">
+&nbsp;and Maven will generate the project for you.    </span>
+            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    You can also do this in Eclipse, see <a href="https://docs.jboss.org/author/display/WFLY8/Creating+your+own+application">Creating your own application</a> for more details. We now have a skeleton project that you can use to implement a subsystem. Import the &#65279;<tt class=" ">acme-subsystem</tt> project&nbsp;into your favourite IDE. A nice side-effect of running this in the IDE is that you can see the javadoc of WildFly classes and interfaces imported by the skeleton code. If you do a <tt class=" ">mvn install</tt> in the project it will work if we plug it into WildFly 8, but before doing that we will change it to do something more useful.            </p>
+                <p>
+    The rest of this section modifies the skeleton project created by the archetype to do something more useful, and the full code can be found in <a href="attachments/66879656/1/acme-subsystem.zip">acme-subsystem.zip</a>.            </p>
+                <p>
+    If you do a <tt class=" ">mvn install</tt> in the created project, you will see some tests being run            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$mvn install
+[INFO] Scanning for projects...
+[...]
+[INFO] Surefire report directory: /Users/kabir/sourcecontrol/temp/archetype-test/acme-subsystem/target/surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running com.acme.corp.tracker.extension.SubsystemBaseParsingTestCase
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.424 sec
+Running com.acme.corp.tracker.extension.SubsystemParsingTestCase
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 sec
+
+Results :
+
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[...]</code></pre>
+        </div>
+    </div>
+            <p>
+    We will talk about these later in the&nbsp;<a href="66322987.html#66322987_Createtheskeletonproject-Testingtheparsers">Testing the parsers</a> section.            </p>
+            </div>
+    </div>
+</body>
+</html>

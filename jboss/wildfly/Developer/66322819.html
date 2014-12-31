@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Reliable Messaging</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Reliable Messaging</h1>
+        </div>
+        
+        <div id="66322819" class="content prepend-top">
+            <p>
+    JBoss Web Services inherits full WS-Reliable Messaging capabilities from the  underlying Apache CXF implementation. At the time of writing, Apache CXF provides support for the <a href="http://schemas.xmlsoap.org/ws/2005/02/rm/">WS-Reliable Messaging 1.0</a> (February 2005) version of the specification.            </p>
+        <div class="section-2"  id="66322819_WS-ReliableMessaging-EnablingWSReliableMessaging"  >
+        <h2>Enabling WS-Reliable Messaging</h2>
+    
+            <p>
+    WS-Reliable Messaging is implemented internally in Apache CXF through a set of interceptors that deal with the low level requirements of the reliable messaging protocol. In order for enabling WS-Reliable Messaging, users need to either:            </p>
+    <ul class=" "><li class=" ">            <p>
+    consume a WSDL contract that specifies proper WS-Reliable Messaging policies / assertions            </p>
+    </li><li class=" ">            <p>
+    manually add / configure the reliable messaging interceptors            </p>
+    </li><li class=" ">            <p>
+    specify the reliable messaging policies in an optional CXF Spring XML descriptor            </p>
+    </li><li class=" ">            <p>
+    specify the Apache CXF reliable messaging feature in an optional CXF Spring XML descriptor            </p>
+    </li></ul>            <p>
+    The former approach relies on the Apache CXF WS-Policy engine and is the only portable one. The other approaches are Apache CXF proprietary ones, however they allow for fine-grained configuration of protocol aspects that are not covered by the WS-Reliable Messaging Policy. More details are available in the <a href="http://cxf.apache.org/docs/wsrmconfiguration.html">Apache CXF documentation</a>.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322819_WS-ReliableMessaging-Example"  >
+        <h2>Example</h2>
+    
+            <p>
+    In this example we configure WS-Reliable Messaging endpoint and client through the WS-Policy support.            </p>
+        <div class="section-3"  id="66322819_WS-ReliableMessaging-Endpoint"  >
+        <h3>Endpoint</h3>
+    
+            <p>
+    We go with a contract-first approach, so we start by creating a proper WSDL contract, containing the WS-Reliable Messaging and WS-Addressing policies (the latter is a requirement of the former):            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;wsdl:definitions name=&quot;SimpleService&quot; targetNamespace=&quot;http://www.jboss.org/jbossws/ws-extensions/wsrm&quot;
+  xmlns:tns=&quot;http://www.jboss.org/jbossws/ws-extensions/wsrm&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;
+  xmlns:soap=&quot;http://schemas.xmlsoap.org/wsdl/soap/&quot; xmlns:wsdl=&quot;http://schemas.xmlsoap.org/wsdl/&quot;
+  xmlns:wsp=&quot;http://www.w3.org/2006/07/ws-policy&quot;&gt;
+
+  &lt;wsdl:types&gt;
+&lt;xsd:schema xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; xmlns:tns=&quot;http://www.jboss.org/jbossws/ws-extensions/wsrm&quot;
+  attributeFormDefault=&quot;unqualified&quot; elementFormDefault=&quot;unqualified&quot;
+  targetNamespace=&quot;http://www.jboss.org/jbossws/ws-extensions/wsrm&quot;&gt;
+&lt;xsd:element name=&quot;ping&quot; type=&quot;tns:ping&quot;/&gt;
+&lt;xsd:complexType name=&quot;ping&quot;&gt;
+&lt;xsd:sequence/&gt;
+&lt;/xsd:complexType&gt;
+&lt;xsd:element name=&quot;echo&quot; type=&quot;tns:echo&quot;/&gt;
+&lt;xsd:complexType name=&quot;echo&quot;&gt;
+&lt;xsd:sequence&gt;
+&lt;xsd:element minOccurs=&quot;0&quot; name=&quot;arg0&quot; type=&quot;xsd:string&quot;/&gt;
+&lt;/xsd:sequence&gt;
+&lt;/xsd:complexType&gt;
+&lt;xsd:element name=&quot;echoResponse&quot; type=&quot;tns:echoResponse&quot;/&gt;
+&lt;xsd:complexType name=&quot;echoResponse&quot;&gt;
+&lt;xsd:sequence&gt;
+&lt;xsd:element minOccurs=&quot;0&quot; name=&quot;return&quot; type=&quot;xsd:string&quot;/&gt;
+&lt;/xsd:sequence&gt;
+&lt;/xsd:complexType&gt;
+&lt;/xsd:schema&gt;
+  &lt;/wsdl:types&gt;
+  &lt;wsdl:message name=&quot;echoResponse&quot;&gt;
+    &lt;wsdl:part name=&quot;parameters&quot; element=&quot;tns:echoResponse&quot;&gt;
+    &lt;/wsdl:part&gt;
+  &lt;/wsdl:message&gt;
+  &lt;wsdl:message name=&quot;echo&quot;&gt;
+    &lt;wsdl:part name=&quot;parameters&quot; element=&quot;tns:echo&quot;&gt;
+    &lt;/wsdl:part&gt;
+  &lt;/wsdl:message&gt;
+  &lt;wsdl:message name=&quot;ping&quot;&gt;
+    &lt;wsdl:part name=&quot;parameters&quot; element=&quot;tns:ping&quot;&gt;
+    &lt;/wsdl:part&gt;
+  &lt;/wsdl:message&gt;
+  &lt;wsdl:portType name=&quot;SimpleService&quot;&gt;
+    &lt;wsdl:operation name=&quot;ping&quot;&gt;
+      &lt;wsdl:input name=&quot;ping&quot; message=&quot;tns:ping&quot;&gt;
+    &lt;/wsdl:input&gt;
+    &lt;/wsdl:operation&gt;
+    &lt;wsdl:operation name=&quot;echo&quot;&gt;
+      &lt;wsdl:input name=&quot;echo&quot; message=&quot;tns:echo&quot;&gt;
+    &lt;/wsdl:input&gt;
+      &lt;wsdl:output name=&quot;echoResponse&quot; message=&quot;tns:echoResponse&quot;&gt;
+    &lt;/wsdl:output&gt;
+    &lt;/wsdl:operation&gt;
+  &lt;/wsdl:portType&gt;
+  &lt;wsdl:binding name=&quot;SimpleServiceSoapBinding&quot; type=&quot;tns:SimpleService&quot;&gt;
+    &lt;wsp:Policy&gt;
+      &lt;!-- WS-Addressing and basic WS-Reliable Messaging policy assertions --&gt;
+      &lt;wswa:UsingAddressing xmlns:wswa=&quot;http://www.w3.org/2006/05/addressing/wsdl&quot;/&gt;
+      &lt;wsrmp:RMAssertion xmlns:wsrmp=&quot;http://schemas.xmlsoap.org/ws/2005/02/rm/policy&quot;/&gt;
+      &lt;!-- --------------------------------------------------------------- --&gt;
+    &lt;/wsp:Policy&gt;
+    &lt;soap:binding style=&quot;document&quot; transport=&quot;http://schemas.xmlsoap.org/soap/http&quot;/&gt;
+    &lt;wsdl:operation name=&quot;ping&quot;&gt;
+      &lt;soap:operation soapAction=&quot;&quot; style=&quot;document&quot;/&gt;
+      &lt;wsdl:input name=&quot;ping&quot;&gt;
+        &lt;soap:body use=&quot;literal&quot;/&gt;
+      &lt;/wsdl:input&gt;
+    &lt;/wsdl:operation&gt;
+    &lt;wsdl:operation name=&quot;echo&quot;&gt;
+      &lt;soap:operation soapAction=&quot;&quot; style=&quot;document&quot;/&gt;
+      &lt;wsdl:input name=&quot;echo&quot;&gt;
+        &lt;soap:body use=&quot;literal&quot;/&gt;
+      &lt;/wsdl:input&gt;
+      &lt;wsdl:output name=&quot;echoResponse&quot;&gt;
+        &lt;soap:body use=&quot;literal&quot;/&gt;
+      &lt;/wsdl:output&gt;
+    &lt;/wsdl:operation&gt;
+  &lt;/wsdl:binding&gt;
+  &lt;wsdl:service name=&quot;SimpleService&quot;&gt;
+    &lt;wsdl:port name=&quot;SimpleServicePort&quot; binding=&quot;tns:SimpleServiceSoapBinding&quot;&gt;
+      &lt;soap:address location=&quot;http://localhost:8080/jaxws-samples-wsrm-api&quot;/&gt;
+    &lt;/wsdl:port&gt;
+  &lt;/wsdl:service&gt;
+&lt;/wsdl:definitions&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Then we use the <i class=" ">wsconsume</i> tool to generate both standard JAX-WS client and endpoint.            </p>
+                <p>
+    We provide a basic JAX-WS implementation for the endpoint, nothing special in it:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package org.jboss.test.ws.jaxws.samples.wsrm.service;
+
+import javax.jws.Oneway;
+import javax.jws.WebMethod;
+import javax.jws.WebService;
+
+@WebService
+(
+   name = &quot;SimpleService&quot;,
+   serviceName = &quot;SimpleService&quot;,
+   wsdlLocation = &quot;WEB-INF/wsdl/SimpleService.wsdl&quot;,
+   targetNamespace = &quot;http://www.jboss.org/jbossws/ws-extensions/wsrm&quot;
+)
+public class SimpleServiceImpl
+{
+   @Oneway
+   @WebMethod
+   public void ping()
+   {
+      System.out.println(&quot;ping()&quot;);
+   }
+
+   @WebMethod
+   public String echo(String s)
+   {
+      System.out.println(&quot;echo(&quot; + s + &quot;)&quot;);
+      return s;
+   }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally we package the generated POJO endpoint together with a basic web.xml the usual way and deploy to the application server. The webservices stack automatically detects the policies and enables WS-Reliable Messaging.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322819_WS-ReliableMessaging-Client"  >
+        <h3>Client</h3>
+    
+            <p>
+    The endpoint advertises his  RM capabilities (and requirements) through the published WSDL and the client is required to  also enable WS-RM for successfully exchanging messages with the server.            </p>
+                <p>
+    So a regular JAX WS client is enough if the user does not need to tune any specific detail of the RM subsystem.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>QName serviceName = new QName(&quot;http://www.jboss.org/jbossws/ws-extensions/wsrm&quot;, &quot;SimpleService&quot;);
+URL wsdlURL = new URL(&quot;http://localhost:8080/jaxws-samples-wsrm-api?wsdl&quot;);
+Service service = Service.create(wsdlURL, serviceName);
+proxy = (SimpleService)service.getPort(SimpleService.class);
+proxy.echo(&quot;Hello World!&quot;);</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322819_WS-ReliableMessaging-Additionalconfiguration"  >
+        <h3>Additional configuration</h3>
+    
+            <p>
+    Fine-grained tuning of WS-Reliable Messaging engine requires setting up proper RM features in the <tt class=" ">Bus</tt> using a Spring XML descriptor; here is an example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;beans
+  xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+  xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+  xmlns:cxf=&quot;http://cxf.apache.org/core&quot;
+  xmlns:wsa=&quot;http://cxf.apache.org/ws/addressing&quot;
+  xmlns:http=&quot;http://cxf.apache.org/transports/http/configuration&quot;
+  xmlns:wsrm-policy=&quot;http://schemas.xmlsoap.org/ws/2005/02/rm/policy&quot;
+  xmlns:wsrm-mgr=&quot;http://cxf.apache.org/ws/rm/manager&quot;
+  xsi:schemaLocation=&quot;
+    http://cxf.apache.org/core
+    http://cxf.apache.org/schemas/core.xsd
+    http://cxf.apache.org/transports/http/configuration
+    http://cxf.apache.org/schemas/configuration/http-conf.xsd
+    http://schemas.xmlsoap.org/ws/2005/02/rm/policy
+    http://schemas.xmlsoap.org/ws/2005/02/rm/wsrm-policy.xsd
+    http://cxf.apache.org/ws/rm/manager
+    http://cxf.apache.org/schemas/configuration/wsrm-manager.xsd
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;
+
+  &lt;cxf:bus&gt;
+    &lt;cxf:features&gt;
+      &lt;cxf:logging/&gt;
+      &lt;wsa:addressing/&gt;
+      &lt;wsrm-mgr:reliableMessaging&gt;
+        &lt;wsrm-policy:RMAssertion&gt;
+          &lt;wsrm-policy:BaseRetransmissionInterval Milliseconds=&quot;4000&quot;/&gt;
+          &lt;wsrm-policy:AcknowledgementInterval Milliseconds=&quot;2000&quot;/&gt;
+        &lt;/wsrm-policy:RMAssertion&gt;
+        &lt;wsrm-mgr:destinationPolicy&gt;
+          &lt;wsrm-mgr:acksPolicy intraMessageThreshold=&quot;0&quot; /&gt;
+        &lt;/wsrm-mgr:destinationPolicy&gt;
+      &lt;/wsrm-mgr:reliableMessaging&gt;
+    &lt;/cxf:features&gt;
+  &lt;/cxf:bus&gt;
+&lt;/beans</code></pre>
+        </div>
+    </div>
+            <p>
+    The client needs to pick up the bus configuration such as below:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package org.jboss.test.ws.jaxws.samples.wsrm.client;
+
+import java.net.URL;
+import java.io.File;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import org.apache.cxf.Bus;
+import org.apache.cxf.BusFactory;
+import org.jboss.wsf.stack.cxf.client.configuration.JBossWSBusFactory;
+import org.jboss.test.ws.jaxws.samples.wsrm.generated.SimpleService;
+
+public final class SimpleServiceTestCase
+{
+   private static final String serviceURL = &quot;http://localhost:8080/jaxws-samples-wsrm/SimpleService&quot;;
+
+   public static void main(String[] args) throws Exception
+   {
+      URL cxfConfig = new File(&quot;resources/jaxws/samples/wsrm/cxf.xml&quot;).toURL();
+      Bus bus = new JBossWSBusFactory().createBus(cxfConfig);
+      try
+      {
+          BusFactory.setThreadDefaultBus(bus);
+
+          // create service
+          QName serviceName = new QName(&quot;http://www.jboss.org/jbossws/ws-extensions/wsrm&quot;, &quot;SimpleService&quot;);
+          URL wsdlURL = new URL(serviceURL + &quot;?wsdl&quot;);
+          Service service = Service.create(wsdlURL, serviceName);
+          SimpleService proxy = (SimpleService)service.getPort(SimpleService.class);
+
+          // invoke methods
+          proxy.echo(&quot;Hello World!&quot;);
+      }
+      finally
+      {
+          // shutdown bus
+          bus.shutdown(true);
+      }
+   }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

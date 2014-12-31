@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Apache httpd</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Apache httpd</h1>
+        </div>
+        
+        <div id="66322834" class="content prepend-top">
+            <p>
+    The recommended front-end module is mod_cluster but mod_jk or mod_proxy could be used as in Tomcat or other JBoss AS version.            </p>
+                <p>
+    To use AJP define a ajp listener in the undertow subsystem like:            </p>
+                <p>
+    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;http-listener name=&quot;default&quot; socket-binding=&quot;http&quot;/&gt;<br/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;ajp-listener name=&quot;ajp&quot; socket-binding=&quot;ajp&quot;/&gt;            </p>
+                <p>
+    To the ajp in the in the socket-binding-group like:            </p>
+                <p>
+    &lt;socket-binding-group name=&quot;standard-sockets&quot; default-interface=&quot;public&quot;&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ....<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;socket-binding name=&quot;http&quot; port=&quot;8080&quot;/&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;socket-binding name=&quot;ajp&quot; port=&quot;8009&quot;/&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;socket-binding name=&quot;https&quot; port=&quot;8443&quot;/&gt;            </p>
+            </div>
+    </div>
+</body>
+</html>

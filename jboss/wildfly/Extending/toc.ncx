@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+    <head>
+        <meta name="dtb:uid" content="wildfly8"/>
+                <meta name="dtb:depth" content="3"/>
+        <meta name="dtb:totalPageCount" content="0"/>
+        <meta name="dtb:maxPageNumber" content="0"/>
+    </head>
+    <docTitle>
+        <text>Extending Wildfly 8</text>
+    </docTitle>
+    <navMap>
+
+        
+                <navPoint id="_66322984" playOrder="1">
+            <navLabel>
+                <text>Extending WildFly 8</text>
+            </navLabel>
+            <content src="66322984.html"/>
+                                                        <navPoint id="_74285351" playOrder="2">
+                    <navLabel>
+                        <text>Domain Mode Subsystem Transformers</text>
+                    </navLabel>
+                    <content src="74285351.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322986" playOrder="3">
+                    <navLabel>
+                        <text>Example subsystem</text>
+                    </navLabel>
+                    <content src="66322986.html"/>
+                                                                        <navPoint id="_66322991" playOrder="4">
+                    <navLabel>
+                        <text>Add the deployers</text>
+                    </navLabel>
+                    <content src="66322991.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322988" playOrder="5">
+                    <navLabel>
+                        <text>Create the schema</text>
+                    </navLabel>
+                    <content src="66322988.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322987" playOrder="6">
+                    <navLabel>
+                        <text>Create the skeleton project</text>
+                    </navLabel>
+                    <content src="66322987.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322989" playOrder="7">
+                    <navLabel>
+                        <text>Design and define the model structure</text>
+                    </navLabel>
+                    <content src="66322989.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322993" playOrder="8">
+                    <navLabel>
+                        <text>Expressions</text>
+                    </navLabel>
+                    <content src="66322993.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322992" playOrder="9">
+                    <navLabel>
+                        <text>Integrate with WildFly 8</text>
+                    </navLabel>
+                    <content src="66322992.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322990" playOrder="10">
+                    <navLabel>
+                        <text>Parsing and marshalling of the subsystem xml</text>
+                    </navLabel>
+                    <content src="66322990.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_66322995" playOrder="11">
+                    <navLabel>
+                        <text>Key Interfaces and Classes Relevant to Extension Developers</text>
+                    </navLabel>
+                    <content src="66322995.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322994" playOrder="12">
+                    <navLabel>
+                        <text>Transformers</text>
+                    </navLabel>
+                    <content src="66322994.html"/>
+                </navPoint>
+                                        </navPoint>
+    </navMap>
+</ncx>

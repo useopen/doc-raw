@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Java EE Application Deployment</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Java EE Application Deployment</h1>
+        </div>
+        
+        <div id="80150848" class="content prepend-top">
+            <p>
+    The EE subsystem configuration allows the customisation of the deployment behaviour for Java EE Applications.            </p>
+        <div class="section-2"  id="80150848_JavaEEApplicationDeploymentConfiguration-GlobalModules"  >
+        <h2>Global Modules</h2>
+    
+            <p>
+    Global modules is a set of JBoss Modules that will be added as dependencies to the JBoss Module of every Java EE deployment. Such dependencies allows Java EE deployments to see the classes exported by the global modules.            </p>
+                <p>
+    Each global module is defined through the <tt class=" ">module</tt> resource, an example of its XML configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;global-modules&gt;
+    &lt;module name=&quot;org.jboss.logging&quot; slot=&quot;main&quot;/&gt;
+    &lt;module name=&quot;org.apache.log4j&quot; annotations=&quot;true&quot; meta-inf=&quot;true&quot; services=&quot;false&quot; /&gt;
+  &lt;/global-modules&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The only mandatory attribute is the JBoss Module <tt class=" ">name</tt>, the <tt class=" ">slot</tt> attribute defaults to <tt class=" ">main</tt>, and both define the JBoss Module ID to reference.            </p>
+                <p>
+    The optional <tt class=" ">annotations</tt> attribute, which defaults to <tt class=" ">false</tt>, indicates if a pre-computed annotation index should be imported from META-INF/jandex.idx            </p>
+                <p>
+    The optional <tt class=" ">services</tt> attribute indicates if any services exposed in META-INF/services should be made available to the deployments class loader, and defaults to <tt class=" ">false</tt>.            </p>
+                <p>
+    The optional <tt class=" ">meta-inf</tt> attribute, which defaults to <tt class=" ">true</tt>, indicates if the Module's <tt class=" ">META-INF</tt> path should be available to the deployment's class loader.            </p>
+        </div>
+    
+    <div class="section-2"  id="80150848_JavaEEApplicationDeploymentConfiguration-EARSubdeploymentsIsolation"  >
+        <h2>EAR Subdeployments Isolation</h2>
+    
+            <p>
+    A flag indicating whether each of the subdeployments within a <tt class=" ">.ear</tt> can access classes belonging to another subdeployment within the same <tt class=" ">.ear</tt>. The default value is <tt class=" ">false</tt>, which allows the subdeployments to see classes belonging to other subdeployments within the <tt class=" ">.ear</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;ear-subdeployments-isolated&gt;true&lt;/ear-subdeployments-isolated&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>myapp.ear
+|
+|--- web.war
+|
+|--- ejb1.jar
+|
+|--- ejb2.jar
+</code></pre>
+        </div>
+    </div>
+            <p>
+    If the <tt class=" ">ear-subdeployments-isolated</tt> is set to false, then the classes in <tt class=" ">web.war</tt> can access classes belonging to <tt class=" ">ejb1.jar</tt> and <tt class=" ">ejb2.jar</tt>. Similarly, classes from <tt class=" ">ejb1.jar</tt> can access classes from <tt class=" ">ejb2.jar</tt> (and vice-versa).            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    This flag has no effect on the isolated classloader of the <tt class=" ">.war</tt> file(s), i.e. irrespective of whether this flag is set to <tt class=" ">true</tt> or <tt class=" ">false</tt>, the <tt class=" ">.war</tt> within a <tt class=" ">.ear</tt> will have a isolated classloader, and other subdeployments within that <tt class=" ">.ear</tt> will not be able to access classes from that <tt class=" ">.war</tt>. This is as per spec.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="80150848_JavaEEApplicationDeploymentConfiguration-PropertyReplacement"  >
+        <h2>Property Replacement</h2>
+    
+            <p>
+    The EE subsystem configuration includes flags to configure whether system property replacement will be done on XML descriptors and Java Annotations, included in Java EE deployments.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    System properties etc are resolved in the security context of the application server itself, not the deployment that contains the file. This means that if you are running with a security manager and enable this property, a deployment can potentially access system properties or environment entries that the security manager would have otherwise prevented.            </p>
+        </div>
+    
+    <div class="section-3"  id="80150848_JavaEEApplicationDeploymentConfiguration-SpecDescriptorPropertyReplacement"  >
+        <h3>Spec Descriptor Property Replacement</h3>
+    
+            <p>
+    Flag indicating whether system property replacement will be performed on standard Java EE XML descriptors. This defaults to <tt class=" ">true</tt>, however it is disabled in the default configurations.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;spec-descriptor-property-replacement&gt;false&lt;/spec-descriptor-property-replacement&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="80150848_JavaEEApplicationDeploymentConfiguration-JBossDescriptorPropertyReplacement"  >
+        <h3>JBoss Descriptor Property Replacement</h3>
+    
+            <p>
+    Flag indicating whether system property replacement will be performed on WildFly proprietary XML descriptors, such as <tt class=" ">jboss-app.xml</tt>. This defaults to <tt class=" ">true</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;jboss-descriptor-property-replacement&gt;false&lt;/jboss-descriptor-property-replacement&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="80150848_JavaEEApplicationDeploymentConfiguration-AnnotationPropertyReplacement"  >
+        <h3>Annotation Property Replacement</h3>
+    
+            <p>
+    Flag indicating whether system property replacement will be performed on Java annotations. The default value is&nbsp;<tt class=" ">false</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>  &lt;annotation-property-replacement&gt;false&lt;/annotation-property-replacement&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

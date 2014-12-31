@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Remote JNDI Reference</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Remote JNDI Reference</h1>
+        </div>
+        
+        <div id="80151063" class="content prepend-top">
+    <div class="section-2"  id="80151063_RemoteJNDIReference-RemoteJNDI"  >
+        <h2>Remote JNDI</h2>
+    
+            <p>
+    WildFly supports two different types of remote JNDI. The old jnp based JNDI implementation used in JBoss AS versions prior to 7.x is no longer supported.            </p>
+        <div class="section-3"  id="80151063_RemoteJNDIReference-remote%3A"  >
+        <h3>remote:</h3>
+    
+            <p>
+    The <tt class=" ">remote:</tt> protocol uses the WildFly&nbsp;remoting protocol to lookup items from the servers local JNDI. To use it, you must have the appropriate jars on the class path, if you are maven user can be done simply by adding the following to your <tt class=" ">pom.xml</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.wildfly&lt;/groupId&gt;
+  &lt;artifactId&gt;wildfly-ejb-client-bom&lt;/artifactId&gt;
+  &lt;version&gt;8.0.0.Final&lt;/version&gt;
+  &lt;type&gt;pom&lt;/type&gt;
+  &lt;scope&gt;compile&lt;/scope&gt;
+&lt;/dependency&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    If you are not using maven a shaded jar that contains all required classes<br/>can be found in the <tt class=" ">bin/client</tt> directory of WildFly's distribution.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>final Properties env = new Properties();
+env.put(Context.INITIAL_CONTEXT_FACTORY, org.jboss.naming.remote.client.InitialContextFactory.class.getName());
+env.put(Context.PROVIDER_URL, &quot;remote://localhost:4447&quot;);
+remoteContext = new InitialContext(env);</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="80151063_RemoteJNDIReference-ejb%3A"  >
+        <h3>ejb:</h3>
+    
+            <p>
+    The ejb: namespace is provided by the jboss-ejb-client library. This protocol allows you to look up EJB's, using their application name, module name, ejb name and interface type.            </p>
+                <p>
+    This is a client side JNDI implementation. Instead of looking up an EJB on the server the lookup name contains enough information for the client side library to generate a proxy with the EJB information. When you invoke a method on this proxy it will use the current EJB client context to perform the invocation. If the current context does not have a connection to a server with the specified EJB deployed then an error will occur. Using this protocol it is possible to look up EJB's that do not actually exist, and no error will be thrown until the proxy is actually used. The exception to this is stateful session beans, which need to connect to a server when they are created in order to create the session bean instance on the server.            </p>
+                <p>
+    Some examples are:            </p>
+                <p>
+    <tt class=" ">ejb:myapp/myejbjar/MyEjbName!com.test.MyRemoteInterface</tt><br/><tt class=" ">ejb:myapp/myejbjar/MyStatefulName!comp.test.MyStatefulRemoteInterface?stateful</tt>            </p>
+                <p>
+    The first example is a lookup of a singleton, stateless or EJB 2.x home interface. This lookup will not hit the server, instead a proxy will be generated for the remote interface specified in the name. The second example is for a stateful session bean, in this case the JNDI lookup will hit the server, in order to tell the server to create the SFSB session.            </p>
+                <p>
+    For more details on how the server connections are configured, please see <a href="66322770.html">EJB invocations from a remote client using JNDI</a>.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

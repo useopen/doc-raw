@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Getting Server-specific Metrics in a Managed Domain</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Getting Server-specific Metrics in a Managed Domain</h1>
+        </div>
+        
+        <div id="84836565" class="content prepend-top">
+            <p>
+    In a managed domain, with one or more server groups deployed, we may wish to view server-specific subsystem metrics for a given subsystem resource. In other words, for a given host and a server deployed on that host, we may wish to view metrics defined for a particular subsystem which reflect the run-time behaviour of that particular subsystem on that particular server instance.&nbsp;            </p>
+                <p>
+    For example, we may have a server group of consisting of two servers using the full-ha profile, so forming a cluster, and a distributed application deployed on that cluster. The values for runtime metrics for distributed cache management on each server would reflect the processing activity at that particular server.            </p>
+        <div class="section-2"  id="84836565_GettingServer-specificMetricsinaManagedDomain-Standalonemode"  >
+        <h2>Standalone mode</h2>
+    
+            <p>
+    In standalone mode, such resources could be accessed by using the CLI to connect to the standalone instance and executing the command:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=infinispan/cache-container=web/distributed-cache=dist:read-resource(include-runtime=true)
+</code></pre>
+        </div>
+    </div>
+            <p>
+    The fact that we have used the CLI to connect to a specific server instance allows us to choose the server we wish to read the metrics from.            </p>
+        </div>
+    
+    <div class="section-2"  id="84836565_GettingServer-specificMetricsinaManagedDomain-Domainmode"  >
+        <h2>Domain mode</h2>
+    
+            <p>
+    In domain mode, the same resources could be accessed by using the CLI to connect to the domain controller of the domain and executing the command:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/host=&lt;host&gt;/server=&lt;server&gt;/subsystem=infinispan/cache-container=web/distributed-cache=dist:read-resource(include-runtime=true)
+</code></pre>
+        </div>
+    </div>
+            <p>
+    where &lt;host&gt; is the name of the host on which the server resides and &lt;server&gt; is the name of the server of interest.&nbsp;            </p>
+                <p>
+    Note that the command:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/profile=full-ha/subsystem=infinispan/cache-container=web/distributed-cache=dist:read-resource(include-runtime=true)</code></pre>
+        </div>
+    </div>
+            <p>
+    does not return run-time information concerning specific servers, but rather the configuration of the full-ha profile used in the domain. Any run-time metrics will be marked as undefined.            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

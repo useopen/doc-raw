@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>EJB IIOP Guide</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>EJB IIOP Guide</h1>
+        </div>
+        
+        <div id="66322756" class="content prepend-top">
+    <div class="section-2"  id="66322756_EJBIIOPGuide-EnablingIIOP"  >
+        <h2>Enabling IIOP</h2>
+    
+            <p>
+    To enable IIOP you must have the JacORB subsystem installed, and the <tt class=" ">&lt;iiop/&gt;</tt> element present in the ejb3 subsystem configuration. The <tt class=" ">standalone-full.xml</tt> configuration that comes with the distribution has both of these enabled.            </p>
+                <p>
+    The <tt class=" ">&lt;iiop/&gt;</tt> element takes two attributes that control the default behaviour of the server, for full details see <a href="https://docs.jboss.org/author/display/AS71/EJB3+subsystem+configuration+guide">EJB3 subsystem configuration guide</a>.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322756_EJBIIOPGuide-EnablingJTS"  >
+        <h2>Enabling JTS</h2>
+    
+            <p>
+    To enable JTS simply add a <tt class=" ">&lt;jts/&gt;</tt> element to the transactions subsystem configuration.            </p>
+                <p>
+    It is also necessary to enable the JacORB transactions interceptor as shown below.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:jacorb:1.1&quot;&gt;
+  &lt;orb&gt;
+    &lt;initializers transactions=&quot;on&quot;/&gt;
+  &lt;/orb&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322756_EJBIIOPGuide-DynamicStub%27s"  >
+        <h2>Dynamic Stub&apos;s</h2>
+    
+            <p>
+    Downloading stubs directly from the server is no longer supported. If you do not wish to pre-generate your stub classes JDK Dynamic stubs can be used instead. The enable JDK dynamic stubs simply set the <tt class=" ">com.sun.CORBA.ORBUseDynamicStub</tt> system property to <tt class=" ">true</tt>.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322756_EJBIIOPGuide-ConfiguringEJBIIOPsettingsvia%7B%7Bjbossejb3.xml%7D%7D"  >
+        <h2>Configuring EJB IIOP settings via  jboss-ejb3.xml</h2>
+    
+            <p>
+    TODO            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

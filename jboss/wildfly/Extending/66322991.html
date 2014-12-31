@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Add the deployers</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Add the deployers</h1>
+        </div>
+        
+        <div id="66322991" class="content prepend-top">
+            <p>
+    When discussing <tt class=" ">SubsystemAddHandler</tt> we did not mention the work done to install the deployers, which is done in the following method:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>    @Override
+    public void performBoottime(OperationContext context, ModelNode operation, ModelNode model,
+            ServiceVerificationHandler verificationHandler, List&lt;ServiceController&lt;?&gt;&gt; newControllers)
+            throws OperationFailedException {
+
+        log.info(&quot;Populating the model&quot;);
+
+        //Add deployment processors here
+        //Remove this if you don't need to hook into the deployers, or you can add as many as you like
+        //see SubDeploymentProcessor for explanation of the phases
+        context.addStep(new AbstractDeploymentChainStep() {
+            public void execute(DeploymentProcessorTarget processorTarget) {
+                processorTarget.addDeploymentProcessor(SubsystemDeploymentProcessor.PHASE, SubsystemDeploymentProcessor.priority, new SubsystemDeploymentProcessor());
+
+            }
+        }, OperationContext.Stage.RUNTIME);
+
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    This adds an extra step which is responsible for installing deployment processors. You can add as many as you like, or avoid adding any all together depending on your needs. Each processor has a <tt class=" ">Phase</tt> and a <tt class=" ">priority</tt>. Phases are sequential, and a deployment passes through each phases deployment processors. The <tt class=" ">priority</tt> specifies where within a phase the processor appears. See <tt class=" ">org.jboss.as.server.deployment.Phase</tt> for more information about phases.            </p>
+                <p>
+    In our case we are keeping it simple and staying with one deployment processor with the phase and priority created for us by the maven archetype. The phases will be explained in the next section. The deployment processor is as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class SubsystemDeploymentProcessor implements DeploymentUnitProcessor {
+    ...
+
+    @Override
+    public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
+        String name = phaseContext.getDeploymentUnit().getName();
+        TrackerService service = getTrackerService(phaseContext.getServiceRegistry(), name);
+        if (service != null) {
+            ResourceRoot root = phaseContext.getDeploymentUnit().getAttachment(Attachments.DEPLOYMENT_ROOT);
+            VirtualFile cool = root.getRoot().getChild(&quot;META-INF/cool.txt&quot;);
+            service.addDeployment(name);
+            if (cool.exists()) {
+                service.addCoolDeployment(name);
+            }
+        }
+    }
+
+    @Override
+    public void undeploy(DeploymentUnit context) {
+        context.getServiceRegistry();
+        String name = context.getName();
+        TrackerService service = getTrackerService(context.getServiceRegistry(), name);
+        if (service != null) {
+            service.removeDeployment(name);
+        }
+    }
+
+    private TrackerService getTrackerService(ServiceRegistry registry, String name) {
+        int last = name.lastIndexOf(&quot;.&quot;);
+        String suffix = name.substring(last + 1);
+        ServiceController&lt;?&gt; container = registry.getService(TrackerService.createServiceName(suffix));
+        if (container != null) {
+            TrackerService service = (TrackerService)container.getValue();
+            return service;
+        }
+        return null;
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">deploy()</tt> method is called when a deployment is being deployed. In this case we look for the <tt class=" ">TrackerService</tt> instance for the service name created from the deployment's suffix. If there is one it means that we are meant to be tracking deployments with this suffix (i.e. <tt class=" ">TypeAddHandler</tt> was called for this suffix), and if we find one we add the deployment's name to it. Similarly <tt class=" ">undeploy()</tt> is called when a deployment is being undeployed, and if there is a <tt class=" ">TrackerService</tt> instance for the deployment's suffix, we remove the deployment's name from it.            </p>
+        <div class="section-2"  id="66322991_Addthedeployers-Deploymentphasesandattachments"  >
+        <h2>Deployment phases and attachments</h2>
+    
+            <p>
+    The code in the SubsystemDeploymentProcessor uses an <i class=" ">attachment</i>, which is the means of communication between the individual deployment processors. A deployment processor belonging to a phase may create an attachment which is then read further along the chain of deployment unit processors. In the above example we look for the <tt class=" ">Attachments.DEPLOYMENT_ROOT</tt> attachment, which is a view of the file structure of the deployment unit put in place before the chain of deployment unit processors is invoked.            </p>
+                <p>
+    As mentioned above, the deployment unit processors are organized in phases, and have a relative order within each phase. A deployment unit passes through all the deployment unit processors in that order. A deployment unit processor may choose to take action or not depending on what attachments are available. Let's take a quick look at what the deployment unit processors for in the phases described in <tt class=" ">org.jboss.as.server.deployment.Phase</tt>.            </p>
+        <div class="section-3"  id="66322991_Addthedeployers-STRUCTURE"  >
+        <h3>STRUCTURE</h3>
+    
+            <p>
+    The deployment unit processors in this phase determine the structure of a deployment, and looks for sub deployments and metadata files.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322991_Addthedeployers-PARSE"  >
+        <h3>PARSE</h3>
+    
+            <p>
+    In this phase the deployment unit processors parse the deployment descriptors and build up the annotation index. <tt class=" ">Class-Path</tt> entries from the META-INF/MANIFEST.MF are added.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322991_Addthedeployers-DEPENDENCIES"  >
+        <h3>DEPENDENCIES</h3>
+    
+            <p>
+    Extra class path dependencies are added. For example if deploying a <tt class=" ">war</tt> file, the commonly needed dependencies for a web application are added.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322991_Addthedeployers-CONFIGUREMODULE"  >
+        <h3>CONFIGURE_MODULE</h3>
+    
+            <p>
+    In this phase the modular class loader for the deployment is created. No attempt should be made loading classes from the deployment until <strong class=" ">after</strong> this phase.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322991_Addthedeployers-POSTMODULE"  >
+        <h3>POST_MODULE</h3>
+    
+            <p>
+    Now that our class loader has been constructed we have access to the classes. In this stage deployment processors may use the <tt class=" ">Attachments.REFLECTION_INDEX</tt> attachment which is a deployment index used to obtain members of classes in the deployment, and to invoke upon them, bypassing the inefficiencies of using <tt class=" ">java.lang.reflect</tt> directly.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322991_Addthedeployers-INSTALL"  >
+        <h3>INSTALL</h3>
+    
+            <p>
+    Install new services coming from the deployment.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322991_Addthedeployers-CLEANUP"  >
+        <h3>CLEANUP</h3>
+    
+            <p>
+    Attachments put in place earlier in the deployment unit processor chain may be removed here.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

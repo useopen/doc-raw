@@ -1,0 +1,692 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Security subsystem configuration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Security subsystem configuration</h1>
+        </div>
+        
+        <div id="66322728" class="content prepend-top">
+            <p>
+    The security subsystem is the subsystem that brings the security services provided by <a href="http://www.jboss.org/picketbox">PicketBox</a> to the WildFly 8&nbsp;server instances.            </p>
+                <p>
+    If you are looking to secure the management interfaces for the management of the domain then you should read the <a href="https://docs.jboss.org/author/display/AS7/Securing+the+Management+Interfaces">Securing the Management Interfaces</a> chapter as the management interfaces themselves are not run within a WildFly&nbsp;process so use a custom configuration.            </p>
+        <div class="section-2"  id="66322728_Securitysubsystemconfiguration-StructureoftheSecuritySubsystem"  >
+        <h2>Structure of the Security Subsystem</h2>
+    
+            <p>
+    When deploying applications to WildFly&nbsp;most of the time it is likely that you would be deploying a web application or EJBs and just require a security domain to be defined with login modules to verify the users identity, this chapter aims to provide additional detail regarding the architecture and capability of the security subsystem however if you are just looking to define a security domain and leave the rest to the container please jump to the <a href="66322728.html#66322728_Securitysubsystemconfiguration-securitydomains">security-domains</a> section.            </p>
+                <p>
+    The security subsystem operates by using a security context associated with the current request, this security context then makes available to the relevant container a number of capabilities from the configured security domain, the capabilities exposed are an authentication manager, an authorization manager, an audit manager and a mapping manager.            </p>
+        <div class="section-3"  id="66322728_Securitysubsystemconfiguration-AuthenticationManager"  >
+        <h3>Authentication Manager</h3>
+    
+            <p>
+    The authentication manager is the component that performs the actual authentication taking the declared users identity and their credential so that the login context for the security domain can be used to 'login' the user using the configured login module or modules.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322728_Securitysubsystemconfiguration-AuthorizationManager"  >
+        <h3>Authorization Manager</h3>
+    
+            <p>
+    The authorization manager is a component which can be obtained by the container from the current security context to either obtain information about a users roles or to perform an authorization check against a resource for the currently authenticated user.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322728_Securitysubsystemconfiguration-AuditManager"  >
+        <h3>Audit Manager</h3>
+    
+            <p>
+    The audit manager from the security context is the component that can be used to log audit events in relation to the security domain.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322728_Securitysubsystemconfiguration-"  >
+        <h3></h3>
+    
+    </div>
+    
+    <div class="section-3"  id="66322728_Securitysubsystemconfiguration-MappingManager"  >
+        <h3>Mapping Manager</h3>
+    
+            <p>
+    The mapping manager can be used to assign additional principals, credentials, roles or attributes to the authenticated subject.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322728_Securitysubsystemconfiguration-SecuritySubsystemConfiguration"  >
+        <h2>Security Subsystem Configuration</h2>
+    
+            <p>
+    By default a lot of defaults have already been selected for the security  subsystem and unless there is a specific implementation detail you need  to change, these defaults should not require modification. This chapter  describes all of the possible configuration attributes for completeness  but do keep in mind that not all will need to be changed.            </p>
+                <p>
+    The security subsystem is enabled by default by the addition of the following extension: -<br/><br/>&lt;extension module=&quot;org.jboss.as.security&quot;/&gt;            </p>
+                <p>
+    The namespace used for the configuration of the  security subsystem is urn:jboss:domain:security:1.0, the configuration  is defined within the &lt;subsystem&gt; element from this namespace.            </p>
+                <p>
+    The &lt;subsystem&gt; element can optionally contain the following child elements.            </p>
+    <ul class=" "><li class=" ">            <p>
+    security-management            </p>
+    </li><li class=" ">            <p>
+    subject-factory            </p>
+    </li><li class=" ">            <p>
+    security-domains            </p>
+    </li><li class=" ">            <p>
+    security-properties            </p>
+    </li></ul>    <div class="section-3"  id="66322728_Securitysubsystemconfiguration-securitymanagement"  >
+        <h3>security-management</h3>
+    
+            <p>
+    This element is used to override some of the high level implementation details of the PicketBox implementation if you have a need to change some of this behaviour.            </p>
+                <p>
+    The element can have any or the following attributes set, all of which are optional.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    authentication-manager-class-name            </td>
+                <td rowspan="1" colspan="1">
+    Specifies the AuthenticationManager implementation class name to use.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    deep-copy-subject-mode            </td>
+                <td rowspan="1" colspan="1">
+    Sets the copy mode of subjects done by the security managers to be deep copies that makes copies of the subject principals and credentials if they are cloneable. It should be set to true if subject include mutable content that can be corrupted when multiple threads have the same identity and cache flushes/logout clearing the subject in one thread results in subject references affecting other threads. Default value is &quot;false&quot;.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    default-callback-handler-class-name            </td>
+                <td rowspan="1" colspan="1">
+    Specifies a global class name for the CallbackHandler implementation to be used with login modules.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    authorization-manager-class-name            </td>
+                <td rowspan="1" colspan="1">
+    Attribute specifies the AuthorizationManager implementation class name to use.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    audit-manager-class-name            </td>
+                <td rowspan="1" colspan="1">
+    Specifies the AuditManager implementation class name to use.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    identity-trust-manager-class-name            </td>
+                <td rowspan="1" colspan="1">
+    Specifies the IdentityTrustManager implementation class name to use.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    mapping-manager-class-name            </td>
+                <td rowspan="1" colspan="1">
+    Specifies the MappingManager implementation class name to use.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-3"  id="66322728_Securitysubsystemconfiguration-subjectfactory"  >
+        <h3>subject-factory</h3>
+    
+            <p>
+    The subject factory is responsible for creating subject instances, this also makes use of the authentication manager to actually verify the caller. It is used mainly by JCA components to establish a subject. It is not likely this would need to be overridden but if it is required the &quot;subject-factory-class-name&quot; attribute can be specified on the subject-factory element.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322728_Securitysubsystemconfiguration-securitydomains"  >
+        <h3>security-domains</h3>
+    
+            <p>
+        <span id="66322728_Securitysubsystemconfiguration-securitydomains"><a name="66322728_Securitysubsystemconfiguration-securitydomains"></a></span>
+            </p>
+                <p>
+    This portion of the configuration is where the bulk of the security subsystem configuration will actually take place for most administrators, the security domains contain the configuration which is specific to a deployment.            </p>
+                <p>
+    The security-domains element can contain numerous &lt;security-domain&gt; definitions, a security-domain can have the following attributes set:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    name            </td>
+                <td rowspan="1" colspan="1">
+    The unique name of this security domain.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    extends            </td>
+                <td rowspan="1" colspan="1">
+    The optional name of a security domain extended by this security domain.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    cache-type            </td>
+                <td rowspan="1" colspan="1">
+    The type of authentication cache to use with this domain. If this attribute is removed no cache will be used. Allowed values are &quot;default&quot; or &quot;infinispan&quot;            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The following elements can then be set within the security-domain to configure the domain behaviour.            </p>
+        <div class="section-4"  id="66322728_Securitysubsystemconfiguration-authentication"  >
+        <h4>authentication</h4>
+    
+            <p>
+        <span id="66322728_Securitysubsystemconfiguration-authentication"><a name="66322728_Securitysubsystemconfiguration-authentication"></a></span>
+            </p>
+                <p>
+    The authentication element is used to hold the list of login modules that will be used for authentication when this domain is used, the structure of the login-module element is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;login-module code=&quot;...&quot; flag=&quot;...&quot; module=&quot;...&quot;&gt;
+  &lt;module-option name=&quot;...&quot; value=&quot;...&quot;/&gt;
+&lt;/login-module&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The code attribute is used to specify the implementing class of the login module which can either be the full class name or one of the abbreviated names from the following list:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Code            </td>
+                <td rowspan="1" colspan="1">
+    Classname            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Client            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.ClientLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Certificate            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.BaseCertLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    CertificateUsers            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.BaseCertLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    CertificateRoles            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.CertRolesLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Database            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.DatabaseServerLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    DatabaseCertificate            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.DatabaseCertLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    DatabaseUsers            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.DatabaseServerLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Identity            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.IdentityLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Ldap            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.LdapLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    LdapExtended            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.LdapExtLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    RoleMapping            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.RoleMappingLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    RunAs            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.RunAsLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Simple            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.SimpleServerLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    ConfiguredIdentity            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.picketbox.datasource.security.ConfiguredIdentityLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    SecureIdentity            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.picketbox.datasource.security.SecureIdentityLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    PropertiesUsers            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.PropertiesUsersLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    SimpleUsers            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.SimpleUsersLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    LdapUsers            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.LdapUsersLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Kerberos            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">com.sun.security.auth.module.Krb5LoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    SPNEGOUsers            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.negotiation.spnego.SPNEGOLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    AdvancedLdap            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.negotiation.AdvancedLdapLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    AdvancedADLdap            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.negotiation.AdvancedADLoginModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    UsersRoles            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.auth.spi.UsersRolesLoginModule</tt>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The module attribute specifies the name of the JBoss Modules module from which the class specified by the code attribute should be loaded. Specifying it is not necessary if one of the abbreviated names in the above list is used.            </p>
+                <p>
+    The flag attribute is used to specify the JAAS flag for this module and should be one of required, requisite, sufficient, or optional.            </p>
+                <p>
+    The module-option element can be repeated zero or more times to specify the module options as required for the login module being configured. It requires the name and value attributes.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322728_Securitysubsystemconfiguration-authenticationjaspi"  >
+        <h4>authentication-jaspi</h4>
+    
+            <p>
+    The authentication-jaspi is used to configure a Java Authentication SPI (JASPI) provider as the authentication mechanism. A security domain can have either a &lt;authentication&gt; or a &lt;authentication-jaspi&gt; element, but not both. We set up JASPI by configuring one or more login modules inside the login-module-stack element and setting up an authentication module. Here is the structure of the authentication-jaspi element:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;login-module-stack name=&quot;...&quot;&gt;
+  &lt;login-module code=&quot;...&quot; flag=&quot;...&quot; module=&quot;...&quot;&gt;
+    &lt;module-option name=&quot;...&quot; value=&quot;...&quot;/&gt;
+  &lt;/login-module&gt;
+&lt;/login-module-stack&gt;
+&lt;auth-module code=&quot;...&quot; login-module-stack-ref=&quot;...&quot;&gt;
+  &lt;module-option name=&quot;...&quot; value=&quot;...&quot;/&gt;
+&lt;/auth-module&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The login-module-stack-ref attribute value must be the name of the login-module-stack element to be used. The sub-element login-module is configured just like in the <a href="66322728.html#66322728_Securitysubsystemconfiguration-authentication">authentication</a> part            </p>
+        </div>
+    
+    <div class="section-4"  id="66322728_Securitysubsystemconfiguration-authorization"  >
+        <h4>authorization</h4>
+    
+            <p>
+    Authorization in the AS container is normally done with RBAC (role based access control) but there are situations where a more fine grained authorization policy is required. The authorization element allows definition of different authorization modules to used, such that authorization can be checked with JACC (Java Authorization Contract for Containers) or XACML (eXtensible Access Control Markup Language). The structure of the authorization element is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;policy-module code=&quot;...&quot; flag=&quot;...&quot; module=&quot;...&quot;&gt;
+  &lt;module-option name=&quot;...&quot; value=&quot;...&quot;/&gt;
+&lt;/policy-module&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The code attribute is used to specify the implementing class of the policy module which can  either be the full class name or one of the abbreviated names from the  following list:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Code            </td>
+                <td rowspan="1" colspan="1">
+    Classname            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    DenyAll            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.authorization.modules.AllDenyAuthorizationModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    PermitAll            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.authorization.modules.AllPermitAuthorizationModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Delegating            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.authorization.modules.DelegatingAuthorizationModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Web            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.authorization.modules.WebAuthorizationModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    JACC            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.authorization.modules.JACCAuthorizationModule</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    XACML            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.authorization.modules.XACMLAuthorizationModule</tt>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The module attribute specifies the name of the JBoss Modules module from which the class specified by the code attribute should be loaded. Specifying it is not necessary if one of the abbreviated names in the above list is used.            </p>
+                <p>
+    The flag attribute is used to specify the JAAS flag for this module and should be one of required, requisite, sufficient, or optional.            </p>
+                <p>
+    The module-option element can be repeated zero or more times to  specify the module options as required for the login module being  configured. It requires the name and value attributes.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322728_Securitysubsystemconfiguration-mapping"  >
+        <h4>mapping</h4>
+    
+            <p>
+    The mapping element defines additional mapping of principals, credentials, roles and attributes for the subject. The structure of the mapping element is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;mapping-module type=&quot;...&quot; code=&quot;...&quot; module=&quot;...&quot;&gt;
+  &lt;module-option name=&quot;...&quot; value=&quot;...&quot;/&gt;
+&lt;/mapping-module&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The type attribute reflects the type of mapping of the provider and should be one of principal, credential, role or attribute. By default &quot;role&quot; is the type used if the attribute is not set.            </p>
+                <p>
+    The code attribute is used to specify the implementing class of the  login module which can either be the full class name or one of the  abbreviated names from the following list:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Code            </td>
+                <td rowspan="1" colspan="1">
+    Classname            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    PropertiesRoles            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.mapping.providers.role.PropertiesRolesMappingProvider</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    SimpleRoles            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.mapping.providers.role.SimpleRolesMappingProvider</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    DeploymentRoles            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.mapping.providers.DeploymentRolesMappingProvider</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    DatabaseRoles            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.mapping.providers.role.DatabaseRolesMappingProvider</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    LdapRoles            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.security.mapping.providers.role.LdapRolesMappingProvider</tt>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The module attribute specifies the name of the JBoss Modules module from which the class specified by the code attribute should be loaded. Specifying it is not necessary if one of the abbreviated names in the above list is used.            </p>
+                <p>
+    The module-option element can be repeated zero or more times to  specify  the module options as required for the login module being  configured.  It requires the name and value attributes.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322728_Securitysubsystemconfiguration-audit"  >
+        <h4>audit</h4>
+    
+            <p>
+    The audit element can be used to define a custom audit provider. The default implementation used is <tt class=" ">org.jboss.security.audit.providers.LogAuditProvider</tt>. The structure of the audit element is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;provider-module code=&quot;...&quot; module=&quot;...&quot;&gt;
+  &lt;module-option name=&quot;...&quot; value=&quot;...&quot;/&gt;
+&lt;/provider-module&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The code attribute is used to specify the implementing class of the provider module.            </p>
+                <p>
+    The module attribute specifies the name of the JBoss Modules module from which the class specified by the code attribute should be loaded.            </p>
+                <p>
+    The module-option element can be repeated zero or more times to  specify  the module options as required for the login module being  configured.  It requires the name and value attributes.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322728_Securitysubsystemconfiguration-jsse"  >
+        <h4>jsse</h4>
+    
+            <p>
+    The jsse element defines configuration for keystores and truststores that can be used for SSL context configuration or for certificate storing/retrieving.            </p>
+                <p>
+    The set of attributes (all of them optional) of this element are:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    keystore-password            </td>
+                <td rowspan="1" colspan="1">
+    Password of the keystore            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    keystore-type            </td>
+                <td rowspan="1" colspan="1">
+    Type of the keystore. By default it's &quot;JKS&quot;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    keystore-url            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">URL</tt> where the keystore file can be found            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    keystore-provider            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">Provider</tt> of the keystore. The default JDK provider for the keystore type is used if this attribute is null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    keystore-provider-argument            </td>
+                <td rowspan="1" colspan="1">
+    String that can be passed as the argument of the keystore <tt class=" ">Provider</tt> constructor            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    key-manager-factory-algorithm            </td>
+                <td rowspan="1" colspan="1">
+    Algorithm of the <tt class=" ">KeyManagerFactory</tt>. The default JDK algorithm of the key manager factory is used if this attribute is null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    key-manager-factory-provider            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">Provider</tt> of the <tt class=" ">KeyManagerFactory</tt>. The default JDK provider for the key manager factory algorithm is used if this attribute is null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    truststore-password            </td>
+                <td rowspan="1" colspan="1">
+    Password of the truststore            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    truststore-type            </td>
+                <td rowspan="1" colspan="1">
+    Type of the truststore. By deafult it's &quot;JKS&quot;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    truststore-url            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">URL</tt> where the truststore file can be found            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    truststore-provider            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">Provider</tt> of the truststore. The default JDK provider for the truststore type is used if this attribute is null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    truststore-provider-argument            </td>
+                <td rowspan="1" colspan="1">
+    String that can be passed as the argument of the truststore <tt class=" ">Provider</tt> constructor            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    trust-manager-factory-algorithm            </td>
+                <td rowspan="1" colspan="1">
+    Algorithm of the <tt class=" ">TrustManagerFactory</tt>. The default JDK algorithm of the trust manager factory is used if this attribute is null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    trust-manager-factory-provider            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">Provider</tt> of the <tt class=" ">TrustManagerFactory</tt>. The default JDK provider for the trust manager factory algorithm is used if this attribute is null            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    client-alias            </td>
+                <td rowspan="1" colspan="1">
+    Alias of the keystore to be used when creating client side SSL sockets            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    server-alias            </td>
+                <td rowspan="1" colspan="1">
+    Alias of the keystore to be used when creating server side SSL sockets            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    service-auth-token            </td>
+                <td rowspan="1" colspan="1">
+    Validation token to enable third party services to retrieve a keystore <tt class=" ">Key</tt>. This is typically used to retrieve a private key for signing purposes            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    client-auth            </td>
+                <td rowspan="1" colspan="1">
+    Flag to indicate if the server side SSL socket should require client authentication. Default is &quot;false&quot;            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    cipher-suites            </td>
+                <td rowspan="1" colspan="1">
+    Comma separated list of cipher suites to be used by a <tt class=" ">SSLContext</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    protocols            </td>
+                <td rowspan="1" colspan="1">
+    Comma separated list of SSL protocols to be used by a <tt class=" ">SSLContext</tt>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The optional additional-properties element can be used to include other options. The structure of the jsse element is:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jsse keystore-url=&quot;...&quot; keystore-password=&quot;...&quot; keystore-type=&quot;...&quot; keystore-provider=&quot;...&quot; keystore-provider-argument=&quot;...&quot; key-manager-factory-algorithm=&quot;...&quot; key-manager-factory-provider=&quot;...&quot; truststore-url=&quot;...&quot; truststore-password=&quot;...&quot; truststore-type=&quot;...&quot; truststore-provider=&quot;...&quot; truststore-provider-argument=&quot;...&quot; trust-manager-factory-algorithm=&quot;...&quot; trust-manager-factory-provider=&quot;...&quot; client-alias=&quot;...&quot; server-alias=&quot;...&quot; service-auth-token=&quot;...&quot; client-auth=&quot;...&quot; cipher-suites=&quot;...&quot; protocols=&quot;...&quot;&gt;
+  &lt;additional-properties&gt;x=y
+    a=b
+  &lt;/additional-properties&gt;
+&lt;/jsse&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322728_Securitysubsystemconfiguration-securityproperties"  >
+        <h3>security-properties</h3>
+    
+            <p>
+    This element is used to specify additional properties as required by the security subsystem, properties are specified in the following format:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;security-properties&gt;
+  &lt;property name=&quot;...&quot; value=&quot;...&quot;/&gt;
+&lt;/security-properties&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The property element can be repeated as required for as many properties need to be defined.            </p>
+                <p>
+    Each property specified is set on the <tt class=" ">java.security.Security</tt> class.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

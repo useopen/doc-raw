@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>mod_cluster Subsystem</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>mod_cluster Subsystem</h1>
+        </div>
+        
+        <div id="66322835" class="content prepend-top">
+            <p>
+    The mod_cluster integration is done via the <a href="http://docs.jboss.org/mod_cluster/1.1.0/html/java.AS7config.html">modcluster subsystem</a> it requires mod_cluster-1.1.x.or mod_cluster-1.2.x (since 7.1.0)            </p>
+                <p>
+    The modcluster subsystem supports several operations:            </p>
+                <p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :read-operation-names
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        &quot;add&quot;,
+        &quot;add-custom-metric&quot;,
+        &quot;add-metric&quot;,
+        &quot;add-proxy&quot;,
+        &quot;disable&quot;,
+        &quot;disable-context&quot;,
+        &quot;enable&quot;,
+        &quot;enable-context&quot;,
+        &quot;list-proxies&quot;,
+        &quot;read-attribute&quot;,
+        &quot;read-children-names&quot;,
+        &quot;read-children-resources&quot;,
+        &quot;read-children-types&quot;,
+        &quot;read-operation-description&quot;,
+        &quot;read-operation-names&quot;,
+        &quot;read-proxies-configuration&quot;,
+        &quot;read-proxies-info&quot;,
+        &quot;read-resource&quot;,
+        &quot;read-resource-description&quot;,
+        &quot;refresh&quot;,
+        &quot;remove-custom-metric&quot;,
+        &quot;remove-metric&quot;,
+        &quot;remove-proxy&quot;,
+        &quot;reset&quot;,
+        &quot;stop&quot;,
+        &quot;stop-context&quot;,
+        &quot;validate-address&quot;,
+        &quot;write-attribute&quot;
+    ]
+}</code></pre>
+        </div>
+    </div>
+The operations specific to the modcluster subsystem are divided in 3 categories the ones that affects the configuration and require a restart of the subsystem, the one that just modify the behaviour temporarily and the ones that display information from the httpd part.            </p>
+        <div class="section-2"  id="66322835_mod_clusterSubsystem-operationsdisplayinghttpdinformations"  >
+        <h2>operations displaying httpd informations</h2>
+    
+            <p>
+    There are 2 operations that display how Apache httpd sees the node:            </p>
+        <div class="section-3"  id="66322835_mod_clusterSubsystem-readproxiesconfiguration"  >
+        <h3>read-proxies-configuration</h3>
+    
+            <p>
+    Send a DUMP message to all Apache httpd the node is connected to and display the message received from Apache httpd.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :read-proxies-configuration
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        &quot;neo3:6666&quot;,
+        &quot;balancer: [1] Name: mycluster Sticky: 1 [JSESSIONID]/[jsessionid] remove: 0 force: 1 Timeout: 0 Maxtry: 1
+node: [1:1],Balancer: mycluster,JVMRoute: 498bb1f0-00d9-3436-a341-7f012bc2e7ec,Domain: [],Host: 127.0.0.1,Port: 8080,Type: http,flushpackets: 0,flushwait: 10,ping: 10,smax: 26,ttl: 60,timeout: 0
+host: 1 [example.com] vhost: 1 node: 1
+host: 2 [localhost] vhost: 1 node: 1
+host: 3 [default-host] vhost: 1 node: 1
+context: 1 [/myapp] vhost: 1 node: 1 status: 1
+context: 2 [/] vhost: 1 node: 1 status: 1
+&quot;,
+        &quot;jfcpc:6666&quot;,
+        &quot;balancer: [1] Name: mycluster Sticky: 1 [JSESSIONID]/[jsessionid] remove: 0 force: 1 Timeout: 0 maxAttempts: 1
+node: [1:1],Balancer: mycluster,JVMRoute: 498bb1f0-00d9-3436-a341-7f012bc2e7ec,LBGroup: [],Host: 127.0.0.1,Port: 8080,Type: http,flushpackets: 0,flushwait: 10,ping: 10,smax: 26,ttl: 60,timeout: 0
+host: 1 [default-host] vhost: 1 node: 1
+host: 2 [localhost] vhost: 1 node: 1
+host: 3 [example.com] vhost: 1 node: 1
+context: 1 [/] vhost: 1 node: 1 status: 1
+context: 2 [/myapp] vhost: 1 node: 1 status: 1
+&quot;
+    ]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-readproxiesinfo"  >
+        <h3>read-proxies-info</h3>
+    
+            <p>
+    Send a INFO message to all Apache httpd the node is connected to and display the message received from Apache httpd.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :read-proxies-info
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        &quot;neo3:6666&quot;,
+        &quot;Node: [1],Name: 498bb1f0-00d9-3436-a341-7f012bc2e7ec,Balancer: mycluster,Domain: ,Host: 127.0.0.1,Port: 8080,Type: http,Flushpackets: Off,Flushwait: 10000,Ping: 10000000,Smax: 26,Ttl: 60000000,Elected: 0,Read: 0,Transfered: 0,Connected: 0,Load: -1
+Vhost: [1:1:1], Alias: example.com
+Vhost: [1:1:2], Alias: localhost
+Vhost: [1:1:3], Alias: default-host
+Context: [1:1:1], Context: /myapp, Status: ENABLED
+Context: [1:1:2], Context: /, Status: ENABLED
+&quot;,
+        &quot;jfcpc:6666&quot;,
+        &quot;Node: [1],Name: 498bb1f0-00d9-3436-a341-7f012bc2e7ec,Balancer: mycluster,LBGroup: ,Host: 127.0.0.1,Port: 8080,Type: http,Flushpackets: Off,Flushwait: 10,Ping: 10,Smax: 26,Ttl: 60,Elected: 0,Read: 0,Transfered: 0,Connected: 0,Load: 1
+Vhost: [1:1:1], Alias: default-host
+Vhost: [1:1:2], Alias: localhost
+Vhost: [1:1:3], Alias: example.com
+Context: [1:1:1], Context: /, Status: ENABLED
+Context: [1:1:2], Context: /myapp, Status: ENABLED
+&quot;
+    ]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322835_mod_clusterSubsystem-"  >
+        <h2></h2>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-operationsthathandletheproxiesthenodeisconnectedtoo"  >
+        <h3>operations that handle the proxies the node is connected too</h3>
+    
+            <p>
+    there are 3 operation that could be used to manipulate the list of Apache httpd the node is connected too.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-listproxies%3A"  >
+        <h3>list-proxies:</h3>
+    
+            <p>
+    Displays the httpd that are connected to the node. The httpd could be discovered via the Advertise protocol or via the proxy-list attribute.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :list-proxies
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        &quot;neo3:6666&quot;,
+        &quot;jfcpc:6666&quot;
+    ]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-removeproxy"  >
+        <h3>remove-proxy</h3>
+    
+            <p>
+    Remove a proxy from the discovered proxies or&nbsp; temporarily from the proxy-list attribute.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :remove-proxy(host=jfcpc, port=6666)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-addproxy"  >
+        <h3>proxy</h3>
+    
+            <p>
+    Add a proxy to the discovered proxies or&nbsp; temporarily to the proxy-list attribute.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :add-proxy(host=jfcpc, port=6666)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322835_mod_clusterSubsystem-Contextrelatedoperations"  >
+        <h2>Context related operations</h2>
+    
+            <p>
+    Those operations allow to send context related commands to Apache httpd. They are send automatically when deploying or undeploying&nbsp; webapps.            </p>
+        <div class="section-3"  id="66322835_mod_clusterSubsystem-enablecontext"  >
+        <h3>enable-context</h3>
+    
+            <p>
+    Tell Apache httpd that the context is ready receive requests.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :enable-context(context=/myapp, virtualhost=default-host)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-disablecontext"  >
+        <h3>disable-context</h3>
+    
+            <p>
+    Tell Apache httpd that it shouldn't send new session requests to the context of the virtualhost.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :disable-context(context=/myapp, virtualhost=default-host)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-stopcontext"  >
+        <h3>stop-context</h3>
+    
+            <p>
+    Tell Apache httpd that it shouldn't send requests to the context of the virtualhost.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :stop-context(context=/myapp, virtualhost=default-host, waittime=50)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322835_mod_clusterSubsystem-Noderelatedoperations"  >
+        <h2>Node related operations</h2>
+    
+            <p>
+    Those operations are like the context operation but they apply to all webapps running on the node and operation that affect the whole node.            </p>
+        <div class="section-3"  id="66322835_mod_clusterSubsystem-refresh"  >
+        <h3>refresh</h3>
+    
+            <p>
+    Refresh the node by sending a new CONFIG message to Apache httpd.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-reset"  >
+        <h3>reset</h3>
+    
+            <p>
+    reset the connection between Apache httpd and the node            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322835_mod_clusterSubsystem-Configuration"  >
+        <h2>Configuration</h2>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-Metricconfiguration"  >
+        <h3>Metric configuration</h3>
+    
+            <p>
+    There are 4 metric operations corresponding to add and remove load metrics to the dynamic-load-provider. Note that when nothing is defined a simple-load-provider is use with a fixed load factor of one.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :read-resource(name=mod-cluster-config)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {&quot;simple-load-provider&quot; =&gt; {&quot;factor&quot; =&gt; &quot;1&quot;}}
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    that corresponds to the following configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:modcluster:1.0&quot;&gt;
+            &lt;mod-cluster-config&gt;
+                &lt;simple-load-provider factor=&quot;1&quot;/&gt;
+            &lt;/mod-cluster-config&gt;
+ &lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    <div class="section-4"  id="66322835_mod_clusterSubsystem-addmetric"  >
+        <h4>metric</h4>
+    
+            <p>
+    Add a metric to the dynamic-load-provider, the dynamic-load-provider in configuration is created if needed.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :add-metric(type=cpu)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}
+[standalone@localhost:9999 subsystem=modcluster] :read-resource(name=mod-cluster-config)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;dynamic-load-provider&quot; =&gt; {
+            &quot;history&quot; =&gt; 9,
+            &quot;decay&quot; =&gt; 2,
+            &quot;load-metric&quot; =&gt; [{
+                &quot;type&quot; =&gt; &quot;cpu&quot;
+            }]
+        }
+    }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322835_mod_clusterSubsystem-removemetric"  >
+        <h4>remove-metric</h4>
+    
+            <p>
+    Remove a metric from the dynamic-load-provider.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :remove-metric(type=cpu)
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322835_mod_clusterSubsystem-addcustommetric%2Fremovecustommetric"  >
+        <h4>custom-metric / remove-custom-metric</h4>
+    
+            <p>
+    like the add-metric and remove-metric except they require a class parameter instead the type. Usually they needed additional properties which can be specified            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 subsystem=modcluster] :add-custom-metric(class=myclass, property=[(&quot;pro1&quot; =&gt; &quot;value1&quot;), (&quot;pro2&quot; =&gt; &quot;value2&quot;)]
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+            <p>
+    which corresponds the following in the xml configuration file:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:modcluster:1.0&quot;&gt;
+            &lt;mod-cluster-config&gt;
+                &lt;dynamic-load-provider history=&quot;9&quot; decay=&quot;2&quot;&gt;
+                    &lt;custom-load-metric class=&quot;myclass&quot;&gt;
+                        &lt;property name=&quot;pro1&quot; value=&quot;value1&quot;/&gt;
+                        &lt;property name=&quot;pro2&quot; value=&quot;value2&quot;/&gt;
+                    &lt;/custom-load-metric&gt;
+                &lt;/dynamic-load-provider&gt;
+            &lt;/mod-cluster-config&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322835_mod_clusterSubsystem-JVMRouteconfiguration"  >
+        <h3>JVMRoute configuration</h3>
+    
+            <p>
+    If you want to use your own JVM route instead of automatically generated one you can insert the following property:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>...
+&lt;/extensions&gt;
+&lt;system-properties&gt;
+   &lt;property name=&quot;jboss.mod_cluster.jvmRoute&quot; value=&quot;myJvmRoute&quot;/&gt;
+&lt;/system-properties&gt;
+&lt;management&gt;
+...</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

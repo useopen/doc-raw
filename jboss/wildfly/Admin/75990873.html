@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Loggers</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Loggers</h1>
+        </div>
+        
+        <div id="75990873" class="content prepend-top">
+<ul class=" "><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-Overview">Overview</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-LoggerResource">Logger Resource</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-filterspec">filter-spec</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-handlers">handlers</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-level">level</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-useparenthandlers">use-parent-handlers</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-RootLoggerResource">Root Logger Resource</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-LoggerHierarchy">Logger Hierarchy</a>            </p>
+    </li></ul></li></ul>    <div class="confbox admonition admonition-info">
+            <div class="title">WIP</div>
+        
+            <p>
+    This is still a work in progress. Please feel free to edit any mistakes you find     <img src="images/author/images/icons/emoticons/109556488.gif" alt="images/author/images/icons/emoticons/109556488.gif" />
+ .            </p>
+        </div>
+    
+    <div class="section-2"  id="75990873_Loggers-Overview"  >
+        <h2>Overview</h2>
+    
+            <p>
+    Loggers are used to log messages. A logger is defined by a category generally consisting of a package name or a class name.            </p>
+                <p>
+    A logger is the first step to determining if a messages should be logged or not. If a logger is defined with a level, the level of the message must be greater than the level defined on the logger. The filter is then checked next and the rules of the filter will determine whether or not the messages is said to be loggable.            </p>
+        <div class="section-3"  id="75990873_Loggers-LoggerResource"  >
+        <h3>Logger Resource</h3>
+    
+            <p>
+    A logger resource uses the path <tt class=" ">subsystem=logging/logger=$category</tt> where <tt class=" ">$category</tt> is the of the logger. For example to a logger named org.wildfly.example would have a resource path of <tt class=" ">subsystem=logging/logger=org.wildfly.example</tt>.            </p>
+                <p>
+    A logger as 4 writeable attributes;            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-filterspec">filter-spec</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-handlers">handlers</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-level">level</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="75990873.html#75990873_Loggers-useparenthandlers">use-parent-handlers</a>            </p>
+    </li></ul>    <div class="confbox admonition admonition-info">
+        
+            <p>
+    You may notice that the <tt class=" ">category</tt> and <tt class=" ">filter</tt> attributes are missing. While <tt class=" ">filter</tt> is writable it may be deprecated and removed in the future. Both attributes are still on the resource for legacy reasons.            </p>
+        </div>
+    
+    <div class="section-4"  id="75990873_Loggers-filterspec"  >
+        <h4>filter-spec</h4>
+    
+            <p>
+    The <tt class=" ">filter-spec</tt> attribute is an expression based string to define filters for the logger.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Filters on loggers are not inherited.            </p>
+        </div>
+    
+    <div class="confbox admonition admonition-info">
+            <div class="title">More Information on filters</div>
+        
+            <p>
+    Check out &#65279;<a href="66322712.html#66322712_LoggingConfiguration-FilterExpressions">Logging Configuration#FilterExpressions</a> for more information on expressions and some examples            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-4"  id="75990873_Loggers-handlers"  >
+        <h4>handlers</h4>
+    
+            <p>
+    The <tt class=" ">handlers</tt> attribute is a list of handler names that should be attached to the logger. If the <a href="75990873.html#75990873_Loggers-useparenthandlers">use-parent-handlers</a> attribute is set to <tt class=" ">true</tt> and the log messages is determined to be loggable, parent loggers will continue to be processed.            </p>
+        </div>
+    
+    <div class="section-4"  id="75990873_Loggers-level"  >
+        <h4>level</h4>
+    
+            <p>
+    The <tt class=" ">level</tt> attribute allows the minimum level to allow messages to be logged at for the logger.            </p>
+        </div>
+    
+    <div class="section-4"  id="75990873_Loggers-useparenthandlers"  >
+        <h4>parent-handlers</h4>
+    
+            <p>
+    The <tt class=" ">use-parent-handlers</tt> attribute is a boolean attribute to determine whether or not parent loggers should also process the log message.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="75990873_Loggers-RootLoggerResource"  >
+        <h3>Root Logger Resource</h3>
+    
+            <p>
+    The <tt class=" ">root-logger</tt> is similar to a <a href="75990873.html#75990873_Loggers-LoggerResource">Logger Resource</a> only it has no category and it's name is must be <tt class=" ">ROOT</tt>.            </p>
+        </div>
+    
+    <div class="section-3"  id="75990873_Loggers-LoggerHierarchy"  >
+        <h3>Logger Hierarchy</h3>
+    
+            <p>
+    A logger hierarchy is defined by it's category. The category is a <tt class=" ">.</tt> (dot) delimited string generally consisting of the package name or a class name. For example the logger <tt class=" ">org.wildfly</tt> is the parent logger of <tt class=" ">org.wildfly.example</tt>.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

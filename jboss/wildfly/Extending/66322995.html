@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Key Interfaces and Classes Relevant to Extension Developers</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Key Interfaces and Classes Relevant to Extension Developers</h1>
+        </div>
+        
+        <div id="66322995" class="content prepend-top">
+            <p>
+    In the first major section of this guide, we provided an example of how to implement an extension to the AS. The emphasis there was learning by doing. In this section, we'll focus a bit more on the major WildFly 8 interfaces and classes that most are relevant to extension developers. The best way to learn about these interfaces and classes in detail is to look at their javadoc. What we'll try to do here is provide a brief introduction of the key items and how they relate to each other.            </p>
+                <p>
+    Before digging into this section, readers are encouraged to read the &quot;Core Management Concepts&quot; section of the Admin Guide.            </p>
+        <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-%7B%7BExtension%7D%7DInterface"  >
+        <h2>Extension  Interface</h2>
+    
+            <p>
+    The <tt class=" ">org.jboss.as.controller.Extension</tt> interface is the hook by which your extension to the core AS is able to integrate with the AS. During boot of the AS, when the <tt class=" ">&lt;extension&gt;</tt> element in the AS's xml configuration file naming your extension is parsed, the JBoss Modules module named in the element's name attribute is loaded. The standard JDK <tt class=" ">java.lang.ServiceLoader</tt> mechanism is then used to load your module's implementation of this interface.            </p>
+                <p>
+    The function of an <tt class=" ">Extension</tt> implementation is to register with the core AS the management API, xml parsers and xml marshallers associated with the extension module's subsystems. An <tt class=" ">Extension</tt> can register multiple subsystems, although the usual practice is to register just one per extension.            </p>
+                <p>
+    Once the <tt class=" ">Extension</tt> is loaded, the core AS will make two invocations upon it:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">void initializeParsers(ExtensionParsingContext context)</tt>            </p>
+    </li></ul>            <p>
+    When this is invoked, it is the <tt class=" ">Extension</tt> implementation's responsibility to initialize the XML parsers for this extension's subsystems and register them with the given <tt class=" ">ExtensionParsingContext</tt>. The parser's job when it is later called is to create <tt class=" ">org.jboss.dmr.ModelNode</tt> objects representing WildFly management API operations needed make the AS's running configuration match what is described in the xml. Those management operation {{ModelNode}}s are added to a list passed in to the parser.            </p>
+                <p>
+    A parser for each version of the xml schema used by a subsystem should be registered. A well behaved subsystem should be able to parse any version of its schema that it has ever published in a final release.            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">void initialize(ExtensionContext context)</tt>            </p>
+    </li></ul>            <p>
+    When this is invoked, it is the <tt class=" ">Extension</tt> implementation's responsibility to register with the core AS the management API for its subsystems, and to register the object that is capable of marshalling the subsystem's in-memory configuration back to XML. Only one XML marshaller is registered per subsystem, even though multiple XML parsers can be registered. The subsystem should always write documents that conform to the latest version of its XML schema.            </p>
+                <p>
+    The registration of a subsystem's management API is done via the <tt class=" ">ManagementResourceRegistration</tt> interface. Before discussing that interface in detail, let's describe how it (and the related <tt class=" ">Resource</tt> interface) relate to the notion of managed resources in the AS.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-WildFly8ManagedResources"  >
+        <h2>WildFly 8 Managed Resources</h2>
+    
+            <p>
+    Each subsystem is responsible for managing one or more management resources. The conceptual characteristics of a management resource are covered in some detail in the <a href="https://docs.jboss.org/author/display/WFLY8/Management+resources">Admin Guide</a>; here we'll just summarize the main points. A management resource has            </p>
+    <ul class=" "><li class=" ">            <p>
+    An <strong class=" "><i class=" ">address</i></strong> consisting of a list of key/value pairs that uniquely identifies a resource            </p>
+    </li><li class=" ">            <p>
+    Zero or more <strong class=" "><i class=" ">attributes</i></strong>, the value of which is some sort of <tt class=" ">org.jboss.dmr.ModelNode</tt>            </p>
+    </li><li class=" ">            <p>
+    Zero or more supported <strong class=" "><i class=" ">operations</i></strong>. An operation has a string name and zero or more parameters, each of which is a key/value pair where the key is a string naming the parameter and the value is some sort of <tt class=" ">ModelNode</tt>            </p>
+    </li><li class=" ">            <p>
+    Zero or <strong class=" "><i class=" ">children</i></strong>, each of which in turn is a managed resource            </p>
+    </li></ul>            <p>
+    The implementation of a managed resource is somewhat analogous to the implementation of a Java object. A managed resource will have a &quot;type&quot;, which encapsulates API information about that resource and logic used to implement that API. And then there are actual instances of the resource, which primarily store data representing the current state of a particular resource. This is somewhat analogous to the &quot;class&quot; and &quot;object&quot; notions in Java.            </p>
+                <p>
+    A managed resource's type is encapsulated by the <tt class=" ">org.jboss.as.controller.registry.ManagementResourceRegistration</tt> the core AS creates when the type is registered. The data for a particular instance is encapsulated in an implementation of the <tt class=" ">org.jboss.as.controller.registry.Resource</tt> interface.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-%7B%7BManagementResourceRegistration%7D%7DInterface"  >
+        <h2>ManagementResourceRegistration  Interface</h2>
+    
+            <p>
+    TODO            </p>
+        </div>
+    
+    <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-%7B%7BResourceDefinition%7D%7DInterface"  >
+        <h2>ResourceDefinition  Interface</h2>
+    
+            <p>
+    TODO            </p>
+                <p>
+    Most commonly used implementation: <tt class=" ">SimpleResourceDefinition</tt>            </p>
+        <div class="section-3"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-%7B%7BResourceDescriptionResolver%7D%7D"  >
+        <h3>ResourceDescriptionResolver</h3>
+    
+            <p>
+    TODO            </p>
+                <p>
+    Most commonly used implementation: <tt class=" ">StandardResourceDescriptionResolver</tt>            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-%7B%7BAttributeDefinition%7D%7DInterface"  >
+        <h2>AttributeDefinition  Interface</h2>
+    
+            <p>
+    TODO            </p>
+                <p>
+    Most commmonly used implementation: <tt class=" ">SimpleAttributeDefinition</tt>. Use <tt class=" ">SimpleAttributeDefinitionBuilder</tt> to build.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-%7B%7BOperationDefinition%7D%7Dand%7B%7BOperationStepHandler%7D%7DInterfaces"  >
+        <h2>OperationDefinition  and  OperationStepHandler  Interfaces</h2>
+    
+            <p>
+    TODO            </p>
+        </div>
+    
+    <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-OperationExecutionandthe%7B%7BOperationContext%7D%7D"  >
+        <h2>Operation Execution and the  OperationContext</h2>
+    
+            <p>
+    TODO            </p>
+        </div>
+    
+    <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-%7B%7BResource%7D%7DInterface"  >
+        <h2>Resource  Interface</h2>
+    
+            <p>
+    TODO            </p>
+        </div>
+    
+    <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-%7B%7BDeploymentUnitProcessor%7D%7DInterface"  >
+        <h2>DeploymentUnitProcessor  Interface</h2>
+    
+            <p>
+    TODO            </p>
+        </div>
+    
+    <div class="section-2"  id="66322995_KeyInterfacesandClassesRelevanttoExtensionDevelopers-Usefulclassesforimplementing%7B%7BOperationStepHandler%7D%7D"  >
+        <h2>Useful classes for implementing  OperationStepHandler</h2>
+    
+            <p>
+    TODO            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

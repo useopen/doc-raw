@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Apache CXF integration</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Apache CXF integration</h1>
+        </div>
+        
+        <div id="66322816" class="content prepend-top">
+<ul class=" "><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-JBossWSintegrationlayerwithApacheCXF">JBossWS integration layer with Apache CXF</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-BuildingWSapplicationstheJBossway">Building WS applications the JBoss way</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Portableapplications">Portable applications</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-DirectApacheCXFAPIusage">Direct Apache CXF API usage</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Springdescriptorsusage">Spring descriptors usage</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Clientside">Client side</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Serverside">Server side</a>            </p>
+    </li></ul></li></ul></li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Bususage">Bus usage</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-CreatingaBusinstance">Creating a Bus instance</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-UsingexistingBusinstances">Using existing Bus instances</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-BusselectionstrategiesforJAXWSclients">Bus selection strategies for JAXWS clients</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Threadbusstrategy%28THREADBUS%29">Thread bus strategy (THREAD_BUS)</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Newbusstrategy%28NEWBUS%29">New bus strategy (NEW_BUS)</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Threadcontextclassloaderbusstrategy%28TCCLBUS%29">Thread context classloader bus strategy (TCCL_BUS)</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Strategyconfiguration">Strategy configuration</a>            </p>
+    </li></ul></li></ul></li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-ServerSideIntegrationCustomization">Server Side Integration Customization</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Deploymentdescriptorproperties">Deployment descriptor properties</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-WorkQueueconfiguration">WorkQueue configuration</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Policyalternativeselector">Policy alternative selector</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-MBeanmanagement">MBean management</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-Schemavalidation">Schema validation</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322816.html#66322816_ApacheCXFintegration-WSDiscoveryenablement">WS-Discovery enablement</a>            </p>
+    </li></ul></li></ul></li></ul>    <div class="section-2"  id="66322816_ApacheCXFintegration-JBossWSintegrationlayerwithApacheCXF"  >
+        <h2>JBossWS integration layer with Apache CXF</h2>
+    
+            <p>
+    All JAX-WS functionalities provided by JBossWS on top of JBoss Application Server are currently served through a proper integration of the JBoss Web Services stack with most of the <a href="http://cxf.apache.org/">Apache CXF</a> project modules.            </p>
+                <p>
+    Apache CXF is an open source services framework. It allows building and  developing services using frontend programming APIs (including JAX-WS), with services speaking a variety of protocols such as SOAP and  XML/HTTP over a variety of transports  such as HTTP and JMS.            </p>
+                <p>
+    The integration layer (<i class=" ">JBossWS-CXF</i> in short hereafter) is mainly meant for:            </p>
+    <ul class=" "><li class=" ">            <p>
+    allowing  using standard webservices APIs (including JAX-WS) on JBoss Application Server; this is performed internally leveraging Apache  CXF without requiring the user to deal with it;            </p>
+    </li><li class=" ">            <p>
+    allowing using  Apache CXF advanced features (including WS-*) on top of JBoss  Application server without requiring the user to deal with / setup /  care about the required integration steps for running in such a  container.            </p>
+    </li></ul>            <p>
+    In order for achieving the goals above, the JBossWS-CXF integration supports the JBoss ws endpoint deployment mechanism and comes with many internal customizations on top of Apache CXF.            </p>
+                <p>
+    In the next sections a list of technical suggestions and notes on the integration is provided; please also refer to the <a href="http://cxf.apache.org/docs/index.html">Apache CXF official documentation</a> for in-depth details on the CXF architecture.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322816_ApacheCXFintegration-BuildingWSapplicationstheJBossway"  >
+        <h2>Building WS applications the JBoss way</h2>
+    
+            <p>
+    The Apache CXF client and endpoint configuration as explained in the <a href="http://cxf.apache.org/docs/index.html">Apache CXF official user guide</a> is heavily based on Spring. Apache CXF basically parses Spring <tt class=" ">cxf.xml</tt> descriptors; those may contain any basic bean plus specific ws client and endpoint beans which CXF has custom parsers for. Apache CXF can be used to deploy webservice endpoints on any servlet container by including its libraries in the deployment; in such a scenario Spring basically serves as a convenient configuration option, given direct Apache CXF API usage won't be very handy. Similar reasoning applies on client side, where a Spring based descriptor offers a shortcut for setting up Apache CXF internals.            </p>
+                <p>
+    This said, nowadays&nbsp;almost any Apache CXF functionality can be configured&nbsp;and used through direct API usage, without Spring.            </p>
+        <div class="section-3"  id="66322816_ApacheCXFintegration-Portableapplications"  >
+        <h3>Portable applications</h3>
+    
+            <p>
+    The JBoss Application Server is much more then a servlet container; it actually provides users with a fully compliant target platform for Java EE applications.            </p>
+                <p>
+    Generally speaking, <i class=" ">users are encouraged to write portable applications</i> by relying only on <i class=" ">JAX-WS specification</i>&nbsp;whenever possible. That would by the way ensure easy migrations to and from other compliant platforms. Being a Java EE container, JBoss Application Server already comes with a JAX-WS compliant implementation, which is basically Apache CXF plus the JBossWS-CXF integration layer. So users just need to write their JAX-WS application; <i class=" ">no need for embedding any Apache CXF or any ws related dependency library in user deployments</i>. Please refer to the&nbsp;<a href="66322810.html">JAX-WS User Guide</a> section of the documentation for getting started.            </p>
+                <p>
+    WS-* usage (including WS-Security, WS-Addressing, WS-ReliableMessaging, ...) should also be configured in the most portable way; that is by <i class=" ">relying on proper WS-Policy assertions</i> on the endpoint WSDL contracts, so that client and endpoint configuration is basically a matter of setting few ws context properties. The WS-* related sections of this documentation cover all the details on configuring applications making use of WS-* through policies.            </p>
+                <p>
+    As a consequence of the reasoning above, the JBossWS-CXF integration is currently built directly on the Apache CXF API and aims at allowing users to configure webservice clients and endpoints&nbsp;<i class=" ">without Spring descriptors</i>.            </p>
+                <p>
+    <strong class=" ">The following two paragraphs provide few directions on how to deploy or use applications explicitly relying on Apache CXF, users should however prefer the portable application approach whenever possible.</strong>            </p>
+        </div>
+    
+    <div class="section-3"  id="66322816_ApacheCXFintegration-DirectApacheCXFAPIusage"  >
+        <h3>Direct Apache CXF API usage</h3>
+    
+            <p>
+    Whenever users can't really meet their application requirements with JAX-WS plus WS-Policy, it is of course still possible to rely on direct Apache CXF API usage (given that's included in the AS), loosing the Java EE portability of the application. That could be the case of a&nbsp;user needing specific Apache CXF functionalities, or having to consume WS-* enabled endpoints advertised through legacy wsdl contracts without WS-Policy assertions.            </p>
+                <p>
+    On server side, direct Apache CXF API usage might not be always possible or end up being not very easy. For this reason,&nbsp;the JBossWS integration comes with a convenient alternative through customization options in the <tt class=" ">jboss-webservices.xml</tt> descriptor described below on this page.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322816_ApacheCXFintegration-Springdescriptorsusage"  >
+        <h3>Spring descriptors usage</h3>
+    
+            <p>
+    Finally, in some cases, users might still want to consume Spring descriptors (<strong class=" ">discouraged approach</strong>); that's possibly the case of applications developed on and being migrated from different environments. For such scenarios, the installation of Spring Framework libraries on application server is the suggested approach. That&nbsp;can be performed using the JBossWS-CXF installation script or by manually populating a&nbsp;<i class=" ">org.springframework.spring</i>&nbsp;JBoss AS module with the required Spring jars. For writing the <tt class=" ">module.xml</tt> descriptor for such a module please refer the relevant JBoss AS documentation on creating modules; in any case it would look similar to:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;module xmlns=&quot;urn:jboss:module:1.1&quot; name=&quot;org.springframework.spring&quot;&gt;
+&lt;resources&gt;
+&lt;!-- List references to jar resources here --&gt;
+&lt;/resources&gt;
+&lt;dependencies&gt;
+&lt;module name=&quot;javax.api&quot; /&gt;
+&lt;module name=&quot;javax.jms.api&quot; /&gt;
+&lt;module name=&quot;javax.annotation.api&quot; /&gt;
+&lt;module name=&quot;org.apache.commons.logging&quot; /&gt;
+&lt;module name=&quot;org.jboss.vfs&quot; /&gt;
+&lt;/dependencies&gt;
+&lt;/module&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The other webservices modules on JBoss AS already have an optional dependency on <i class=" ">org.springframework.spring</i> module and will hence automatically consume it.            </p>
+                <p>
+    Once the Spring module is available on target application server, Spring based Apache CXF buses can be built up.            </p>
+        <div class="section-4"  id="66322816_ApacheCXFintegration-Clientside"  >
+        <h4>Client side</h4>
+    
+            <p>
+    Whenever Spring is available in the current thread classloader (possibly as a consequence of having set a dependency to the above mentioned <tt class=" ">org.springframework.spring</tt> module) and the classloader can successfully locate a valid Spring descriptor resource, a Spring based <tt class=" ">Bus</tt> will be created if required. So user can either:            </p>
+    <ul class=" "><li class=" ">            <p>
+    programmatically use a <tt class=" ">SpringBusFactory</tt>&nbsp;(or the <tt class=" ">JBossWSBusFactory</tt> if the JBossWS additions are available) to load a Spring Bus from a given <i class=" ">cxf.xml</i> descriptor; that can include any CXF customization or client bean;            </p>
+    </li><li class=" ">            <p>
+    build a JAX-WS client and let the JAX-WS Provider implementation internally build a Spring based <tt class=" ">Bus</tt> using the available <i class=" ">cxf.xml</i> resource retrieved from the current classloader (usually found in <i class=" ">META-INF/cxf.xml</i>).            </p>
+    </li></ul>            <p>
+    Consider having a look at <a href="66322824.html">this page</a> for directions on setting module dependencies, especially if willing to create a ws client within a Spring Bus and running in-container.            </p>
+                <p>
+    Finally please be sure to check the section below on <tt class=" ">Bus</tt> usage any time you're building a <tt class=" ">Bus</tt> on client side.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322816_ApacheCXFintegration-Serverside"  >
+        <h4>Server side</h4>
+    
+            <p>
+    It is possible to customize the JBossWS integration with Apache CXF by incorporating a CXF configuration file into the endpoint deployment archive.&nbsp;The convention is the following:            </p>
+    <ul class=" "><li class=" ">            <p>
+    the descriptor file name must be <strong class=" ">jbossws-cxf.xml</strong>            </p>
+    </li><li class=" ">            <p>
+    for POJO deployments it is located in <strong class=" ">WEB-INF</strong> directory            </p>
+    </li><li class=" ">            <p>
+    for EJB3 deployments it is located in <strong class=" ">META-INF</strong> directory            </p>
+    </li></ul>            <p>
+    The <i class=" ">jbossws-cxf.xml</i> is parsed similarly to a common <i class=" ">cxf.xml</i> in order for building up a <tt class=" ">Bus</tt> for the WS deployment; the endpoint beans included in the deployment are to be specified using the <tt class=" ">&lt;jaxws:endpoint&gt;</tt> tag the same they would be specified in a <i class=" ">cxf.xml</i> descriptor (a example from the testsuite can be seen <a href="http://anonsvn.jboss.org/repos/jbossws/stack/cxf/tags/jbossws-cxf-4.1.3.Final/modules/testsuite/cxf-spring-tests/src/test/resources/jaxws/cxf/descriptor/WEB-INF/jbossws-cxf.xml">here</a>). The application server HTTP engine will be serving the endpoints.            </p>
+                <p>
+    If there is no <tt class=" ">&lt;jaxws:endpoint&gt;</tt> defined in <i class=" ">jbossws-cxf.xml</i>,&nbsp; the endpoint classes mentioned in&nbsp;<i class=" ">WEB-INF/web.xml</i> will be automatically transformed to <tt class=" ">&lt;jaxws:endpoint&gt;</tt> entries in the Spring configuration and loaded by JBossWS-CXF. This allows using the jbossws-cxf.xml to customize the bus without having to manually duplicate the endpoint information in the descriptor. The following is an example of configuring an endpoint through <i class=" ">web.xml</i> with Aegis databinding setup from <i class=" ">jbossws-cxf.xml</i>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;web-app xmlns=&quot;http://java.sun.com/xml/ns/j2ee&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd&quot; version=&quot;2.4&quot;&gt;
+&lt;servlet&gt;
+&lt;servlet-name&gt;AegisGroupQueryService&lt;/servlet-name&gt;
+&lt;servlet-class&gt;org.jboss.test.ws.jaxws.cxf.aegis.AegisGroupQueryImpl&lt;/servlet-class&gt;
+&lt;/servlet&gt;
+&lt;servlet-mapping&gt;
+&lt;servlet-name&gt;AegisGroupQueryService&lt;/servlet-name&gt;
+&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+&lt;/servlet-mapping&gt;
+&lt;/web-app&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;beans xmlns='http://www.springframework.org/schema/beans'
+xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:beans='http://www.springframework.org/schema/beans'
+xmlns:jaxws='http://cxf.apache.org/jaxws'
+xsi:schemaLocation='http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+http://www.w3.org/2006/07/ws-policy http://www.w3.org/2006/07/ws-policy.xsd
+http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd'&gt;
+&lt;bean id=&quot;aegisBean&quot; class=&quot;org.apache.cxf.aegis.databinding.AegisDatabinding&quot; scope=&quot;prototype&quot; /&gt;
+&lt;bean name=&quot;{http://aegis.cxf.jaxws.ws.test.jboss.org/}AegisGroupQueryImplPort.jaxws-endpoint&quot; abstract=&quot;true&quot;&gt;
+&lt;property name=&quot;dataBinding&quot; ref=&quot;aegisBean&quot; /&gt;
+&lt;/bean&gt;
+&lt;/beans&gt; </code></pre>
+        </div>
+    </div>
+            <p>
+    The <i class=" ">jbossws-cxf.xml</i> approach can be used for the very few scenarios Apache CXF can be configured for only using Spring descriptor, e.g. for some advanced WS-RM customizations.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322816_ApacheCXFintegration-Bususage"  >
+        <h2>Bus usage</h2>
+    
+    <div class="section-3"  id="66322816_ApacheCXFintegration-CreatingaBusinstance"  >
+        <h3>Creating a Bus instance</h3>
+    
+            <p>
+    Most of the Apache CXF features are configurable using the <tt class=" ">org.apache.cxf.Bus</tt> class. While for basic JAX-WS usage the user might never need to  explicitly deal with Bus, using Apache CXF specific features generally  requires getting a handle to a&nbsp; <tt class=" ">org.apache.cxf.Bus</tt> instance. This can happen on client side as well as in a ws endpoint or handler business code.            </p>
+                <p>
+    New Bus instances are produced by the currently configured <tt class=" ">org.apache.cxf.BusFactory</tt> implementation the following way:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Bus bus = BusFactory.newInstance().createBus();</code></pre>
+        </div>
+    </div>
+            <p>
+    The  algorithm for selecting the actual implementation of <tt class=" ">BusFactory</tt> to be  used leverages the Service API, basically looking for optional  configurations in <i class=" ">META-INF/services/...</i> location using the current  thread context classloader. JBossWS-CXF integration comes with its own  implementation of <tt class=" ">BusFactory</tt>, <tt class=" ">org.jboss.wsf.stack.cxf.client.configuration.JBossWSBusFactory</tt>,  that allows for automatic detection of <i class=" ">Spring</i> availability as well as  seamless setup of JBossWS customizations on top of Apache CXF. So,  assuming the JBossWS-CXF libraries are available in the current thread  context classloader, the <tt class=" ">JBossWSBusFactory</tt> is <i class=" ">automatically</i> retrieved by the <tt class=" ">BusFactory.newInstance()</tt> call above.            </p>
+                <p>
+    JBossWS users willing to explicitely use functionalities of <tt class=" ">org.apache.cxf.bus.spring.SpringBusFactory</tt> or <tt class=" ">org.apache.cxf.bus.CXFBusFactory</tt><i class=" ">,</i> get the same API with JBossWS additions through <tt class=" ">JBossWSBusFactory</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>String myConfigFile = ...
+Bus bus = new JBossWSBusFactory().createBus(myConfigFile);</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Map&lt;Class, Object&gt; myExtensions = new HashMap&lt;Class, Object&gt;();
+myExtensions.put(...);
+Bus bus = new JBossWSBusFactory().createBus(myExtensions);</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322816_ApacheCXFintegration-UsingexistingBusinstances"  >
+        <h3>Using existing Bus instances</h3>
+    
+            <p>
+    Apache  CXF keeps reference to a global default <tt class=" ">Bus</tt> instance as well as to a  thread default bus for each thread. That is performed through static  members in <tt class=" ">org.apache.cxf.BusFactory</tt><i class=" ">,</i> which also comes with the following methods in the public API:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public static synchronized Bus getDefaultBus()
+public static synchronized Bus getDefaultBus(boolean createIfNeeded)
+public static synchronized void setDefaultBus(Bus bus)
+public static Bus getThreadDefaultBus()
+public static Bus getThreadDefaultBus(boolean createIfNeeded)
+public static void setThreadDefaultBus(Bus bus)</code></pre>
+        </div>
+    </div>
+            <p>
+    Please note that the default behaviour of <tt class=" ">getDefaultBus()</tt> <i class=" ">/</i> <tt class=" ">getDefaultBus(true)</tt> <i class=" ">/</i> <tt class=" ">getThreadDefaultBus()</tt> <i class=" ">/</i> <tt class=" ">getThreadDefaultBus(true)</tt> is to create a new Bus instance if that's not set yet. Moreover <i class=" ">getThreadDefaultBus()</i> and <i class=" ">getThreadDefaultBus(true)</i> first fallback to retrieving the configured global default bus before  actually trying creating a new instance (and the created new instance is  set as global default bus if that was not set there yet).            </p>
+                <p>
+    The  drawback of this mechanism (which is basically fine in JSE environment)  is that when running in a JBoss AS container you need to be careful in  order not to (mis)use a bus over multiple applications (assuming the  Apache CXF classes are loaded by the same classloader, which is  currently the case with JBoss AS6, JBoss AS7 and WildFly 8).            </p>
+                <p>
+    Here is a list of general suggestions to avoid problems when running in-container:            </p>
+    <ul class=" "><li class=" ">            <p>
+    forget about the global default bus; you don't need that, so don't do <tt class=" ">getDefaultBus()</tt> <i class=" ">/</i> <tt class=" ">getDefaultBus(true)</tt> <i class=" ">/</i> <tt class=" ">setDefaultBus()</tt> in your code;            </p>
+    </li><li class=" ">            <p>
+    avoid <tt class=" ">getThreadDefaultBus()</tt> <i class=" ">/</i> <tt class=" ">getThreadDefaultBus(true)</tt> unless you already know for sure the default bus is already set;            </p>
+    </li><li class=" ">            <p>
+    keep  in mind thread pooling whenever you customize a thread default bus  instance (for instance adding bus scope interceptors, ...), as that  thread and bus might be later reused; so either shutdown the bus when  you're done or explicitly remove it from the BusFactory thread  association.            </p>
+    </li></ul>            <p>
+    Finally, remember that each time you explictly  create a new Bus instance (factory.createBus()) that is set as thread  default bus and global default bus if those are not set yet. The JAXWS <tt class=" ">Provider</tt> implementation also creates <tt class=" ">Bus</tt> instances internally, in particular the JBossWS version of JAXWS <tt class=" ">Provider</tt> makes sure the default bus is never internally used and instead a new <tt class=" ">Bus</tt> is created if required (more details on this in the next paragraph).            </p>
+        </div>
+    
+    <div class="section-3"  id="66322816_ApacheCXFintegration-BusselectionstrategiesforJAXWSclients"  >
+        <h3>Bus selection strategies for JAXWS clients</h3>
+    
+            <p>
+    JAXWS clients require an Apache CXF Bus to be available; the client is registered within the Bus and the Bus affects the client behavior (e.g. through the configured CXF interceptors). The way a bus is internally selected for serving a given JAXWS client is very important, especially for in-container clients; for this reason, JBossWS users can choose the preferred Bus selection strategy. The strategy is enforced in the <tt class=" ">javax.xml.ws.spi.Provider</tt> implementation from the JBossWS integration, being that called whenever a JAXWS <tt class=" ">Service</tt> (client) is requested.            </p>
+        <div class="section-4"  id="66322816_ApacheCXFintegration-Threadbusstrategy%28THREADBUS%29"  >
+        <h4>Thread bus strategy (THREAD_BUS)</h4>
+    
+            <p>
+    Each time the vanilla JAXWS api is used to create a Bus, the JBossWS-CXF integration will automatically make sure a Bus is currently associated to the current thread in the BusFactory. If that's not the case, a new Bus is created and linked to the current thread (to prevent the user from relying on the default Bus). The Apache CXF engine will then create the client using the current thread Bus.            </p>
+                <p>
+    This is the default strategy, and the most straightforward one in Java SE environments; it lets users automatically reuse a previously created Bus instance and allows using customized Bus that can possibly be created and associated to the thread before building up a JAXWS client.            </p>
+                <p>
+    The drawback of the strategy is that the link between the Bus instance and the thread needs to be eventually cleaned up (when not needed anymore). This is really evident in a Java EE environment (hence when running in-container), as threads from pools (e.g. serving web requests) are re-used.            </p>
+                <p>
+    When relying on this strategy, the safest approach to be sure of cleaning up the link is to surround the JAXWS client with a <tt class=" ">try/finally</tt> block as below:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>try {
+Service service = Service.create(wsdlURL, serviceQName);
+MyEndpoint port = service.getPort(MyEndpoint.class);
+//...
+} finally {
+BusFactory.setThreadDefaultBus(null);
+// OR (if you don't need the bus and the client anymore)
+ Bus bus = BusFactory.getThreadDefaultBus(false);
+bus.shutdown(true);
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322816_ApacheCXFintegration-Newbusstrategy%28NEWBUS%29"  >
+        <h4>New bus strategy (NEW_BUS)</h4>
+    
+            <p>
+    Another strategy is to have the JAXWS Provider from the JBossWS integration create a new Bus each time a JAXWS client is built. The main benefit of this approach is that a fresh bus won't rely on any formerly cached information (e.g. cached WSDL / schemas) which might have changed after the previous client creation. The main drawback is of course worse performance as the Bus creation takes time.            </p>
+                <p>
+    If there's a bus already associated to the current thread before the JAXWS client creation, that is automatically restored when returning control to the user; in other words, the newly created bus will be used only for the created JAXWS client but won't stay associated to the current thread at the end of the process. Similarly, if the thread was not associated to any bus before the client creation, no bus will be associated to the thread at the end of the client creation.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322816_ApacheCXFintegration-Threadcontextclassloaderbusstrategy%28TCCLBUS%29"  >
+        <h4>Thread context classloader bus strategy (TCCL_BUS)</h4>
+    
+            <p>
+    The last strategy is to have the bus created for serving the client be associated to the current thread context classloader (TCCL). That basically means the same Bus instance is shared by JAXWS clients running when the same TCCL is set. This is particularly interesting as each web application deployment usually has its own context classloader, so this strategy is possibly a way to keep the number of created Bus instances bound to the application number in a JBoss AS container.            </p>
+                <p>
+    If there's a bus already associated to the current thread before the JAXWS client creation, that is automatically restored when returning control to the user; in other words, the bus corresponding to the current thread context classloader will be used only for the created JAXWS client but won't stay associated to the current thread at the end of the process. If the thread was not associated to any bus before the client creation, a new bus will be created (and later user for any other client built with this strategy and the same TCCL in place); no bus will be associated to the thread at the end of the client creation.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322816_ApacheCXFintegration-Strategyconfiguration"  >
+        <h4>Strategy configuration</h4>
+    
+            <p>
+    Users can request a given Bus selection strategy to be used for the client being built by specifying one of the following JBossWS features (which extend <tt class=" ">javax</tt><tt class=" ">.</tt><tt class=" ">xml</tt><tt class=" ">.</tt><tt class=" ">ws</tt><tt class=" ">.</tt><tt class=" ">WebServiceFeature</tt>):            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Feature            </td>
+                <td rowspan="1" colspan="1">
+    Strategy            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org.jboss.wsf.stack.cxf.client.UseThreadBusFeature</tt>            </td>
+                <td rowspan="1" colspan="1">
+    THREAD_BUS            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org</tt><tt class=" ">.</tt><tt class=" ">jboss</tt><tt class=" ">.</tt><tt class=" ">wsf</tt><tt class=" ">.</tt><tt class=" ">stack</tt><tt class=" ">.</tt><tt class=" ">cxf</tt><tt class=" ">.</tt><tt class=" ">client.</tt><tt class=" ">UseNewBusFeature</tt>            </td>
+                <td rowspan="1" colspan="1">
+    NEW_BUS            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">org</tt><tt class=" ">.</tt><tt class=" ">jboss</tt><tt class=" ">.</tt><tt class=" ">wsf</tt><tt class=" ">.</tt><tt class=" ">stack</tt><tt class=" ">.</tt><tt class=" ">cxf</tt><tt class=" ">.</tt><tt class=" ">client.</tt><tt class=" ">UseTCCLBusFeature</tt>            </td>
+                <td rowspan="1" colspan="1">
+    TCCL_BUS            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The feature is specified as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Service service = Service.create(wsdlURL, serviceQName, new UseThreadBusFeature());</code></pre>
+        </div>
+    </div>
+            <p>
+    If no feature is explicitly specified, the system default strategy is used, which can be modified through the <tt class=" ">org.jboss.ws.cxf.jaxws-client.bus.strategy</tt> system property when starting the JVM. The valid values for the property are <tt class=" ">THREAD_BUS</tt>, <tt class=" ">NEW_BUS</tt> and <tt class=" ">TCCL_BUS</tt>. The default is <tt class=" ">THREAD_BUS</tt>.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322816_ApacheCXFintegration-ServerSideIntegrationCustomization"  >
+        <h2>Server Side Integration Customization</h2>
+    
+            <p>
+    The  JBossWS-CXF server side integration takes care of internally creating  proper Apache CXF structures (including a <tt class=" ">Bus</tt> instance, of course) for the provided ws deployment. Should the deployment include multiple endpoints, those would all live within the same Apache CXF Bus, which would of course be completely separated by the other deployments' bus instances.            </p>
+                <p>
+    While JBossWS sets sensible defaults for most of the Apache CXF configuration options on server side, users might want to fine tune the <tt class=" ">Bus</tt> instance that's created for their deployment; a <tt class=" ">jboss-webservices.xml</tt> descriptor can be used for deployment level customizations.            </p>
+        <div class="section-3"  id="66322816_ApacheCXFintegration-Deploymentdescriptorproperties"  >
+        <h3>Deployment descriptor properties</h3>
+    
+            <p>
+    The <tt class=" ">jboss-webservices.xml</tt> descriptor can be used to <a href="66322814.html">provide property values</a>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;webservices xmlns=&quot;http://www.jboss.com/xml/ns/javaee&quot; version=&quot;1.2&quot;&gt;
+  ...
+  &lt;property&gt;
+    &lt;name&gt;...&lt;/name&gt;
+    &lt;value&gt;...&lt;/value&gt;
+  &lt;/property&gt;
+  ...
+&lt;/webservices&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    JBossWS-CXF integration comes with a set of allowed property names to control Apache CXF internals. The main advantage of the property based approach is that it does not require Spring libraries.            </p>
+        <div class="section-4"  id="66322816_ApacheCXFintegration-WorkQueueconfiguration"  >
+        <h4>WorkQueue configuration</h4>
+    
+            <p>
+    Apache CXF uses WorkQueue instances for dealing with some operations (e.g. @Oneway requests processing). A <a href="http://cxf.apache.org/javadoc/latest-2.5.x/org/apache/cxf/workqueue/WorkQueueManager.html">WorkQueueManager</a> is installed in the Bus as an extension and allows for adding / removing queues as well as controlling the existing ones.            </p>
+                <p>
+    On server side, queues can be provided through <i class=" ">Spring</i> based Bus declaration or by using the <tt class=" ">cxf.queue.&lt;queue-name&gt;.*</tt> properties in <tt class=" ">jboss-webservices.xml</tt> (e.g. <tt class=" ">cxf.queue.default.maxQueueSize</tt>&nbsp;for controlling the max queue size of the <tt class=" ">default</tt> workqueue). At deployment time, the JBossWS integration can add new instances of <a href="http://cxf.apache.org/javadoc/latest-2.5.x/org/apache/cxf/workqueue/AutomaticWorkQueueImpl.html">AutomaticWorkQueueImpl</a> to the currently configured WorkQueueManager; the properties below are used to fill in parameter into the <a href="http://cxf.apache.org/javadoc/latest-2.5.x/org/apache/cxf/workqueue/AutomaticWorkQueueImpl.html#AutomaticWorkQueueImpl(int,%20int,%20int,%20int,%20long,%20java.lang.String)">AutomaticWorkQueueImpl constructor</a>:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Property            </td>
+                <td rowspan="1" colspan="1">
+    Default value            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">cxf.queue.&lt;queue-name&gt;.maxQueueSize</tt>            </td>
+                <td rowspan="1" colspan="1">
+    256            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">cxf.queue.&lt;queue-name&gt;.initialThreads</tt>            </td>
+                <td rowspan="1" colspan="1">
+    0            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">cxf.queue.&lt;queue-name&gt;.highWaterMark</tt>            </td>
+                <td rowspan="1" colspan="1">
+    25            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">cxf.queue.&lt;queue-name&gt;.lowWaterMark</tt>            </td>
+                <td rowspan="1" colspan="1">
+    5            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">cxf.queue.&lt;queue-name&gt;.dequeueTimeout</tt>            </td>
+                <td rowspan="1" colspan="1">
+    120000            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-4"  id="66322816_ApacheCXFintegration-Policyalternativeselector"  >
+        <h4>Policy alternative selector</h4>
+    
+            <p>
+    The Apache CXF policy engine supports different strategies to deal with policy alternatives. JBossWS-CXF integration currently defaults to the <a href="http://cxf.apache.org/javadoc/latest-2.5.x/org/apache/cxf/ws/policy/selector/MaximalAlternativeSelector.html">MaximalAlternativeSelector</a>, but still allows for setting different selector implementation using the <tt class=" ">cxf.policy.alternativeSelector</tt> property in <tt class=" ">jboss-webservices.xml</tt>.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322816_ApacheCXFintegration-MBeanmanagement"  >
+        <h4>MBean management</h4>
+    
+            <p>
+    Apache CXF allows managing its MBean objects that are installed into the JBoss AS MBean server. The feature is enabled on a deployment basis through the <tt class=" ">cxf.management.enabled</tt> property in <tt class=" ">jboss-webservices.xml</tt>. The <tt class=" ">cxf.management.installResponseTimeInterceptors</tt> property can also be used to control installation of CXF response time interceptors, which are added by default when enabling MBean management, but might not be desired in some cases. Here is an example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;webservices xmlns=&quot;http://www.jboss.com/xml/ns/javaee&quot; version=&quot;1.2&quot;&gt;
+&lt;property&gt;
+&lt;name&gt;cxf.management.enabled&lt;/name&gt;
+&lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+&lt;name&gt;cxf.management.installResponseTimeInterceptors&lt;/name&gt;
+&lt;value&gt;false&lt;/value&gt;
+&lt;/property&gt;
+&lt;/webservices&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322816_ApacheCXFintegration-Schemavalidation"  >
+        <h4>Schema validation</h4>
+    
+            <p>
+    Schema validation of exchanged messages can also be enabled in <tt class=" ">jboss-webservices.xml</tt>. Further details available <a href="66322814.html">here</a>.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322816_ApacheCXFintegration-WSDiscoveryenablement"  >
+        <h4>Discovery enablement</h4>
+    
+            <p>
+    WS-Discovery support can be turned on in <tt class=" ">jboss-webservices</tt> for the current deployment. Further details available <a href="66486734.html">here</a>.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

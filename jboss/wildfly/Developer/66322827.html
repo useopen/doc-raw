@@ -1,0 +1,2578 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>How do I migrate my application from WebLogic to WildFly</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>How do I migrate my application from WebLogic to WildFly</h1>
+        </div>
+        
+        <div id="66322827" class="content prepend-top">
+            <p>
+    The purpose of this guide is to document the application changes that are  needed to  successfully run and deploy WebLogic applications on AS 7. The following is a rough outline of topics to addressed.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Feel free to add content in any way you prefer. You do not need to follow the template below. This is a work in progress.            </p>
+        </div>
+    
+<ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Introduction">Introduction</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-AboutthisGuide">About this Guide</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-IntroductiontotheJBossAS7Server">Introduction to the JBoss AS 7 Server</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JavaEnterpriseEdition6Overview">Java Enterprise Edition 6 Overview</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-OverviewofJavaEE6Profiles">Overview of Java EE 6 Profiles</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JavaEnterpriseEdition6WebProfile">Java Enterprise Edition 6 Web Profile</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JavaEnterpriseEdition6FullProfile">Java Enterprise Edition 6 Full Profile</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JBossAS7ArchitecturalOverview">JBoss AS 7 Architectural Overview</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReviewWhat%27sNewandDifferentinJBossAS7">Review What's New and Different in JBoss AS 7</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ModulesandModularClassLoading">Modules and Modular Class Loading</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DirectoryStructureofJBossAS7">Directory Structure of JBoss AS 7</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Deployment">Deployment</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-AdministrationTools">Administration Tools</a>            </p>
+    </li></ul></li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-PrepareforMigration">Prepare for Migration</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-BecomeFamiliarwithJavaEE6">Become Familiar with Java EE 6</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-BecomeFamiliarwithJBossAS7">Become Familiar with JBoss AS 7</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Identifythecurrenthardwareandoperatingsystems">Identify the current hardware and operating systems</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExaminetheexistingWebLogicapplicationserverandplatform">Examine the existing WebLogic application server and platform</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExamineandunderstandtheexistingWebLogicapplication">Examine and understand the existing WebLogic application</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Reviewmonitoringandadministrationproceduresandtools">Review monitoring and administration procedures and tools</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Reviewresourcesavailableforthemigrationprocess">Review resources available for the migration process</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Prepareamigrationplan">Prepare a migration plan</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Executetheplan">Execute the plan</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ServerConfigurationandDeploymentDescriptorFiles">Server Configuration and Deployment Descriptor Files</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicandJBossServerConfigurationFile">WebLogic and JBoss Server Configuration File</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicServerConfigurationandDeploymentDescriptorFiles">WebLogic Server Configuration and Deployment Descriptor Files</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JBossAS7ConfigurationFile">JBoss AS 7 Configuration File</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigratetheServerConfiguration">Migrate the Server Configuration</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MapConfigurationFilesandDescriptorstotheJBossEquivalent">Map Configuration Files and Descriptors to the JBoss Equivalent</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Replacetheweblogicejbjar.xmlDeploymentDescriptor">Replace the weblogic-ejb-jar.xml Deployment Descriptor</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Mapweblogicejbjar.xmlElementstothejbossejb3.xmlDescriptor">Map weblogic-ejb-jar.xml Elements to the jboss-ejb3.xml Descriptor</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MapAdditionalweblogicejbjar.xmlElementstotheJBossEnterpriseApplicationPlatformEquivalent">Map Additional weblogic-ejb-jar.xml Elements to the JBoss Enterprise Application Platform Equivalent</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Migrateweblogic.xmlDescriptorFileConfigurations">Migrate weblogic.xml Descriptor File Configurations</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Migrateweblogicapplication.xmlDescriptorFileConfigurations">Migrate weblogic-application.xml Descriptor File Configurations</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplacetheWebLogicplan.xmlDeploymentDescriptorConfiguration">Replace the WebLogic plan.xml Deployment Descriptor Configuration</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-UsePropertySubstitutiontoSpecifytheTargetDeploymentEnvironment">Use Property Substitution to Specify the Target Deployment Environment</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebService.xml">WebService.xml</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-%5Cjms.xml">*-jms.xml</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-weblogicejbjar.xml">weblogic-ejb-jar.xml</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Security">Security</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicOracleWallets">Replace WebLogic Oracle Wallets</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicCerticombasedSSLImplementation">WebLogic Certicom-based SSL Implementation</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicSecurityversusJBossJAASSecurityAPIs">WebLogic Security versus JBoss JAAS Security APIs</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-UnderstandDifferencesBetweenWebLogicandJBossImplementations">Understand Differences Between WebLogic and JBoss Implementations</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-OverviewofJNDIDifferences">Overview of JNDI Differences</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigrateWebLogicJNDILookupstoUsePortableJNDISyntax">Migrate WebLogic JNDI Lookups to Use Portable JNDI Syntax</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicJNDILookupCode">Replace WebLogic JNDI Lookup Code</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-PortableJNDINamingSyntax">Portable JNDI Naming Syntax</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-PortableJNDINamingSyntaxRules">Portable JNDI Naming Syntax Rules</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ProgrammaticLogin">Programmatic Login</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicTransactionManagerJEETransaction%26nbsp%3BManager">WebLogic Transaction Manager JEE Transaction &nbsp;Manager</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicJMXLookupsversusJBossJMXLookups">WebLogic JMX Lookups versus JBoss JMX Lookups</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ClassLoadingandApplicationPackaging">Class Loading and Application Packaging</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ArchivePackagingandAssemblyRules">Archive Packaging and Assembly Rules</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DebugandResolveClassCastExceptionsandClassNotFoundExceptions">Debug and Resolve ClassCastExceptions and ClassNotFoundExceptions</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-HibernateandJPA">Hibernate and JPA</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigrateYourApplicationFromHibernate3toHibernate4">Migrate Your Application From Hibernate 3 to Hibernate 4</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ConfigureYourApplicationtoUsetheHibernate3Libraries">Configure Your Application to Use the Hibernate 3 Libraries</a>            </p>
+    </li></ul></li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicProprietaryFeatures">Replace WebLogic Proprietary Features</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicCommonJFrameworkorWebLogicWorkManagerAPI">WebLogic CommonJ Framework or WebLogic Work Manager API</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicVirtualDirectories">Replace WebLogic Virtual Directories</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-SplitDirectories">Split Directories</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicApplicationLifecycleListenerCode">Replace WebLogic ApplicationLifecycleListener Code</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceApplicationStartandStopEvents">Replace Application Start and Stop Events</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicProprietaryAnnotations">WebLogic Proprietary Annotations</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplacetheProprietaryWebLogic%40WLServletAnnotation">Replace the Proprietary WebLogic @WLServlet Annotation</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplacetheProprietaryWebLogic%40WLFilterAnnotation">Replace the Proprietary WebLogic @WLFilter Annotation</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplacetheProprietaryWebLogic%40WLInitParamAnnotation">Replace the Proprietary WebLogic @WLInitParam Annotation</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicSpecificOracleDatasources">WebLogic Specific Oracle Datasources</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-EvaluatetheWebLogicApplication">Evaluate the WebLogic Application</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExaminetheHighlevelArchitectureoftheApplication">Examine the High-level Architecture of the Application</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JVMVersion">JVM Version</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Frameworks">Frameworks</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-IDE%28EclipsePlugins%29">IDE (Eclipse Plugins)</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Database">Database</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-LDAP">LDAP</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-RequirementsforHighAvailablity%2CClusting%2CFailover%2CCaching">Requirements for High-Availablity, Clusting, Failover, Caching</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ThirdpartyLibraries">Third-party Libraries</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExternalSystems">External Systems</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicProprietaryLibrariesandAPIs">WebLogic Proprietary Libraries and APIs</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExaminetheCurrentBuildProcess">Examine the Current Build Process</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-AnalyzeandUnderstandtheApplicationCode">Analyze and Understand the Application Code</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ServicesandComponents">Services and Components</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ProprietaryWebLogicFeaturesorLibraries">Proprietary WebLogic Features or Libraries</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-PackagingandDeployment">Packaging and Deployment</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DeploymentDescriptorsandPlans">Deployment Descriptors and Plans</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-EvaluatetheWebLogicDevelopmentTools">Evaluate the WebLogic Development Tools</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-EclipseandPlugins">Eclipse and Plugins</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-NetBeans">NetBeans</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ADF">ADF</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DataMigration">Data Migration</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DetermineNeedforJBossModules">Determine Need for JBoss Modules</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ConfiguretheEnvironmentfortheMigratedApplications">Configure the Environment for the Migrated Applications</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-InstallJBoss">Install JBoss</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-VerifytheInstallationUsingtheHelloworldQuickstart">Verify the Installation Using the Helloworld Quickstart</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigratetheApplication">Migrate the Application</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExecutetheMigrationPlan">Execute the Migration Plan</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Test">Test</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MovetoProduction">Move to Production</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ToolsandTips">Tools and Tips</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Debugging">Debugging</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-AutomatedTools">Automated Tools</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-FAQs">FAQs</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322827.html#66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ConsultingService">Consulting Service</a>            </p>
+    </li></ul></li></ul>    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Introduction"  >
+        <h2>Introduction</h2>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-AboutthisGuide"  >
+        <h3>About this Guide</h3>
+    
+            <p>
+    The purpose of this document is to guide you through the planning process and migration of fairly simple and standard Oracle WebLogic applications to JBoss AS 7. &nbsp;Oracle WebLogic applications that adhere to the Java EE 6 specification should require minimal changes to run on JBoss AS 7.            </p>
+                <p>
+    This document will not cover migration of advanced features such as portal, rules engines, workflow systems, or ESB frameworks. Red Hat Consulting and Red Hat partners offer a wide variety of workshops, training, and service offerings designed to help customers migrate more complex applications.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-IntroductiontotheJBossAS7Server"  >
+        <h3>Introduction to the JBoss AS 7 Server</h3>
+    
+            <p>
+    JBoss AS 7 is a fast, secure, powerful middleware platform built upon open standards, and compliant with the Java Enterprise Edition 6 specification. It integrates JBoss Application Server 7 with high-availability clustering, powerful messaging, distributed caching, and other technologies to create a stable and scalable platform. JBoss AS 7 is a certified implementation of the Java Enterprise Edition 6 Full Profile and Web Profile specifications.            </p>
+                <p>
+    The new modular structure allows for services to be enabled only when required, significantly increasing start up speed. The Management Console and Management Command Line Interface remove the need to edit XML configuration files by hand, adding the ability to script and automate tasks. In addition, it includes APIs and development frameworks that can be used to develop secure, powerful, and scalable Java EE applications quickly.            </p>
+                <p>
+    For more information about JBoss AS 7, see <a href="https://docs.jboss.org/author/display/WFLY8/Getting+Started+Guide">Getting Started with JBoss Application Server 7 </a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JavaEnterpriseEdition6Overview"  >
+        <h3>Java Enterprise Edition 6 Overview</h3>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-OverviewofJavaEE6Profiles"  >
+        <h4>Overview of Java EE 6 Profiles</h4>
+    
+            <p>
+    Java Enterprise Edition 6 (EE 6) includes support for multiple profiles, or subsets of APIs. The only two profiles that the EE 6 specification defines are the Full Profile and the Web Profile.<br/>EE 6 Full Profile includes all APIs and specifications included in the EE 6 specification. EE 6 Web Profile includes a subset of APIs which are useful to web developers.            </p>
+                <p>
+    JBoss AS 7 is a certified implementation of the Java Enterprise Edition 6 Full Profile and Web Profile specifications.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JavaEnterpriseEdition6WebProfile"  >
+        <h4>Java Enterprise Edition 6 Web Profile</h4>
+    
+            <p>
+    The Web Profile is one of two profiles defined by the Java Enterprise Edition 6 specification. It is designed for web application development.            </p>
+        <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JavaEE6WebProfileRequirements"  >
+        <h5>Java EE 6 Web Profile Requirements</h5>
+    
+<ul class=" "><li class=" ">            <p>
+    Java Platform, Enterprise Edition 6            </p>
+    </li><li class=" ">            <p>
+    Java Web Technologies            </p>
+    <ul class=" "><li class=" ">            <p>
+    Servlet 3.0 (JSR 315)            </p>
+    </li><li class=" ">            <p>
+    JSP 2.2 and Expression Language (EL) 1.2            </p>
+    </li><li class=" ">            <p>
+    JavaServer Faces (JSF) 2.0 (JSR 314)            </p>
+    </li><li class=" ">            <p>
+    Java Standard Tag Library (JSTL) for JSP 1.2            </p>
+    </li><li class=" ">            <p>
+    Debugging Support for Other Languages 1.0 (JSR 45)            </p>
+    </li></ul></li><li class=" ">            <p>
+    Enterprise Application Technologies            </p>
+    <ul class=" "><li class=" ">            <p>
+    Contexts and Dependency Injection (CDI) (JSR 299)            </p>
+    </li><li class=" ">            <p>
+    Dependency Injection for Java (JSR 330)            </p>
+    </li><li class=" ">            <p>
+    Enterprise JavaBeans 3.1 Lite (JSR 318)            </p>
+    </li><li class=" ">            <p>
+    Java Persistence API 2.0 (JSR 317)            </p>
+    </li><li class=" ">            <p>
+    Common Annotations for the Java Platform 1.1 (JSR 250)            </p>
+    </li><li class=" ">            <p>
+    Java Transaction API (JTA) 1.1 (JSR 907)            </p>
+    </li><li class=" ">            <p>
+    Bean Validation (JSR 303)            </p>
+    </li></ul></li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JavaEnterpriseEdition6FullProfile"  >
+        <h4>Java Enterprise Edition 6 Full Profile</h4>
+    
+            <p>
+    The Java Enterprise Edition 6 (EE 6) specification defines a concept of profiles, and defines two of them as part of the specification. Besides the items supported in the Java Enterprise Edition 6 Web Profile, the Full Profile supports the following APIs. JBoss AS 7 supports the Full Profile.            </p>
+        <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ItemsIncludedintheEE6FullProfile"  >
+        <h5>Items Included in the EE 6 Full Profile</h5>
+    
+<ul class=" "><li class=" ">            <p>
+    EJB 3.1 (not Lite) (JSR 318)            </p>
+    </li><li class=" ">            <p>
+    Java EE Connector Architecture 1.6 (JSR 322)            </p>
+    </li><li class=" ">            <p>
+    Java Message Service (JMS) API 1.1 (JSR 914)            </p>
+    </li><li class=" ">            <p>
+    JavaMail 1.4 (JSR 919)            </p>
+    </li><li class=" ">            <p>
+    Web Service Technologies            </p>
+    <ul class=" "><li class=" ">            <p>
+    Jax-RS RESTful Web Services 1.1 (JSR 311)            </p>
+    </li><li class=" ">            <p>
+    Implementing Enterprise Web Services 1.3 (JSR 109)            </p>
+    </li><li class=" ">            <p>
+    JAX-WS Java API for XML-Based Web Services 2.2 (JSR 224)            </p>
+    </li><li class=" ">            <p>
+    Java Architecture for XML Binding (JAXB) 2.2 (JSR 222)            </p>
+    </li><li class=" ">            <p>
+    Web Services Metadata for the Java Platform (JSR 181)            </p>
+    </li><li class=" ">            <p>
+    Java APIs for XML-based RPC 1.1 (JSR 101)            </p>
+    </li><li class=" ">            <p>
+    Java APIs for XML Messaging 1.3 (JSR 67)            </p>
+    </li><li class=" ">            <p>
+    Java API for XML Registries (JAXR) 1.0 (JSR 93)            </p>
+    </li></ul></li><li class=" ">            <p>
+    Management and Security Technologies            </p>
+    <ul class=" "><li class=" ">            <p>
+    Java Authentication Service Provider Interface for Containers 1.0 (JSR 196)            </p>
+    </li><li class=" ">            <p>
+    Java Authentication Contract for Containers 1.3 (JSR 115)            </p>
+    </li><li class=" ">            <p>
+    Java EE Application Deployment 1.2 (JSR 88)            </p>
+    </li><li class=" ">            <p>
+    J2EE Management 1.1 (JSR 77)            </p>
+    </li></ul></li></ul>    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JBossAS7ArchitecturalOverview"  >
+        <h3>JBoss AS 7 Architectural Overview</h3>
+    
+            <p>
+    The following sections highlight some basic information about JBoss Enterprise Application Platform 6. For complete information on how to download, install, configure, and develop applications, refer to the Installation Guide, Administration and Configuration Guide, and Development Guide located on the <a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">Customer Portal </a>.            </p>
+        <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReviewWhat%27sNewandDifferentinJBossAS7"  >
+        <h4>Review What&apos;s New and Different in JBoss AS 7</h4>
+    
+            <p>
+    The following is a list of notable differences in JBoss AS 7 from the previous release.            </p>
+        <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Modulebasedclassloading"  >
+        <h5>Module based class loading</h5>
+    
+            <p>
+    In previous releases of JBoss AS, the class loading architecture was hierarchical. In JBoss AS 7, class loading is based on JBoss Modules. This offers true application isolation, hides server implementation classes, and only loads the classes your application needs. Class loading is concurrent for better performance. Applications written for JBoss Enterprise Application Platform 5 must be modified to specify module dependencies and in some cases, repackage archives. For more information, refer to Class Loading and Modules in the Development Guide for JBoss Enterprise Application Platform 6 on the <a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">Customer Portal </a>.            </p>
+        </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DomainManagement"  >
+        <h5>Domain Management</h5>
+    
+            <p>
+    In JBoss AS 7, the server can be run as a standalone server or in a managed domain. In a managed domain, you can configure entire groups of servers at once, keeping configurations synchronized across your entire network of servers. While this should not impact applications built for previous releases, this can simplify management of deployments to multiple servers. For more information, refer to About Managed Domains in the Administration and Configuration Guide for JBoss Enterprise Application Platform 6 on the <a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">Customer Portal </a>.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Domain mode is not supported in the following JBoss Enterprise products:            </p>
+    <ul class=" "><li class=" ">            <p>
+    JBoss Portal Platform 6            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DeploymentConfiguration"  >
+        <h5>Deployment Configuration</h5>
+    
+    <div class="section-6"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-StandaloneServersandManagedDomains"  >
+        <h6>Standalone Servers and Managed Domains</h6>
+    
+            <p>
+    JBoss AS 7 used profile based deployment configuration. These profiles were located in the JBOSS_HOME/server/ directory. Applications often contained multiple configuration files for security, database, resource adapter, and other configurations. In JBoss Enterprise Application Platform 6, deployment configuration is done using one file. This file is used to configure all the services and subsystems used for the deployment. A standalone server is configured using the JBOSS_HOME/standalone/configuration/standalone.xml file. For servers running in a managed domain, the server is configured using the JBOSS_HOME/domain/configuration/domain.xml file. The information contained in the multiple JBoss Enterprise Application Platform 5 configuration files must be migrated to the new single configuration file.            </p>
+        </div>
+    
+    <div class="section-6"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Orderingofdeployments"  >
+        <h6>Ordering of deployments</h6>
+    
+            <p>
+    JBoss AS 7 uses fast, concurrent initialization for deployment resulting in improved performance and efficiency. In most cases, the application server is able to automatically determine dependencies in advance and choose the most efficient deployment strategy. However, JBoss Enterprise Application Platform 5 applications that consist of multiple modules deployed as EARs and use legacy JNDI lookups instead of CDI injection or resource-ref entries may require configuration changes.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DirectoryStructureandScripts"  >
+        <h5>Directory Structure and Scripts</h5>
+    
+            <p>
+    As previously mentioned, JBoss AS 7 no longer uses profile based deployment configuration, so there is no JBOSS_HOME/server/ directory. Configuration files for standalone servers are now located in the JBOSS_HOME/standalone/configuration/ directory and deployments are located in the JBOSS_HOME/standalone/deployments/ directory. For servers running in a managed domain, configuration files can be found in the JBOSS_HOME/domain/configuration/ directory and deployments can be found in the JBOSS_HOME/domain/deployments/ directory.<br/>In JBoss Enterprise Application Platform 5, the Linux script JBOSS_HOME/bin/run.sh or Windows script JBOSS_HOME/bin/run.bat was used to start the server. In JBoss Enterprise Application Platform 6, the server start script is dependent on how you run your server. The Linux script JBOSS_HOME/bin/standalone.sh or Windows script JBOSS_HOME/bin/standalone.bat is used to start a standalone server. The Linux script JBOSS_HOME/bin/domain.sh or Windows script JBOSS_HOME/bin/domain.bat is used to start a managed domain.            </p>
+        </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JNDILookups"  >
+        <h5>JNDI Lookups</h5>
+    
+            <p>
+    JBoss AS 7 now uses standardized portable JNDI namespaces. Applications that use other types of JNDI lookups must be changed to follow the new standardized JNDI namespace convention. For more information about JNDI naming syntax, see the section below on &ldquo;Portable JNDI Naming Syntax&rdquo;.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ModulesandModularClassLoading"  >
+        <h4>Modules and Modular Class Loading</h4>
+    
+            <p>
+    Class loading in AS 7 is based on the <a href="https://docs.jboss.org/author/display/MODULES/Home">JBoss Modules </a> project.            </p>
+        <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Modules"  >
+        <h5>Modules</h5>
+    
+            <p>
+    A Module is a logical grouping of classes used for class loading and dependency management. JBoss AS 7 identifies two different types of modules, sometimes called static and dynamic modules. However the only difference between the two is how they are packaged. All modules provide the same features.            </p>
+        <div class="section-6"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-StaticModules"  >
+        <h6>Static Modules</h6>
+    
+            <p>
+    Static Modules are predefined in the JBOSS_HOME/modules/ directory of the application server. Each sub-directory represents one module and contains one or more JAR files and a configuration file (module.xml). The name of the module is defined in the module.xml file. All the application server provided APIs are provided as static modules, including the Java EE APIs as well as other APIs such as JBoss Logging. The following is an example <tt class=" ">module.xml</tt> file.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;module xmlns=&quot;urn:jboss:module:1.0&quot; name=&quot;com.mysql&quot;&gt;
+  &lt;resources&gt;
+    &lt;resource-root path=&quot;mysql-connector-java-5.1.15.jar&quot;/&gt;
+  &lt;/resources&gt;
+  &lt;dependencies&gt;
+    &lt;module name=&quot;javax.api&quot;/&gt;
+    &lt;module name=&quot;javax.transaction.api&quot;/&gt;
+  &lt;/dependencies&gt;
+&lt;/module&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The module name, <tt class=" ">com.mysql</tt>, should match the directory structure for the module.            </p>
+                <p>
+    Creating custom static modules can be useful if many applications are deployed on the same server that use the same third party libraries. Instead of bundling those libraries with each application, a module containing these libraries can be created and installed by the JBoss administrator. The applications can then declare an explicit dependency on the custom static modules.            </p>
+                <p>
+    h6, Dynamic Modules<br/>Dynamic Modules are created and loaded by the application server for each JAR or WAR deployment, or subdeployment in an EAR. The name of a dynamic module is derived from the name of the deployed archive. Because deployments are loaded as modules, they can configure dependencies and be used as dependencies by other deployments.            </p>
+                <p>
+    Modules are only loaded when required. This usually only occurs when an application is deployed that has explicit or implicit dependencies.            </p>
+                <p>
+    For more information on modular class loading, see <a href="https://docs.jboss.org/author/display/WFLY8/Class+Loading+in+AS7">Class Loading in AS7 </a>.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ModulesandClassLoadinginEnterpriseArchives"  >
+        <h5>Modules and Class Loading in Enterprise Archives</h5>
+    
+            <p>
+    Enterprise Archives (EAR) are not loaded as a single module like JAR or WAR deployments. They are loaded as multiple unique modules.            </p>
+                <p>
+    The following rules determine what modules exist in an EAR.            </p>
+    <ul class=" "><li class=" ">            <p>
+    Each WAR and EJB JAR subdeployment is a module.            </p>
+    </li><li class=" ">            <p>
+    The contents of the <tt class=" ">lib/ directory</tt> in the root of the EAR archive is a module. This is called the parent module.            </p>
+    </li></ul>            <p>
+    These modules have the same behavior as any other module with the following additional implicit dependencies:            </p>
+    <ul class=" "><li class=" ">            <p>
+    WAR subdeployments have implicit dependencies on the parent module and any EJB JAR subdeployments.            </p>
+    </li><li class=" ">            <p>
+    EJB JAR subdeployments have implicit dependencies on the parent module and any other EJB JAR subdeployments.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    No subdeployment ever gains an implicit dependency on a WAR subdeployment. Any subdeployment can be configured with explicit dependencies on another subdeployment as would be done for any other module.            </p>
+        </div>
+    
+</li></ul>            <p>
+    The implicit dependencies described above occur because JBoss AS 7 has subdeployment class loader isolation disabled by default.            </p>
+                <p>
+    Subdeployment class loader isolation can be enabled if strict compatibility is required. This can be enabled for a single EAR deployment or for all EAR deployments. The Java EE 6 specification recommends that portable applications should not rely on subdeployments being able to access each other unless dependencies are explicitly declared as Class-Path entries in the <tt class=" ">MANIFEST.MF</tt> file of each subdeployment.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DirectoryStructureofJBossAS7"  >
+        <h4>Directory Structure of JBoss AS 7</h4>
+    
+            <p>
+    JBoss AS 7 includes a simplified directory structure, compared to previous versions. The following table contains a listing of the directories and a description of what each directory contains. It also includes directory structures of the <tt class=" ">standalone/</tt> and <tt class=" ">domain/</tt> folders.            </p>
+        <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ToplevelDirectories"  >
+        <h5>level Directories</h5>
+    
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Purpose            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    appclient/            </td>
+                <td rowspan="1" colspan="1">
+    Contains configuration details for the application client container.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    bin/            </td>
+                <td rowspan="1" colspan="1">
+    Contains start-up scripts for JBoss EAP 6 on Red Hat Enterprise Linux and Microsoft Windows.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    bundles/            </td>
+                <td rowspan="1" colspan="1">
+    Contains OSGi bundles which pertain to JBoss EAP 6 internal functionality.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    docs/            </td>
+                <td rowspan="1" colspan="1">
+    License files, schemas, and examples.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    domain/            </td>
+                <td rowspan="1" colspan="1">
+    Configuration files, deployment content, and writable areas used when JBoss EAP 6 runs as a managed domain.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    modules/            </td>
+                <td rowspan="1" colspan="1">
+    Modules which are dynamically loaded by JBoss EAP 6 when services request them.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    standalone/            </td>
+                <td rowspan="1" colspan="1">
+    Configuration files, deployment content, and writable areas used when JBoss EAP 6 runs as a standalone server.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    welcome-content/            </td>
+                <td rowspan="1" colspan="1">
+    Contains content used by the Welcome web application which is available on port 8080 of a default installation.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    jboss-modules.jar            </td>
+                <td rowspan="1" colspan="1">
+    The bootstrapping mechanism which loads modules.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Directorieswithinthedomain%2Fdirectory"  >
+        <h5>Directories within the domain/ directory</h5>
+    
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Purpose            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    configuration/            </td>
+                <td rowspan="1" colspan="1">
+    Configuration files for the managed domain. These files are modified by the Management Console and Management CLI, and are not meant to be edited directly.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    data/            </td>
+                <td rowspan="1" colspan="1">
+    Information about deployed services. Services are deployed using the Management Console and Management CLI, rather than by a deployment scanner. Therefore, do not place files in this directory manually.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    log/            </td>
+                <td rowspan="1" colspan="1">
+    Contains the run-time log files for the host and process controllers which run on the local instance.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    servers/	 Contains the equivalent data/, log/, and tmp/ directories for each server instance in a domain, which contain similar data to the same directories within the top-level domain/ directory. |            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    tmp/            </td>
+                <td rowspan="1" colspan="1">
+    Contains temporary data such as files pertaining to the shared-key mechanism used by the Management CLI to authenticate local users to the managed domain.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Directorieswithinthestandalone%2Fdirectory"  >
+        <h5>Directories within the standalone/ directory</h5>
+    
+    <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Name            </td>
+                <td rowspan="1" colspan="1">
+    Purpose            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    configuration/            </td>
+                <td rowspan="1" colspan="1">
+    Configuration files for the standalone server. These files are modified by the Management Console and Management CLI, and are not meant to be edited directly.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    deployments/            </td>
+                <td rowspan="1" colspan="1">
+    Information about deployed services. The standalone server does include a deployment scanner, so you can place archives in this directory to be deployed. However, the recommended approach is to manage deployments using the Management Console or Management CLI.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    lib/            </td>
+                <td rowspan="1" colspan="1">
+    External libraries which pertain to a standalone server mode. Empty by default.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    tmp/            </td>
+                <td rowspan="1" colspan="1">
+    Contains temporary data such as files pertaining to the shared-key mechanism used by the Management CLI to authenticate local users to the server.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Deployment"  >
+        <h4>Deployment</h4>
+    
+            <p>
+    TODO: section is not complete.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-AdministrationTools"  >
+        <h4>Administration Tools</h4>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ManagementConsole"  >
+        <h5>Management Console</h5>
+    
+            <p>
+    The Management Console is a web-based administration tool used to to start and stop servers, deploy and undeploy applications, tune system settings, and make persistent modifications to the server configuration. The Management Console also has the ability to perform administrative tasks, with live notifications when any changes require the server instance to be restarted or reloaded. In a Managed Domain, server instances and server groups in the same domain can be centrally managed from the Management Console of the domain controller.            </p>
+        </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JBossCLI"  >
+        <h5>JBoss CLI</h5>
+    
+            <p>
+    The Management Command Line Interface (CLI) is a command line administration tool that can perform operations in batch modes, allowing multiple tasks to be run as a group.            </p>
+        </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JON"  >
+        <h5>JON</h5>
+    
+            <p>
+    TODO: section is not complete.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-PrepareforMigration"  >
+        <h2>Prepare for Migration</h2>
+    
+            <p>
+    Before you attempt to migrate your WebLogic application to JBoss AS 7, it helps to have an understanding of the process.            </p>
+        <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-BecomeFamiliarwithJavaEE6"  >
+        <h3>Become Familiar with Java EE 6</h3>
+    
+            <p>
+    JBoss AS 7 is a fast, lightweight, powerful implementation of the Java Enterprise Edition 6 specification, so understanding Java EE 6 is a great place to start. You can find Java Enterprise Edition 6 documentation here: <a href="http://www.oracle.com/technetwork/java/javaee/tech/index.html">http://www.oracle.com/technetwork/java/javaee/tech/index.html</a> and a Java EE 6 tutorial here: <a href="http://docs.oracle.com/javaee/6/tutorial/doc/">http://docs.oracle.com/javaee/6/tutorial/doc/</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-BecomeFamiliarwithJBossAS7"  >
+        <h3>Become Familiar with JBoss AS 7</h3>
+    
+            <p>
+    See the <a href="https://docs.jboss.org/author/display/WFLY8/Admin+Guide">Admin Guide</a> and <a href="https://docs.jboss.org/author/display/WFLY8/Developer+Guide">Developer Guide</a> for details on how to configure and develop applications with JBoss AS 7.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Identifythecurrenthardwareandoperatingsystems"  >
+        <h3>Identify the current hardware and operating systems</h3>
+    
+            <p>
+    This includes the operating systems and versions, number of processors, memory capacity, disk usage and capacity.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExaminetheexistingWebLogicapplicationserverandplatform"  >
+        <h3>Examine the existing WebLogic application server and platform</h3>
+    
+            <p>
+    Examine the existing application server and platform, including the operating systems, JVMs, databases, and web servers, and determine the equivalent capabilities in JBoss AS 7. The supported JBoss configurations can be found on the Customer Portal at <a href="https://access.redhat.com/support/configurations/jboss/">https://access.redhat.com/support/configurations/jboss/</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExamineandunderstandtheexistingWebLogicapplication"  >
+        <h3>Examine and understand the existing WebLogic application</h3>
+    
+            <p>
+    Thoroughly examine the existing WebLogic application. Be totally familiar with its architecture, functions, features and components. In particular, note the proprietary APIs and features and determine the JBoss or Java EE 6 equivalents.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Reviewmonitoringandadministrationproceduresandtools"  >
+        <h3>Review monitoring and administration procedures and tools</h3>
+    
+            <p>
+    Perform a review of all monitoring and administration procedures and tools in place to identify any that may need modification or replacement to work with the JBoss AS 7.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Reviewresourcesavailableforthemigrationprocess"  >
+        <h3>Review resources available for the migration process</h3>
+    
+            <p>
+    Resources include people, software, and hardware. Assess the skills of the development team that will be doing the work and plan for training or additional consulting help. Also be aware that additional hardware and other resources will be required during the migration process until the effort is completed.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Prepareamigrationplan"  >
+        <h3>Prepare a migration plan</h3>
+    
+            <p>
+    Develop a migration plan including a detailed roadmap and resources that will be needed.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Executetheplan"  >
+        <h3>Execute the plan</h3>
+    
+            <p>
+    Implement the strategic migration plan and employ implementation support strategies.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ServerConfigurationandDeploymentDescriptorFiles"  >
+        <h2>Server Configuration and Deployment Descriptor Files</h2>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicandJBossServerConfigurationFile"  >
+        <h3>WebLogic and JBoss Server Configuration File</h3>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicServerConfigurationandDeploymentDescriptorFiles"  >
+        <h4>WebLogic Server Configuration and Deployment Descriptor Files</h4>
+    
+            <p>
+    Configuration of the WebLogic Server is centralized in the <tt class=" ">WEBLOGIC_HOME/domains/DOMAIN_NAME/config/config.xml</tt> file. It contains the configuration parameter settings for each server instance, cluster, resource, and service in the domain. In most cases you use the Administration Console or one of the other WebLogic tools to modify the domain's configuration and the changes are then reflected in the configuration files.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JBossAS7ConfigurationFile"  >
+        <h4>JBoss AS 7 Configuration File</h4>
+    
+            <p>
+    In JBoss AS 7, the server can be run as a standalone server or in a managed domain. A standalone server is configured using the <tt class=" ">JBOSS_HOME/standalone/configuration/standalone.xml</tt> file. For servers running in a managed domain, the server is configured using the <tt class=" ">JBOSS_HOME/domain/configuration/domain.xml</tt> and <tt class=" ">JBOSS_HOME/domain/configuration/host.xml</tt> files. In most cases you will not edit these files directly. You can use the Management Console or Management Command Line Interface (CLI) to configure the server and the changes will be reflected in the server configuration file. You can find more information about the Management CLI here: <a href="https://docs.jboss.org/author/display/WFLY8/CLI+Recipes">CLI Recipes</a>.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigratetheServerConfiguration"  >
+        <h4>Migrate the Server Configuration</h4>
+    
+            <p>
+    Unfortunately, server configuration is a complex process and there is not an easy mapping from one application server to another. The best approach is to open the WebLogic configuration file and examine each section. Use the <a href="https://docs.jboss.org/author/display/WFLY8/Admin+Guide">Admin Guide</a> to find information about how to perform the same configuration in JBoss.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MapConfigurationFilesandDescriptorstotheJBossEquivalent"  >
+        <h3>Map Configuration Files and Descriptors to the JBoss Equivalent</h3>
+    
+            <p>
+    WebLogic configuration files are fairly complex and it can be difficult to map them to JBoss &nbsp;equivalents, but the following table can be used as a guideline:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    WebLogic File            </td>
+                <td rowspan="1" colspan="1">
+    AS 7 Equivalent            </td>
+                <td rowspan="1" colspan="1">
+    Description of the File            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">ejb-jar.xml</tt>, <tt class=" ">weblogic-ejb-jar.xml</tt>, or <tt class=" ">weblogic-cmp-rdbms-jar.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">jboss-ejb3.xml</tt>, <tt class=" ">standalone.xml</tt>, or <tt class=" ">domain.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Deployment descriptor file describes the EJB elements that are unique to WebLogic Server.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">weblogic.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">standalone.xml</tt> or <tt class=" ">domain.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Deployment descriptor for web applications to support value-added features that are not included in the standard specifications.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">*-jdbc.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">standalone.xml</tt> or <tt class=" ">domain.xml</tt>            </td>
+                <td rowspan="1" colspan="1">
+    JDBC datasource descriptor file. In JBoss, this information is specified in the datasources subsystem of the JBoss configuration file.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Replacetheweblogicejbjar.xmlDeploymentDescriptor"  >
+        <h3>Replace the weblogic-ejb-jar.xml Deployment Descriptor</h3>
+    
+            <p>
+    The WebLogic <tt class=" ">weblogic-ejb-jar.xml</tt> deployment descriptor file describes elements that are specific to the WebLogic Server. The equivalent file in JBoss AS 7 is the jboss-ejb3.xml file. Many of these elements map to the <tt class=" ">jboss-ejb3.xml</tt> file in The equivalent file in JBoss Enterprise Application Platform 6. Some elements, however, map to other descriptor files.            </p>
+        <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Mapweblogicejbjar.xmlElementstothejbossejb3.xmlDescriptor"  >
+        <h4>Map weblogic-ejb-jar.xml Elements to the jboss-ejb3.xml Descriptor</h4>
+    
+            <p>
+    The following table maps the WebLogic XPath elements to the corresponding JBoss XPath elements for various types of beans.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    WebLogic <tt class=" ">weblogic-ejb-jar.xml</tt> XPath Element            </td>
+                <td rowspan="1" colspan="1">
+    JBoss <tt class=" ">jboss-ejb3.xml</tt> XPath Element            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    WEBLOGIC_PREFIX/ejb-name            </td>
+                <td rowspan="1" colspan="1">
+    JBOSS_PREFIX/ejb-name            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    WEBLOGIC_PREFIX/resource-description/res-ref-name            </td>
+                <td rowspan="1" colspan="1">
+    JBOSS_PREFIX/resource-ref/res-ref-name            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    WEBLOGIC_PREFIX/resource-env-description/res-env-ref-name            </td>
+                <td rowspan="1" colspan="1">
+    JBOSS_PREFIX/resource-env-ref/resource-env-ref-name            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    WEBLOGIC_PREFIX/ejb-reference-description/ejb-ref-name            </td>
+                <td rowspan="1" colspan="1">
+    JBOSS_PREFIX/ejb-ref/ejb-ref-name            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    WEBLOGIC_PREFIX/service-reference-description/service-ref-name            </td>
+                <td rowspan="1" colspan="1">
+    JBOSS_PREFIX/service-ref/service-ref-name            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    WEBLOGIC_PREFIX/service-reference-description/wsdl-file            </td>
+                <td rowspan="1" colspan="1">
+    JBOSS_PREFIX/service-ref/wsdl-file            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    For readability, the variables WEBLOGIC_PREFIX and JBOSS_PREFIX were used in place of paths in the table.            </p>
+    <ul class=" "><li class=" ">            <p>
+    For WebLogic descriptor elements, replace the variable WEBLOGIC_PREFIX with the following path prefix: /weblogic-ejb-jar/weblogic-enterprise-bean for all bean types.            </p>
+    </li><li class=" ">            <p>
+    For JBoss descriptor elements, replace the variable JBOSS_PREFIX with the following file path prefix depending on the bean type:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Entity Bean:  /ejb-jar/enterprise-beans/entity            </p>
+    </li><li class=" ">            <p>
+    Session Bean:  /ejb-jar/enterprise-beans/session            </p>
+    </li><li class=" ">            <p>
+    Message-Driven Bean:  /ejb-jar/enterprise-beans/message-driven            </p>
+    </li></ul></li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MapAdditionalweblogicejbjar.xmlElementstotheJBossEnterpriseApplicationPlatformEquivalent"  >
+        <h4>Map Additional weblogic-ejb-jar.xml Elements to the JBoss Enterprise Application Platform Equivalent</h4>
+    
+            <p>
+    The following list describes how to map addtional elements to the JBoss Enterprise Application Platform Equivalent.            </p>
+    <ul class=" "><li class=" ">            <p>
+    delay-updates-until-end-of-tx<br/>This element in the webLogic-ejb-jar.xml file, which defaults to True, is used for performance reasons to delay updates to the persistent store of all beans until the end of the transaction. When set to False, updates are sent to the database after each method invocation, but are not committed until the end of the transaction. This allows other processes to access the persisted data while the transaction is waiting to be completed. In JBoss Enterprise Application Platform 6, you can achieve the same behavior by specifying the &lt;sync-on-commit-only&gt; in the jbosscmp-jdbc.xml file. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jbosscmp-jdbc&gt;
+...
+    &lt;entity&gt;
+        &lt;ejb-name&gt;Student&lt;/ejb-name&gt;
+        &lt;create-table&gt;true&lt;/create-table&gt;
+        &lt;remove-table&gt;true&lt;/remove-table&gt;
+        &lt;table-name&gt;STUDENT&lt;/table-name&gt;
+        ...
+        &lt;sync-on-commit-only&gt;true&lt;/sync-on-commit-only&gt;
+        &lt;insert-after-ejb-post-create&gt;true&lt;/insert-after-ejb-post-create&gt;
+        &lt;call-ejb-store-on-clean&gt;true&lt;/call-ejb-store-on-clean&gt;
+    &lt;/entity&gt;
+&lt;/jbosscmp-jdbc&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    This feature is available in JBoss Enterprise Application Platform 6.1. For JBoss Enterprise Application Platform 6.0.x, it is available as a patch.            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Migrateweblogic.xmlDescriptorFileConfigurations"  >
+        <h3>Migrate weblogic.xml Descriptor File Configurations</h3>
+    
+            <p>
+    he&nbsp;weblogic.xml&nbsp;deployment descriptor file is used to support value-added features that are not included in the standard specifications for web applications. While there is no direct mapping of these descriptor elements, many of these features may be configured in the application deployment or JBoss server configuration files. The following section provides examples of how to map a few common configurations. For more information on how to configure the JBoss server, refer to the Administration and Configuration Guide for JBoss Enterprise Application Platform 6 on&nbsp;<a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/</a>.            </p>
+                <p>
+    The table that follows uses this <tt class=" ">weblogic.xml</tt> file as the example.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;\!DOCTYPE weblogic-web-app PUBLIC &quot;-//BEA Systems, Inc.//DTD Web Application 7.0//EN&quot; &quot;http://www.bea.com/servers/wls700/dtd/weblogic700-web-jar.dtd&quot;&gt;
+&lt;weblogic-web-app&gt;
+    &lt;context-root&gt;MyAppContextRoot&lt;/context-root&gt;
+
+    &lt;security-role-assignment&gt;
+        &lt;role-name&gt;TestRole1&lt;/role-name&gt;
+        &lt;principal-name&gt;TestRole1&lt;/principal-name&gt;
+    &lt;/security-role-assignment&gt;
+
+    &lt;security-role-assignment&gt;
+        &lt;role-name&gt;TestRole2&lt;/role-name&gt;
+        &lt;principal-name&gt;TestRole2&lt;/principal-name&gt;
+    &lt;/security-role-assignment&gt;
+
+    &lt;session-descriptor&gt;
+        &lt;session-param&gt;
+            &lt;param-name&gt;TimeoutSecs&lt;/param-name&gt;
+            &lt;param-value&gt;3650&lt;/param-value&gt;
+        &lt;/session-param&gt;
+    &lt;/session-descriptor&gt;
+
+    &lt;container-descriptor&gt;
+        &lt;save-sessions-enabled&gt;true&lt;/save-sessions-enabled&gt;
+        &lt;prefer-web-inf-classes&gt;true&lt;/prefer-web-inf-classes&gt;
+    &lt;/container-descriptor&gt;
+
+    &lt;jsp-descriptor&gt;
+        &lt;jsp-param&gt;
+            &lt;param-name&gt;keepgenerated&lt;/param-name&gt;
+            &lt;param-value&gt;true&lt;/param-value&gt;
+        &lt;/jsp-param&gt;
+        &lt;jsp-param&gt;
+            &lt;param-name&gt;encoding&lt;/param-name&gt;
+            &lt;param-value&gt;ISO8859_1&lt;/param-value&gt;
+        &lt;/jsp-param&gt;
+    &lt;/jsp-descriptor&gt;
+
+&lt;/weblogic-web-app&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The following table maps the some common weblogic.xml configurations to JBoss            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    weblogic.xml            </td>
+                <td rowspan="1" colspan="1">
+    JBoss Equivalent            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Specify the context root:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;context-root&gt;MyAppContextRoot&lt;/context-root&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+                <td rowspan="1" colspan="1">
+    Add the following to the <tt class=" ">WEB-INF/jboss-web.xml</tt> file    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-web&gt;
+    &lt;context-root&gt;MyAppContextRoot&lt;/context-root&gt;
+&lt;/jboss-web&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Map roles:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;security-role-assignment&gt;
+    &lt;role-name&gt;TestRole1&lt;/role-name&gt;
+    &lt;principal-name&gt;TestRole1&lt;/principal-name&gt;
+&lt;/security-role-assignment&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+                <td rowspan="1" colspan="1">
+    Use the RoleMappingLoginModule in the server configuration file    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;security-domain name=&quot;FormBasedAuthWebAppPolicy&quot;&gt;
+    &lt;authentication&gt; \\
+        &lt;login-module code=&quot;org.jboss.security.auth.spi.DatabaseServerLoginModule&quot; flag=&quot;required&quot;&gt;
+            &lt;module-option name=&quot;dsJndiName&quot; value=&quot;java:/MySQLDS&quot;/&gt; \\
+            &lt;module-option name=&quot;principalsQuery&quot; value=&quot;select password from  PRINCIPLES where principal_id=?&quot;/&gt;
+            &lt;module-option name=&quot;rolesQuery&quot; value=&quot;select user_role, 'Roles' from  ROLES where  principal_id=?&quot;/&gt;
+        &lt;/login-module&gt;
+
+        &lt;\!-\- Following is the RoleMappingLoginModule \--&gt;
+        &lt;login-module code=&quot;org.jboss.security.auth.spi.RoleMappingLoginModule&quot; flag=&quot;optional&quot;&gt;
+            &lt;module-option name=&quot;rolesProperties&quot; value=&quot;/home/userone/jboss-eap-6.0-GA/standalone/configuration/test-roles.properties&quot;/&gt;
+            &lt;module-option name=&quot;replaceRole&quot; value=&quot;false&quot;/&gt;
+        &lt;/login-module&gt;
+    &lt;/authentication&gt;
+&lt;/security-domain&gt;</code></pre>
+        </div>
+    </div>
+Then add the following to the WEB-INF/jboss-web.xml:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-web&gt;
+    &lt;security-domain&gt;java:/jaas/FormBasedAuthWebAppPolicy&lt;/security-domain&gt;
+&lt;/jboss-web&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Specify Session Timeout:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;session-descriptor&gt;
+    &lt;session-param&gt;
+        &lt;param-name&gt;TimeoutSecs&lt;/param-name&gt;
+        &lt;param-value&gt;3650&lt;/param-value&gt;
+    &lt;/session-param&gt;
+&lt;/session-descriptor&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+                <td rowspan="1" colspan="1">
+    Add the following to the WEB-INF/jboss-web.xml:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;session-config&gt;
+    &lt;session-timeout&gt;3650&lt;/session-timeout&gt;\
+&lt;/session-config&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Specify class loading precedence:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;container-descriptor&gt;
+    &lt;save-sessions-enabled&gt;true&lt;/save-sessions-enabled&gt;
+    &lt;prefer-web-inf-classes&gt;true&lt;/prefer-web-inf-classes&gt;
+&lt;/container-descriptor&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+                <td rowspan="1" colspan="1">
+    Since the WAR has its own scoped class loader, the classes packaged in the <tt class=" ">WEB-INF/lib</tt> and <tt class=" ">WEB-INF/classes</tt> directories will always be loaded from inside the web application. There is no known alternative/relative configuration in JBoss.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    Configure JSPs:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jsp-descriptor&gt;
+    &lt;jsp-param&gt;
+        &lt;param-name&gt;keepgenerated&lt;/param-name&gt;
+        &lt;param-value&gt;true&lt;/param-value&gt;
+    &lt;/jsp-param&gt;
+    &lt;jsp-param&gt;
+        &lt;param-name&gt;encoding&lt;/param-name&gt;
+        &lt;param-value&gt;ISO8859_1&lt;/param-value&gt;
+    &lt;/jsp-param&gt;
+&lt;/jsp-descriptor&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+                <td rowspan="1" colspan="1">
+    Configure JSPs in the web subsystem of the server configuration file.    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:web:1.1&quot; default-virtual-server=&quot;default-host&quot; native=&quot;false&quot;&gt;
+    &lt;configuration&gt;
+        &lt;jsp-configuration development=&quot;true&quot; java-encoding=&quot;ISO8859_1&quot; keep-generated=&quot;true&quot;/&gt;
+    &lt;/configuration&gt;
+    &lt;connector name=&quot;http&quot; protocol=&quot;HTTP/1.1&quot; scheme=&quot;http&quot; socket-binding=&quot;http&quot;/&gt;
+    &lt;virtual-server name=&quot;default-host&quot; enable-welcome-root=&quot;true&quot;&gt;
+        &lt;alias name=&quot;localhost&quot;/&gt;
+        &lt;alias name=&quot;example.com&quot;/&gt;
+    &lt;/virtual-server&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Migrateweblogicapplication.xmlDescriptorFileConfigurations"  >
+        <h3>Migrate weblogic-application.xml Descriptor File Configurations</h3>
+    
+            <p>
+    The <tt class=" ">weblogic-application.xml</tt> deployment descriptor file is used to describe WebLogic EAR archives. While there is no direct mapping of these descriptor elements, many of these features may be configured in standard Java EE files. The following example shows how to map a few common elements. For more information on how to configure the JBoss server, refer to the Administration and Configuration Guide for JBoss Enterprise Application Platform 6 on<a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/</a>.            </p>
+                <p>
+    The table that follows shows an example of elements in a <tt class=" ">weblogic-application.xml</tt> file and the equivalent in standard Java EE descriptor files.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    WebLogic weblogic-application.xml Element            </td>
+                <td rowspan="1" colspan="1">
+    JBoss Equivalent            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    &lt;application-param&gt; element:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;application-param&gt;
+    &lt;description&gt;
+        Web application default encoding
+    &lt;/description&gt;
+    &lt;param-name&gt;
+        webapp.encoding.default
+    &lt;/param-name&gt;
+    &lt;param-value&gt;
+        UTF8
+    &lt;/param-value&gt;
+&lt;/application-param&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+                <td rowspan="1" colspan="1">
+    Maps to the web.xml &lt;context-param&gt; element:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;context-param&gt;
+    &lt;description&gt;
+        Web application default encoding
+    &lt;/description&gt;
+    &lt;param-name&gt;
+        webapp.encoding.default
+    &lt;/param-name&gt;
+    &lt;param-value&gt;
+        UTF8
+    &lt;/param-value&gt;
+&lt;/context-param&gt;</code></pre>
+        </div>
+    </div>
+            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplacetheWebLogicplan.xmlDeploymentDescriptorConfiguration"  >
+        <h3>Replace the WebLogic plan.xml Deployment Descriptor Configuration</h3>
+    
+            <p>
+    The WebLogic <tt class=" ">plan.xml</tt> deployment descriptor file provides a way to target the application deployment for a specific environment, for example, development, integration testing, quality assurance, or production. In JBoss Enterprise Application Platform 6, you achieve the same outcome using property substitution. Using this technique, you pass the new values to the deployment descriptors based on the deployment environment. This topic describes how to change the target deployment environment in JBoss Enterprise Application Platform 6.            </p>
+        <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-UsePropertySubstitutiontoSpecifytheTargetDeploymentEnvironment"  >
+        <h4>Use Property Substitution to Specify the Target Deployment Environment</h4>
+    
+            <p>
+    1.  Enable Property Substitution in the Server Configuration File            </p>
+                <p>
+    The &lt;spec-descriptor-property-replacement&gt; element in the ee subsystem of the server configuration file is used to enable or disable property substitution in the ejb-jar.xml and persistence.xml descriptor files. The &lt;jboss-descriptor-property-replacement&gt; element in the ee subsystem of the server configuration file is used to enable or disable property substitution in the jboss-ejb3.xml, jboss-app.xml, jboss-web.xml, *-jms.xml, and *-ds.xml descriptor files. To enable property substitution it must be set to true. This is the default value. The following is an example of the ee subsystem element configured to enable property substitution.    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>    &lt;subsystem xmlns=&quot;urn:jboss:domain:ee:1.1&quot;&gt;
+        &lt;spec-descriptor-property-replacement&gt;true&lt;/spec-descriptor-property-replacement&gt;
+        &lt;jboss-descriptor-property-replacement&gt;true&lt;/jboss-descriptor-property-replacement&gt;
+    &lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+<br/>For more information about property substitution, refer to the Administration and Configuration Guide for JBoss Enterprise Application Platform 6 located on the Customer Portal at <a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/</a>.            </p>
+                <p>
+    2. Bind Strings for JNDI Runtime Mapping            </p>
+                <p>
+    For values outside deployment descriptors that change depending on the target environment, you can bind string values into JNDI and them map them into the application.<br/>Assume the application's <tt class=" ">web.xml</tt> file contains the following resource reference:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;resource-env-ref&gt;
+    &lt;description&gt;IP address of the destination&lt;/description&gt;
+    &lt;resource-env-ref-name&gt;destination/ip-address&lt;/resource-env-ref-name&gt;
+    &lt;resource-env-ref-type&gt;java.lang.String&lt;/resource-env-ref-type&gt;
+&lt;/resource-env-ref&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    To bind simple strings into JNDI, create a &lt;simple&gt; element in the naming subsystem of the server configuration file. The following is an example of the naming subsystem element configured for JNDI substitution.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:naming:1.1&quot;&gt;
+    &lt;bindings&gt;
+        &lt;simple name=&quot;java:/my/jndi/key&quot; value=&quot;MyJndiValue&quot;/&gt;
+    &lt;/bindings&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Add an entry to the application's <tt class=" ">jboss-web.xml</tt> to map the global JNDI entry to the application's java:comp/env/ Environment Naming Context (ENC). The &lt;resource-env-ref-name&gt; element value must match the value specified in the web.xml and the &lt;jndi-name&gt; element must match the &lt;simple&gt; element name in the server configuration file.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-web&gt;
+    &lt;resource-env-ref&gt;
+        &lt;resource-env-ref-name&gt;destination/ip-address&lt;/resource-env-ref-name&gt;
+        &lt;jndi-name&gt;java:/my/jndi/key&lt;/jndi-name&gt;
+    &lt;/resource-env-ref&gt;
+&lt;/jboss-web&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Follow the same procedure to implement property substitution for other descriptor files.<br/>For more information about how to manage the server configuration files, refer to the Administration and Configuration Guide for JBoss Enterprise Application Platform 6 located on the Customer Portal at <a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/</a>.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebService.xml"  >
+        <h3>WebService.xml</h3>
+    
+            <p>
+    WebLogic Webservice descriptor files<br/>TODO: This section is not complete            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-%5Cjms.xml"  >
+        <h3>*-jms.xml</h3>
+    
+            <p>
+    WebLogic JMS descriptor file<br/>TODO: This section is not complete            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-weblogicejbjar.xml"  >
+        <h3>weblogic-ejb-jar.xml</h3>
+    
+            <p>
+    WebLogic EJB descriptor            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Security"  >
+        <h2>Security</h2>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicOracleWallets"  >
+        <h3>Replace WebLogic Oracle Wallets</h3>
+    
+            <p>
+    Weblogic administrators use wallets created by Oracle Wallet Manager to manage public key security credentials on application clients and servers. These wallets must first be converted to standard Java KeyStore (JKS) entries that can then be used to configure the credentials in JBoss Enterprise Application Platform 6.            </p>
+                <p>
+    1. Convert Oracle Wallet to JKS            </p>
+                <p>
+    Use the Oracle orapki command-line tool to convert the wallet to standard JKS keystore. Refer to the Oracle Wallet Manager documentation for details: <a href="http://docs.oracle.com/cd/E16340_01/core.1111/e10105/walletmgr.htm#ASADM10989">http://docs.oracle.com/cd/E16340_01/core.1111/e10105/walletmgr.htm#ASADM10989</a>.            </p>
+                <p>
+    2. Configure JBoss Enterprise Application Platform 6 to Use the Java KeyStore            </p>
+                <p>
+    Java KeyStores are configured in the security subsystem of the server configuration file. The schema is defined in the <a href="file:///JBOSS_INSTALL_DIRECTORY/docs/schema/jboss-as-config_1_4.xsd">file:///JBOSS_INSTALL_DIRECTORY/docs/schema/jboss-as-config_1_4.xsd</a> file. Be sure to replace JBOSS_INSTALL_DIRECTORY in the previous link with the actual path for your install. For details on how to configure the server to use keystores, refer to the chapter entitled Securing JBoss Enterprise Application Platform in the Administration and Configuration Guide for JBoss Enterprise Application Platform 6 located on the Customer Portal at <a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicCerticombasedSSLImplementation"  >
+        <h3>WebLogic Certicom-based SSL Implementation</h3>
+    
+            <p>
+    Releases prior to WebLogic Server version 11g Release 1 (10.3.5) defaulted to the Certicom-based SSL (Secure Sockets Layer) implementation. The 11g release introduced an SSL implementation based on JSSE (Java Secure Socket Extension) and deprecated the Certicom-based SSL implementation. As of WebLogic Server version 12.1.1, JSSE is the only SSL implementation that is supported. JBoss Enterprise Application Platform 6 supports the JSSE implementation.            </p>
+                <p>
+    For instructions on how to implement SSL in JBoss Enterprise Application Platform 6, refer to Implement SSL Encryption for the JBoss Enterprise Application Platform Web Server in the Administration and Configuration Guide for JBoss Enterprise Application Platform 6 located on the Customer Portal at <a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicSecurityversusJBossJAASSecurityAPIs"  >
+        <h3>WebLogic Security versus JBoss JAAS Security APIs</h3>
+    
+            <p>
+    TODO: This section is not complete.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-UnderstandDifferencesBetweenWebLogicandJBossImplementations"  >
+        <h2>Understand Differences Between WebLogic and JBoss Implementations</h2>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-OverviewofJNDIDifferences"  >
+        <h3>Overview of JNDI Differences</h3>
+    
+            <p>
+    JBoss Enterprise Application Platform 6 uses standardized portable JNDI namespaces. WebLogic applications must be changed to follow the standardized JNDI namespace convention. For more information about portable JNDI naming syntax, see the sections below on Portable JNDI Naming Syntax and JNDI Namespace Rules.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigrateWebLogicJNDILookupstoUsePortableJNDISyntax"  >
+        <h3>Migrate WebLogic JNDI Lookups to Use Portable JNDI Syntax</h3>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicJNDILookupCode"  >
+        <h4>Replace WebLogic JNDI Lookup Code</h4>
+    
+            <p>
+    In WebLogic, you create a Hashtable containing environment information such as provider URL, context factory, security principal and credentials. You pass this table as a parameter when you create the InitialContext. Then you lookup the Service using a prefix with the Service class name            </p>
+                <p>
+    This is an example of how code may look in WebLogic:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Hashtable&lt;String, String&gt; env = new Hashtable&lt;String, String&gt;();
+env.put( Context.PROVIDER_URL, &quot;t3://localhost:7001&quot; );
+env.put( Context.INITIAL_CONTEXT_FACTORY, &quot;weblogic.jndi.WLInitialContextFactory&quot; );
+env.put( Context.SECURITY_PRINCIPAL, &quot;weblogic&quot; );
+env.put( Context.SECURITY_CREDENTIALS, &quot;weblogic&quot; );
+Context context = new InitialContext( env );
+Service service = (Service)context.lookup( &quot;sample.Service#&quot; + Service.class.getName() );</code></pre>
+        </div>
+    </div>
+            <p>
+    In JBoss, you instantiate the InitialContext with no argument and then look up the service using the portable JNDI lookup rules: java:global, java:app, java:module.            </p>
+                <p>
+    This is an example of what the code would look like in JBoss:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Context context = new InitialContext();
+Service service = (Service) context.lookup( &quot;java:app/service/&quot; + ServiceImpl.class.getSimpleName() );</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-PortableJNDINamingSyntax"  >
+        <h4>Portable JNDI Naming Syntax</h4>
+    
+            <p>
+    There are four logical namespaces, each with its own scope. Three of the namespaces are used for portable JNDI lookups. The following table details when and how to use each namespace.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    JNDI Namespace            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    java:global            </td>
+                <td rowspan="1" colspan="1">
+    Names in this namespace are shared by all applications deployed in an application server instance. Use names in this namespace to find remote EJBs. The following is an example of a java:global namespace: java:global/jboss-seam-booking/jboss-seam-booking.jar/HotelBookingAction            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    java:module            </td>
+                <td rowspan="1" colspan="1">
+    Names in this namespace are shared by all components in a module, for example, all enterprise beans in a single EJB module or all components in a web module. The following is an example of a java:module namespace: java:module/HotelBookingAction!org.jboss.seam.example.booking.HotelBooking            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    java:app            </td>
+                <td rowspan="1" colspan="1">
+    Names in this namespace are shared by all components in all modules in a single application. For example, a WAR and an EJB jar file in the same EAR file would have access to resources in the java:app namespace.<br/>The following is an example of a java:app namespace: java:app/jboss-seam-booking.jar/HotelBookingAction            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    You can find more information about JNDI naming contexts in section EE.5.2.2, &quot;Application Component Environment Namespaces&quot; in the &quot;JSR 316: JavaTM Platform, Enterprise Edition (Java EE) Specification, v6&quot;. You can download the specification from here: <a href="http://jcp.org/en/jsr/detail?id=316">http://jcp.org/en/jsr/detail?id=316</a>            </p>
+        </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-PortableJNDINamingSyntaxRules"  >
+        <h4>Portable JNDI Naming Syntax Rules</h4>
+    
+            <p>
+    JBoss Enterprise Application Platform 6 has improved upon JNDI namespace names, not only to provide predictable and consistent rules for every name bound in the application server, but also to prevent future compatibility issues. This means you might run into issues with the current namespaces in your application if they don't follow the new rules.            </p>
+                <p>
+    Namespaces should follow these rules:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Unqualified relative names like DefaultDS or jdbc/DefaultDS should be qualified relative to java:comp/env, java:module/env, or java:jboss/env, depending on the context.            </p>
+    </li><li class=" ">            <p>
+    Unqualified absolute names like /jdbc/DefaultDS should be qualified relative to a java:jboss/root name.            </p>
+    </li><li class=" ">            <p>
+    Qualified absolute names like java:/jdbc/DefaultDS should be qualified the same way as Unqualified absolute names above.            </p>
+    </li><li class=" ">            <p>
+    The special java:jboss namespace is shared across the entire AS server instance.            </p>
+    </li><li class=" ">            <p>
+    Any relative name with a java: prefix must be in one of the five namespaces: comp, module, app, global, or the proprietary jboss. Any name starting with java:xxx where xxx does not match any of the above five would result in an invalid name error.            </p>
+    </li></ol>    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ProgrammaticLogin"  >
+        <h3>Programmatic Login</h3>
+    
+            <p>
+    WebLogic provides a proprietary <tt class=" ">ServletAuthentication</tt> class to perform programmatic login. In JBoss AS 7, you can use the standard Java EE6 Servlet 3.0 <tt class=" ">HttpServletRequest.login()</tt> method to perform programmatic login or you can define  a <tt class=" ">&lt;security-constraint&gt;</tt> element in the <tt class=" ">web.xml</tt> file.            </p>
+                <p>
+    To enable programmatic login, you must replace the WebLogic proprietary code with one of the following:            </p>
+    <ul class=" "><li class=" ">            <p>
+    You can add the following annotations to the Servlet class that performs the authentication.            </p>
+    </li></ul>    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>// Imports for annotations
+import javax.annotation.security.DeclareRoles;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.annotation.HttpConstraint;
+import javax.servlet.annotation.ServletSecurity;
+
+@WebServlet(&quot;/securedUrlPattern&quot;)
+@ServletSecurity(@HttpConstraint(rolesAllowed = { &quot;myRole&quot; }))
+@DeclareRoles(&quot;myRole&quot;)
+public class SecuredServlet extends HttpServlet {
+    //Rest of code
+}</code></pre>
+        </div>
+    </div>
+<ul class=" "><li class=" ">            <p>
+    If you prefer not to use the standard servlet, you can instead add a <tt class=" ">&lt;security-constraint&gt;</tt> element containing a dummy URL pattern to the <tt class=" ">web.xml</tt> file. This notifies JBoss to create a default Authenticator. Failure to create a <tt class=" ">&lt;security-constraint&gt;</tt> element in the <tt class=" ">web.xml</tt> file may result in the error message &quot;No authenticator available for programmatic login&quot;.            </p>
+    </li></ul>            <p>
+    The following is an example of a <tt class=" ">web.xml</tt> file with a <tt class=" ">&lt;security-constraint&gt;</tt> element:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;login-config&gt;
+    &lt;auth-method&gt;FORM&lt;/auth-method&gt;
+    &lt;realm-name&gt;ApplicationRealm&lt;/realm-name&gt;
+    &lt;form-login-config&gt;
+        &lt;form-login-page&gt;/login.jsp&lt;/form-login-page&gt;
+        &lt;form-error-page&gt;/loginError.jsp&lt;/form-error-page&gt;
+    &lt;/form-login-config&gt;
+&lt;/login-config&gt;
+
+&lt;security-constraint&gt;
+    &lt;web-resource-collection&gt;
+        &lt;web-resource-name&gt;All resources&lt;/web-resource-name&gt;
+            &lt;description&gt;Protects all resources&lt;/description&gt;
+        &lt;url-pattern&gt;/dummy/*&lt;/url-pattern&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;auth-constraint&gt;
+        &lt;role-name&gt;myRole&lt;/role-name&gt;
+    &lt;/auth-constraint&gt;
+&lt;/security-constraint&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    If the application uses the WebLogic proprietary <tt class=" ">ServletAuthentication</tt> class for programmatic login, you must replace it with the standard HttpServletRequest login as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>    String userName = request.getParameter( &quot;username&quot; );
+    String password = request.getParameter( &quot;password&quot; );
+    try {
+        request.login(userName, password);
+    } catch(ServletException ex) {
+        // handle the error
+        response.getWriter().println( &quot;Failed to log in &quot; + username + &quot; with the given password&lt;br/&gt;&quot; );
+        response.getWriter().println( &quot;&lt;form name=\&quot;FailedLogin\&quot; method=\&quot;post\&quot;&gt;&quot; );
+        response.getWriter().println( &quot;&lt;br/&gt;&quot; );
+        response.getWriter().println( &quot;&lt;input name=\&quot;FailedLogin\&quot; type=\&quot;submit\&quot; value=\&quot;Return\&quot; /&gt;&quot; );
+        response.getWriter().println( &quot;&lt;/form&gt;&quot; );
+        return;
+
+    }</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicTransactionManagerJEETransaction%26nbsp%3BManager"  >
+        <h3>WebLogic Transaction Manager JEE Transaction &#160;Manager</h3>
+    
+            <p>
+    TODO: This section is not complete            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicJMXLookupsversusJBossJMXLookups"  >
+        <h3>WebLogic JMX Lookups versus JBoss JMX Lookups</h3>
+    
+            <p>
+    TODO: This section is not complete            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ClassLoadingandApplicationPackaging"  >
+        <h3>Class Loading and Application Packaging</h3>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ArchivePackagingandAssemblyRules"  >
+        <h4>Archive Packaging and Assembly Rules</h4>
+    
+            <p>
+    JBoss Enterprise Application Platform 6 uses a modular classloading system for controlling the class paths of deployed applications. This system provides more flexibility and control than the traditional system of hierarchical class loaders. This can simplify packaging of archives and eliminate the need to bundle Java EE 6 and other common classes. The following are general rules for assembly of archives or directories that are deployed to JBoss Enterprise Application Platform 6:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Archives may be nested within other archived deployments.            </p>
+    </li><li class=" ">            <p>
+    Extracted directories may be nested in extracted deployments.            </p>
+    </li><li class=" ">            <p>
+    Archives may be nested in extracted deployments.            </p>
+    </li><li class=" ">            <p>
+    Extracted directories may NOT be nested in archived deployments. You must recreate archives for the nested artifacts.            </p>
+    </li><li class=" ">            <p>
+    In WebLogic, an extracted WAR, EAR, or other archive can be deployed without the archive extension in the directory name. In JBoss, the extension must appear on the extracted directory name, for example <tt class=" ">myEnterpriseApp.ear</tt> or <tt class=" ">myWebApp.war</tt>.            </p>
+    </li><li class=" ">            <p>
+    The JBoss AS 7 installation includes Java EE 6, JBoss Logging, Hibernate, and other commonly used classes in the server install <tt class=" ">modules/</tt> directory. You can also create custom dynamic modules to make third-party JARs and other resources available to all applications running on the server. Modules are only loaded when a deployment requests them and these JARs or classes should not be bundled within the application archives.            </p>
+    </li><li class=" ">            <p>
+    For web applications, it is generally better to avoid the use of a <tt class=" ">web.xml</tt> file if possible. If this file is required, it should be located under the root of the application <tt class=" ">WEB-INF/</tt> directory.            </p>
+    </li><li class=" ">            <p>
+    If your enterprise application requires an <tt class=" ">application.xml</tt> file, it should be located under the <tt class=" ">META-INF/</tt> directory in the root of the EAR.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DebugandResolveClassCastExceptionsandClassNotFoundExceptions"  >
+        <h4>Debug and Resolve ClassCastExceptions and ClassNotFoundExceptions</h4>
+    
+            <p>
+    A ClassCastException can occur because a class is being loaded by a different class loader than the class it extends. It can also be a result of the same class existing in multiple JARs. A ClassNotFoundException can be a result of missing JARs or a mismatch of API versions. Due to the modular class loading system used by JBoss AS 7, you may need to modify deployment descriptors, remove JARs, or change the packaging structure of your EAR or WAR.            </p>
+                <p>
+    JBoss AS ships with a number of classes, or modules, that are commonly used by applications. These classes are located in the <tt class=" ">JBOSS_HOME/modules/system/layers/base/</tt> directory and include all the application server provided APIs, the Java EE APIs, as well as other APIs such as JBoss Logging. If your WebLogic application packages a JAR that is also included in the server modules/system/layers/base/ directory, you may see a ClassCastException when you deploy or run your application. If your application needs a version of the classes that is different than the classes located in the <tt class=" ">JBOSS_HOME/modules/system/layers/base/</tt> directory, you may see a ClassCastException or a ClassNotFoundException.            </p>
+                <p>
+    For more information about class loading and modules, refer to the chapter entitled Class Loading and Modules in the Development Guide for JBoss Enterprise Application Platform 6 on the <a href="https://access.redhat.com/site/documentation/JBoss_Enterprise_Application_Platform/">Customer Portal </a>.            </p>
+        <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ResolveClassCastExceptionsCausedbyDuplicateJARs"  >
+        <h5>Resolve ClassCastExceptions Caused by Duplicate JARs</h5>
+    
+            <p>
+    Because JBoss AS 7 ships with a number of classes, or modules, that are commonly used by applications, packaging these common JARs with your application can result in a ClassCastException. For example, if you bundle the jstl.jar and standard.jar with the application archive, you may see a ClassCastException similar to the following:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>08:38:01,867 ERROR [org.apache.catalina.core.ContainerBase.[jboss.web].[default-host].[/].[MVCUserInterface]] (http-localhost/127.0.0.1:8080-2)
+Servlet.service() for servlet MVCUserInterface threw exception: java.lang.ClassCastException: javax.servlet.jsp.jstl.fmt.LocalizationContext cannot be cast to java.lang.String at org.apache.taglibs.standard.tag.common.fmt.BundleSupport.getLocalizationContext(BundleSupport.java:178)
+[jboss-jstl-api_1.2_spec-1.0.3.Final-redhat-2.jar:1.0.3.Final-redhat-2]
+The following is an example of the procedure used to resolve this type issue.</code></pre>
+        </div>
+    </div>
+            <p>
+    To resolve this issue:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Find the JBoss module that contains the class named by the ClassCastException. In this case, the jboss-jstl-api_1.2_spec-1.0.3.Final-redhat-2.jar can be found in the EAP_HOME/modules/system/layers/base/javax/servlet/jstl/api/main directory.            </p>
+    </li><li class=" ">            <p>
+    Explicitly define the dependency in either the MANIFEST.MF file or in the jboss-deployment-structure.xml file. The following is an example of a jboss-deployment-structure file that defines the module dependency:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-deployment-structure xmlns=&quot;urn:jboss:deployment-structure:1.2&quot;&gt;
+  &lt;deployment&gt;
+      &lt;dependencies&gt;
+        &lt;module name=&quot;javax.servlet.jstl.api&quot; slot=&quot;main&quot; /&gt;
+      &lt;/dependencies&gt;
+  &lt;/deployment&gt;
+&lt;/jboss-deployment-structure&gt;</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Search the application archive to find all JAR(s) that are packaged with the application that contain the class named by the ClassCastException. In this case, the jstl.jar and standard.jar JARs were packaged in the lib/ folder of the application archive. Remove the duplicate JAR(s) from the application's packaged WAR or EAR file.            </p>
+    </li></ol>    </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ResolveClassCastExceptionsandClassNotFoundExceptionsCausedbyAPIVersionDifferences"  >
+        <h5>Resolve ClassCastExceptions and ClassNotFoundExceptions Caused by API Version Differences</h5>
+    
+            <p>
+    If your application uses a version of an API other than the default API included in the main/ module of the modules/system/layers/base/ directory, you may see a ClassCastException or a ClassNotFoundException when you run the application.            </p>
+                <p>
+    For example, if your application uses JSF 1.2 instead of the default JSF 2.0, you may see you may see a ClassCastException or ClassNotFoundException like the following:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Caused by: java.lang.ClassNotFoundException: javax.faces.FacesException from \[Module &quot;deployment.weblogic-example.ear:main&quot; from Service Module Loader\]
+    at org.jboss.modules.ModuleClassLoader.findClass(ModuleClassLoader.java:191)</code></pre>
+        </div>
+    </div>
+            <p>
+    In this case, it cannot find the class javax.faces.FacesException due to a mismatch in API versions. The default JSF module for JBoss AS 7 is version JSF 2.0 and the application is using JSF 1.2. To resolve the mismatch, you must explicitly include the JSF 1.2 dependency and exclude the JSF 2.0 dependency.            </p>
+                <p>
+    To resolve this issue:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Find the JBoss module that contains the class named by the ClassNotFoundException. In this case, there are 2 modules for the javax.faces.api classes. The default module for JSF 2.0 is located in the EAP_HOME/modules/system/layers/base/javax/faces/api/main directory and a module for JSF 1.2 is located in the EAP_HOME/modules/system/layers/base/javax/faces/api/1.2 directory.            </p>
+    </li><li class=" ">            <p>
+    Explicitly define the dependency on the older JSF 1.2 version in the jboss-deployment-structure.xml file and exclude the default JSF 2.0 module as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-deployment-structure xmlns=&quot;urn:jboss:deployment-structure:1.0&quot;&gt;
+    &lt;deployment&gt;
+        &lt;exclusions&gt;
+            &lt;module name=&quot;javax.faces.api&quot; slot=&quot;main&quot;/&gt;
+            &lt;module name=&quot;com.sun.jsf-impl&quot; slot=&quot;main&quot;/&gt;
+        &lt;/exclusions&gt;
+        &lt;dependencies&gt;
+            &lt;module name=&quot;javax.faces.api&quot; slot=&quot;1.2&quot; export=&quot;true&quot;/&gt;
+            &lt;module name=&quot;com.sun.jsf-impl&quot; slot=&quot;1.2&quot; export=&quot;true&quot;/&gt;
+        &lt;/dependencies&gt;
+    &lt;/deployment&gt;
+&lt;/jboss-deployment-structure&gt;</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Search the application archives and remove any jsf-api JARs from the packaged application.            </p>
+    </li></ol>    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-HibernateandJPA"  >
+        <h3>Hibernate and JPA</h3>
+    
+            <p>
+    Class loading in JBoss AS 7 is based on the <a href="https://docs.jboss.org/author/display/MODULES/Home">JBoss Modules</a> project. Some module dependencies defined by the application server are set up for you automatically. Other dependencies must be explicitly defined. By default, JBoss AS 7 assumes the use of Hibernate 4 with JPA applications and implicitly adds Hibernate 4 plus a few other dependencies to your application classpath. If your application currently uses Hibernate 3.x libraries, you may see ClassNotFoundExceptions or other Hibernate exceptions in the server log.            </p>
+                <p>
+    You have 2 choices:            </p>
+    <ol class=" "><li class=" ">            <p>
+    You can migrate your Hibernate 3.x application to use Hibernate 4. This is the recommended approach.            </p>
+    </li><li class=" ">            <p>
+    If you do not want to update your application to use Hibernate 4, you can configure your application to use Hibernate 3.x in one of the following ways:            </p>
+    <ol class=" "><li class=" ">            <p>
+    You can package the Hibernate 3 libraries with your application.            </p>
+    </li><li class=" ">            <p>
+    You can create a custom Hibernate 3 module.            </p>
+    </li></ol></li></ol>            <p>
+    The following sections describe how to do this.            </p>
+        <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigrateYourApplicationFromHibernate3toHibernate4"  >
+        <h4>Migrate Your Application From Hibernate 3 to Hibernate 4</h4>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigrateYourHibernate3.3.xApplicationtoHibernate4.x"  >
+        <h5>Migrate Your Hibernate 3.3.x Application to Hibernate 4.x</h5>
+    
+<ol class=" "><li class=" ">            <p>
+    Map Hibernate text types to JDBC LONGVARCHAR<br/>In versions of Hibernate prior to 3.5, text type was mapped to JDBC &quot;CLOB&quot;. A new Hibernate type, &quot;materialized_clob&quot;, was added in Hibernate 4 to map Java String properties to JDBC &quot;CLOB&quot;. If your application has properties configured as type=&quot;text&quot; that are intended to be mapped to JDBC &quot;CLOB&quot;, you must do one of the following:            </p>
+    <ol class=" "><li class=" ">            <p>
+    If your application uses hbm mapping files, change the property to type=&quot;materialized_clob&quot;.            </p>
+    </li><li class=" ">            <p>
+    If your application uses annotations, you should replace @Type(type = &quot;text&quot;) with @Lob.            </p>
+    </li></ol></li><li class=" ">            <p>
+    Review code to find changes in returned value types<br/>Numeric aggregate criteria projections now return the same value type as their HQL counterparts. As a result, the return types from the following projections in org.hibernate.criterion have changed.            </p>
+    <ol class=" "><li class=" ">            <p>
+    Due to changes in CountProjection, Projections.rowCount(), Projections.count(propertyName), and Projections.countDistinct(propertyName), the count and count distinct projections now return a Long value.            </p>
+    </li><li class=" ">            <p>
+    Due to changes in Projections.sum(propertyName), the sum projections now return a value type that depends on the property type.            </p>
+    <ol class=" "><li class=" ">            <p>
+    For properties mapped as Long, Short, Integer, or primitive integer types, a Long value is returned;            </p>
+    </li><li class=" ">            <p>
+    For properties mapped as Float, Double, or primitive floating point types, a Double value is returned.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Failure to modify your application code could result in a java.lang.ClassCastException.            </p>
+        </div>
+    
+</li></ol></li></ol></li></ol>    </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigrateYourHibernate3.5.xApplicationtoHibernate4.x"  >
+        <h5>Migrate Your Hibernate 3.5.x Application to Hibernate 4.x</h5>
+    
+<ol class=" "><li class=" ">            <p>
+    Merge the AnnotationConfiguration into the Configuration<br/>Although AnnotationConfiguration is now deprecated, it should not affect your migration. If you are still using an <tt class=" ">hbm.xml</tt> file, you should be aware that JBoss AS 7 now uses the &quot;org.hibernate.cfg.EJB3NamingStrategy&quot; in AnnotationConfiguration instead of the &quot;org.hibernate.cfg.DefaultNamingStrategy&quot; that was used in previous releases. This can result in naming mismatches. If you rely on the naming strategy to default the name of an association (many-to-many and collections of elements) table, you may see this issue. To resolve it, you can tell Hibernate to use the legacy org.hibernate.cfg.DefaultNamingStrategy by calling Configuration#setNamingStrategy and passing it org.hibernate.cfg.DefaultNamingStrategy#INSTANCE.            </p>
+    </li><li class=" ">            <p>
+    Modify the namespaces to conform to the new Hibernate DTD file names.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Previous DTD Namespace            </td>
+                <td rowspan="1" colspan="1">
+    New DTD Namespace            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <a href="http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd</a>            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd</a>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <a href="http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd</a>            </td>
+                <td rowspan="1" colspan="1">
+    <a href="http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd</a>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+</li><li class=" ">            <p>
+    Modify environment variables            </p>
+    <ol class=" "><li class=" ">            <p>
+    If you are using Oracle and using the &quot;materialized_clob&quot; or &quot;materialized_blob&quot; properties, the global environment variable &quot;hibernate.jdbc.use_streams_for_binary&quot; must be set to true.            </p>
+    </li><li class=" ">            <p>
+    If you are using PostgreSQL and using the &quot;CLOB&quot; or &quot;BLOB&quot; properties, the global environment variable &quot;hibernate.jdbc.use_streams_for_binary&quot; must be set to false.            </p>
+    </li></ol></li></ol>    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ConfigureYourApplicationtoUsetheHibernate3Libraries"  >
+        <h4>Configure Your Application to Use the Hibernate 3 Libraries</h4>
+    
+            <p>
+    If you do not want to migrate your appliation to use Hibernate 4, you can try to resolve any issues using one of the following approaches.            </p>
+        <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-PackagetheHibernate3.xJARswiththeApplication"  >
+        <h5>Package the Hibernate 3.x JARs with the Application</h5>
+    
+<ol class=" "><li class=" ">            <p>
+    Copy the specific Hibernate 3.x JARs into the application's <tt class=" ">lib/</tt> directory.            </p>
+    </li><li class=" ">            <p>
+    Create a <tt class=" ">jboss-deployment-structure.xml</tt> file with the following content to tell the server to exclude the Hibernate 4 classes:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-deployment-structure xmlns=&quot;urn:jboss:deployment-structure:1.0&quot;&gt;
+    &lt;deployment&gt;
+        &lt;exclusions&gt;
+            &lt;module name=&quot;org.hibernate&quot;/&gt;
+        &lt;/exclusions&gt;
+    &lt;deployment&gt;
+&lt;/jboss-deployment-structure&gt;</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Place the <tt class=" ">jboss-deployment-structure.xml</tt> file in either the <tt class=" ">META-INF/</tt> directory or the <tt class=" ">WEB-INF/</tt> directory if you are deploying a WAR, or in the <tt class=" ">META-INF/</tt> directory if you are deploying an EAR.            </p>
+    </li></ol>    <div class="confbox admonition admonition-note">
+        
+            <p>
+    In some cases this may result in ClassCastExceptions or other class loading issues due to the mixed use of the Hibernate versions. If that happens, you need to instruct the server to use only the Hibernate 3 libraries using the following procedure.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-CreateaCustomModulefortheHibernate3.xLibraries"  >
+        <h5>Create a Custom Module for the Hibernate 3.x Libraries</h5>
+    
+<ol class=" "><li class=" ">            <p>
+    Create a custom module for the Hibernate 3 libraries.            </p>
+    <ol class=" "><li class=" ">            <p>
+    Create a directory structure under the <tt class=" ">JBOSS_HOME/module</tt> directory to contain the Hibernate 3 files and JARs. For example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ cd JBOSS_HOME/modules/
+$ mkdir -p org/hibernate/3</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Copy the JARs from the Hibernate distribution to the {{JBOSS_HOME/modules/org/hibernate/3/} folder.            </p>
+    </li><li class=" ">            <p>
+    Create a <tt class=" ">module.xml</tt> file in the <tt class=" ">JBOSS_HOME/modules/org/hibernate/3/</tt> directory that describes the JARs and dependencies for the Hibernate 3 libraries. The following is an example of a <tt class=" ">module.xml</tt> file for Hibernate 3.6.6:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;module xmlns=&quot;urn:jboss:module:1.0&quot; name=&quot;org.hibernate&quot; slot=&quot;3&quot;&gt;
+    &lt;resources&gt;
+        &lt;resource-root path=&quot;hibernate3.jar&quot;/&gt;
+        &lt;resource-root path=&quot;javassist-3.12.0.GA.jar&quot;/&gt;
+        &lt;resource-root path=&quot;antlr-2.7.6.jar&quot;/&gt;
+        &lt;resource-root path=&quot;commons-collections.jar&quot;/&gt;
+        &lt;resource-root path=&quot;dom4j-1.6.1.jar&quot;/&gt;
+        &lt;!-- Insert other Hibernate 3 jars to be used here --&gt;
+    &lt;/resources&gt;
+    &lt;dependencies&gt;
+        &lt;module name=&quot;org.jboss.as.jpa.hibernate&quot; slot=&quot;3&quot;/&gt;
+        &lt;module name=&quot;asm.asm&quot;/&gt;
+        &lt;module name=&quot;javax.api&quot;/&gt;
+        &lt;module name=&quot;javax.persistence.api&quot;/&gt;
+        &lt;module name=&quot;javax.transaction.api&quot;/&gt;
+        &lt;module name=&quot;javax.validation.api&quot;/&gt;
+        &lt;module name=&quot;org.apache.ant&quot;/&gt;
+        &lt;module name=&quot;org.infinispan&quot;/&gt;
+        &lt;module name=&quot;org.javassist&quot;/&gt;
+        &lt;module name=&quot;org.slf4j&quot;/&gt;
+    &lt;/dependencies&gt;
+&lt;/module&gt;</code></pre>
+        </div>
+    </div>
+</li></ol></li><li class=" ">            <p>
+    Modify the <tt class=" ">persistence.xml</tt> to use the custom Hibernate module. Set the &quot;jboss.as.jpa.providerModule&quot; to &quot;org.hibernate:3&quot; as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;!-- persistence.xml using Hibernate 3.6.6.Final --&gt;
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;persistence xmlns=&quot;http://java.sun.com/xml/ns/persistence&quot; version=&quot;1.0&quot;&gt;
+&lt;persistence-unit name=&quot;GameOfThrones_pu&quot;&gt;
+    &lt;description&gt;my Hibernate 3 persistence unit.&lt;/description&gt;
+    &lt;jta-data-source&gt;java:jboss/datasources/gameDS&lt;/jta-data-source&gt;
+    &lt;properties&gt;
+        &lt;property name=&quot;jboss.as.jpa.providerModule&quot; value=&quot;org.hibernate:3&quot;/&gt;
+    &lt;/properties&gt;
+&lt;/persistence-unit&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    The Java Persistence API (JPA) deployer will detect the presence of a persistence provider in the application and use the Hibernate 3 libraries.            </p>
+    </li><li class=" ">            <p>
+    Create a <tt class=" ">jboss-deployment-structure.xml</tt> file with the following content to tell the server to use the Hibernate 3 module and exclude the Hibernate 4 libraries:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-deployment-structure xmlns=&quot;urn:jboss:deployment-structure:1.0&quot;&gt;
+    &lt;deployment&gt;
+        &lt;dependencies&gt;
+            &lt;module name=&quot;org.hibernate&quot; slot=&quot;3&quot;/&gt;
+        &lt;/dependencies&gt;
+        &lt;exclusions&gt;
+            &lt;module name=&quot;org.hibernate&quot; slot=&quot;main&quot;/&gt;
+       &lt;/exclusions&gt;
+    &lt;deployment&gt;
+&lt;/jboss-deployment-structure&gt;</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Place the <tt class=" ">jboss-deployment-structure.xml</tt> file in either the <tt class=" ">META-INF/</tt> directory or the <tt class=" ">WEB-INF/</tt> directory if you are deploying a WAR, or in the <tt class=" ">META-INF/</tt> directory if you are deploying an EAR.            </p>
+    </li></ol>    </div>
+    
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicProprietaryFeatures"  >
+        <h2>Replace WebLogic Proprietary Features</h2>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicCommonJFrameworkorWebLogicWorkManagerAPI"  >
+        <h3>WebLogic CommonJ Framework or WebLogic Work Manager API</h3>
+    
+            <p>
+    The WebLogic CommonJ framework, sometimes referred to as the WebLogic Work Manager API, is not an official standard and, as such, is not supported in JBoss Application Server. JBoss instead supports the Java EE 6 standard WorkManager API (javax.resource.work.WorkManager). WebLogic applications that use the WebLogic version of the framework will need to replace this code.            </p>
+                <p>
+    The best approach is to implement a JCA Resource Adapter with the required business interface to replace the CommonJ code. The JCA Resource Adapter specification can be found here: <a href="http://jcp.org/en/jsr/detail?id=322">JSR 322: JavaTM EE Connector Architecture 1.6 </a>. The <a href="http://www.jboss.org/ironjacamar/">IronJacamar </a> tool can help you get started writing a Resource Adapter. IronJacamar provides a WorkManager Resource Adapter in its test suite. Information about the WorkManager Interface can be found here: <a href="http://www.ironjacamar.org/doc/api/spec/1.7/javax/resource/spi/work/WorkManager.html">http://www.ironjacamar.org/doc/api/spec/1.7/javax/resource/spi/work/WorkManager.html</a>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicVirtualDirectories"  >
+        <h3>Replace WebLogic Virtual Directories</h3>
+    
+            <p>
+    WebLogic provides the ability to specify an alternate document root for files in a Web application using the &lt;virtual-directory-mapping&gt; element in the <tt class=" ">weblogic.xml</tt> proprietary descriptor file. JBoss AS 7 does not support this feature. If an application uses this feature, you must do one of the following:for JBoss to find the documents.            </p>
+    <ul class=" "><li class=" ">            <p>
+    For JBoss servers running on Linux, you can set up symbolic links (symlinks) for the the documents defined with alternate roots.            </p>
+    </li><li class=" ">            <p>
+    You must modify the application packaging structure and move the files to the well-known standard Java EE 6 location.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-SplitDirectories"  >
+        <h3>Split Directories</h3>
+    
+            <p>
+    WebLogic supports a split development directory environment. This directory layout contains both source and build directories. WebLogic uses both directories during deployment to find or generate artifacts. This model is meant for development purposes only. It is not recommended for production, so it should not impact your migration.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceWebLogicApplicationLifecycleListenerCode"  >
+        <h3>Replace WebLogic ApplicationLifecycleListener Code</h3>
+    
+            <p>
+    The WebLogic ApplicationLifecycleListener abstract class is used to perform functions or schedule jobs at application server start and stop. The following table shows the four stages in the application lifecycle available for listener registration in WebLogic:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    WebLogic Method            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    void preStart(ApplicationLifecycleEvent evt)            </td>
+                <td rowspan="1" colspan="1">
+    Provides hooks for listeners before the application finishes initialization.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    void postStart(ApplicationLifecycleEvent evt)            </td>
+                <td rowspan="1" colspan="1">
+    Provides hooks for listeners after the application finishes initialization.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    void preStop(ApplicationLifecycleEvent evt)            </td>
+                <td rowspan="1" colspan="1">
+    Provides hooks for listeners when the application begins the shutdown process.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    void postStop(ApplicationLifecycleEvent evt)            </td>
+                <td rowspan="1" colspan="1">
+    Provides hooks for listeners after the application ends the shutdown process.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplaceApplicationStartandStopEvents"  >
+        <h4>Replace Application Start and Stop Events</h4>
+    
+            <p>
+    In JBoss Enterprise Application Platform 6, there is no equivalent to intercept the preStart or preStop processing, but you can use one of the following methods to achieve results similar to the postStart and postStop methods.            </p>
+                <p>
+    1. Create a ServletContextListener            </p>
+                <p>
+    The ServletContextListener class provides two methods that are analoguous to postStart() and postStop() methods in the WebLogic ApplicationLifecycleListener class. Since the code must access the context root of the application using the ServletContext, the servlet must be deployed to a WAR file. The following is an example of code that uses the ServletContextListener to perform tasks after application server start and stop:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.annotation.WebListener;
+
+@WebListener
+public class ContextListener implements ServletContextListener {
+
+    @Override
+    public void contextInitialized(ServletContextEvent evt)  {
+        ServletContext ctx = evt.getServletContext();
+        System.out.println(&quot;contextInitialized(): ServerInfo: &quot; +
+            ctx.getServerInfo() + &quot; &quot; + System.currentTimeMillis());
+        System.out.println(&quot;contextInitialized(): ContextPath: &quot; +
+            ctx.getContextPath() + &quot; &quot; + System.currentTimeMillis());
+    }
+
+    @Override
+    public void contextDestroyed(ServletContextEvent evt)  {
+        ServletContext ctx = evt.getServletContext();
+        System.out.println(&quot;contextDestroyed(): ServerInfo: &quot; +
+            ctx.getServerInfo() + &quot; &quot; + System.currentTimeMillis());
+        System.out.println(&quot;contextDestroyed(): ContextPath: &quot; +
+            ctx.getContextPath() + &quot; &quot; + System.currentTimeMillis());
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    2. Create a Singleton Stateless Session Bean            </p>
+                <p>
+    Create a singleton bean using the @Singleton annotation. Use the @Startup annotation to tell the container to initialize the singleton session bean at application start. Use the @PostConstruct annotation to specify the method to invoke at the start of the application lifecyle and the @PostDestroy annotation to specify the method to invoke at the end of the application life cycle. The following is an example of a stateless session bean:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+
+@Startup
+@Singleton
+public class StartupBean
+{
+    @PostConstruct
+    void startup() {
+        System.out.println(&quot;startup()&quot;, &quot;@PostContruct called&quot;);
+    }
+
+    @PreDestroy
+    void shutdown() {
+        System.out.println(&quot;shutdown()&quot;, &quot;@PreDestroy called&quot;);
+    }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicProprietaryAnnotations"  >
+        <h3>WebLogic Proprietary Annotations</h3>
+    
+            <p>
+    WebLogic provides its own proprietary servlet and filter annotations for dependency injection. If the application uses them, they must be replaced the standard Java EE 6 annotations. The following table contains a mapping of the most commonly used WebLogic annotations to the corresponding standard Java EE 6 annotation.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    WebLogic            </td>
+                <td rowspan="1" colspan="1">
+    Java EE 6 Equivalent            </td>
+                <td rowspan="1" colspan="1">
+    Java EE 6 Import            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    @WLServlet            </td>
+                <td rowspan="1" colspan="1">
+    @WebServlet            </td>
+                <td rowspan="1" colspan="1">
+    javax.servlet.annotation.WebServlet            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    @WLFilter            </td>
+                <td rowspan="1" colspan="1">
+    @WebFilter            </td>
+                <td rowspan="1" colspan="1">
+    javax.servlet.annotation.WebFilter            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    @WLInitParam            </td>
+                <td rowspan="1" colspan="1">
+    @WebInitParam            </td>
+                <td rowspan="1" colspan="1">
+    javax.servlet.annotation.WebParam            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    Be sure to modify the attributes for the annotations to conform to the standard attribute names. Details about the attributes are listed below. For more information on the Java EE 6 servlet annotations, see the <a href="http://docs.oracle.com/javaee/6/api/javax/servlet/annotation/package-summary.html">javax.servlet.annotation javadoc </a>.            </p>
+                <p>
+    You must also remove the WebLogic imports and JAR.            </p>
+        <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplacetheProprietaryWebLogic%40WLServletAnnotation"  >
+        <h4>Replace the Proprietary WebLogic @WLServlet Annotation</h4>
+    
+            <p>
+    You must replace the proprietary WebLogic @WLServlet annotation with the standard Java EE 6 @WebServlet equivalent. Before you replace the code, you must understand how to map the attribute values. The following table shows the mapping of the WebLogic @WLServlet annotation attributes to the Java EE 6 @WebServlet equivalents.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    WebLogic Attribute Name            </td>
+                <td rowspan="1" colspan="1">
+    Java EE 6 Equivalent            </td>
+                <td rowspan="1" colspan="1">
+    Description / Comments            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    String displayName            </td>
+                <td rowspan="1" colspan="1">
+    String displayName            </td>
+                <td rowspan="1" colspan="1">
+    Display name for the Servlet            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String description            </td>
+                <td rowspan="1" colspan="1">
+    String description            </td>
+                <td rowspan="1" colspan="1">
+    Servlet description            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String icon            </td>
+                <td rowspan="1" colspan="1">
+    String smallicon -or-String largeicon            </td>
+                <td rowspan="1" colspan="1">
+    The icon location            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String name            </td>
+                <td rowspan="1" colspan="1">
+    String name            </td>
+                <td rowspan="1" colspan="1">
+    The Servlet name            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    WLInitParam[] initParams            </td>
+                <td rowspan="1" colspan="1">
+    WebInitParam[] initParams            </td>
+                <td rowspan="1" colspan="1">
+    Servlet initialization parameters            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    int loadOnStartup            </td>
+                <td rowspan="1" colspan="1">
+    int loadOnStartup            </td>
+                <td rowspan="1" colspan="1">
+    Whether the Servlet should load on server start            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String runAs            </td>
+                <td rowspan="1" colspan="1">
+    No equivalent attribute            </td>
+                <td rowspan="1" colspan="1">
+    The run-as User for the Servlet. There are 3 options for replacement detailed below.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String[] mapping            </td>
+                <td rowspan="1" colspan="1">
+    String[] urlPatterns <del class=" ">or</del> String[] value            </td>
+                <td rowspan="1" colspan="1">
+    The Servlet URL pattern            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The following is a list of options for replacement of the <i class=" ">runAs</i> attribute:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Use the <i class=" ">javax.annotation.security.RunAs</i> annotation in the class file.            </p>
+    </li><li class=" ">            <p>
+    Define the run-as element for the Servlet in the application's <tt class=" ">web.xml</tt> file.            </p>
+    </li><li class=" ">            <p>
+    Define the run-as element in a application's {{web-fragments.xml} file. See sections 8.2.1 through 8.2.3 of the Servlet 3.0 specification for further information about web-fragments.            </p>
+    </li></ol>            <p>
+    Here is an example of WebLogic code that uses the @WLServlet annotation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import weblogic.servlet.annotation.WLServlet;
+
+@WLServlet (
+    name = &quot;catalog&quot;,
+    runAs = &quot;SuperEditor&quot;
+    initParams = {
+        @WLInitParam (name=&quot;catalog&quot;, value=&quot;spring&quot;),
+        @WLInitParam (name=&quot;language&quot;, value=&quot;English&quot;)
+     },
+     mapping = {&quot;/catalog/*&quot;}
+)
+public class MyCatalogServlet extends HttpServlet { . . . }</code></pre>
+        </div>
+    </div>
+            <p>
+    Here is the equivalent code that uses the standard @WebServlet annotation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import javax.annotation.security.RunAs;
+import javax.servlet.annotation.WebServlet;
+
+@WebServlet (
+    name = &quot;catalog&quot;,
+    initParams = {
+        @WebInitParam (name=&quot;catalog&quot;, value=&quot;spring&quot;),
+        @WebInitParam (name=&quot;language&quot;, value=&quot;English&quot;)
+    },
+    urlPatterns = &quot;/catalog/*&quot;
+)
+@RunAs(&quot;SuperEditor&quot;)
+public class MyCatalogServlet extends HttpServlet { . . . }</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplacetheProprietaryWebLogic%40WLFilterAnnotation"  >
+        <h4>Replace the Proprietary WebLogic @WLFilter Annotation</h4>
+    
+            <p>
+    You must replace the proprietary WebLogic @WLFilter annotation with the standard Java EE 6 @WebFilter equivalent. Before you replace the code, you must understand how to map the attribute values. The following table shows the mapping of the WebLogic @WLFilter annotation attributes to the Java EE 6 @WebFilter equivalents.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    WebLogic Attribute Name            </td>
+                <td rowspan="1" colspan="1">
+    Java EE 6 Equivalent            </td>
+                <td rowspan="1" colspan="1">
+    Description / Comments            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    String displayName            </td>
+                <td rowspan="1" colspan="1">
+    String displayName            </td>
+                <td rowspan="1" colspan="1">
+    Display name for the Servlet            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String description            </td>
+                <td rowspan="1" colspan="1">
+    String description            </td>
+                <td rowspan="1" colspan="1">
+    Servlet description            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String icon            </td>
+                <td rowspan="1" colspan="1">
+    String smallicon -or-String largeicon            </td>
+                <td rowspan="1" colspan="1">
+    The icon location            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String name            </td>
+                <td rowspan="1" colspan="1">
+    String name            </td>
+                <td rowspan="1" colspan="1">
+    The Servlet name            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    WLInitParam[] initParams            </td>
+                <td rowspan="1" colspan="1">
+    WebInitParam[] initParams            </td>
+                <td rowspan="1" colspan="1">
+    Servlet initialization parameters            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String[] mapping            </td>
+                <td rowspan="1" colspan="1">
+    String[] urlPatterns <del class=" ">or</del> String[] value            </td>
+                <td rowspan="1" colspan="1">
+    The Servlet URL pattern            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    No equivalent attribute            </td>
+                <td rowspan="1" colspan="1">
+    DispatcherTypes[] dispatcherTypes            </td>
+                <td rowspan="1" colspan="1">
+    The dispatcher types to which the filter applies            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    No equivalent attribute            </td>
+                <td rowspan="1" colspan="1">
+    String[] servletNames            </td>
+                <td rowspan="1" colspan="1">
+    The names of the servlets to which the filter applies            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    Here is an example of WebLogic code that uses the @WLFilter annotation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import weblogic.servlet.annotation.WLFilter;
+import weblogic.servlet.annotation.WLInitParam;
+
+@WLFilter (
+    name = &quot;catalogFilter&quot;,
+    initParams = { @WLInitParam(name=&quot;catalog&quot;, value=&quot;winter&quot;) }
+    mapping = {&quot;/catalog/*&quot;}
+)
+public class MyFilter implements Filter { . . . }</code></pre>
+        </div>
+    </div>
+            <p>
+    Here is the equivalent code that uses the standard @WebFilter annotation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebInitParam;
+
+@WebFilter (
+    filterName = &quot;catalogFilter&quot;,
+    initParams = { @WebInitParam(name=&quot;catalog&quot;, value=&quot;winter&quot;) }
+    urlPatterns = {&quot;/catalog/*&quot;}
+)
+public class MyFilter implements Filter { . . . }</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ReplacetheProprietaryWebLogic%40WLInitParamAnnotation"  >
+        <h4>Replace the Proprietary WebLogic @WLInitParam Annotation</h4>
+    
+            <p>
+    You must replace the proprietary WebLogic @WLInitParam annotation with the standard Java EE 6 @WebInitParam equivalent. Before you replace the code, you must understand how to map the attribute values. The following table shows the mapping of the WebLogic @WLInitParam annotation attributes to the Java EE 6 @WebInitParam equivalents.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    WebLogic Attribute Name            </td>
+                <td rowspan="1" colspan="1">
+    Java EE 6 Equivalent            </td>
+                <td rowspan="1" colspan="1">
+    Description / Comments            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    String name            </td>
+                <td rowspan="1" colspan="1">
+    String name            </td>
+                <td rowspan="1" colspan="1">
+    Name of the initialization parameter            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    String value            </td>
+                <td rowspan="1" colspan="1">
+    String value            </td>
+                <td rowspan="1" colspan="1">
+    Value of the initialization parameter            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    No equivalent attribute            </td>
+                <td rowspan="1" colspan="1">
+    String description            </td>
+                <td rowspan="1" colspan="1">
+    Optional description of the initialization parameter            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    Here is an example of WebLogic code that uses the @WLInitParam annotation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import weblogic.servlet.annotation.WLFilter;
+import weblogic.servlet.annotation.WLInitParam;
+
+@WLFilter (
+    name = &quot;catalogFilter&quot;,
+    initParams = { @WLInitParam(name=&quot;catalog&quot;, value=&quot;winter&quot;) }
+    mapping = {&quot;/catalog/*&quot;}
+)
+public class MyFilter implements Filter { . . . }</code></pre>
+        </div>
+    </div>
+            <p>
+    Here is the equivalent code that uses the standard @WebInitParam annotation:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import javax.servlet.annotation.WebFilter;
+import avax.servlet.annotation.WebInitParam;
+
+@WebFilter (
+    filterName = &quot;catalogFilter&quot;,
+    initParams = { @WebInitParam(name=&quot;catalog&quot;, value=&quot;winter&quot;, description=&quot;winter catalog&quot;) }
+    urlPatterns = {&quot;/catalog/*&quot;}
+)
+public class MyFilter implements Filter { . . . }</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicSpecificOracleDatasources"  >
+        <h3>WebLogic Specific Oracle Datasources</h3>
+    
+            <p>
+    TODO: section is not complete.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-EvaluatetheWebLogicApplication"  >
+        <h2>Evaluate the WebLogic Application</h2>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExaminetheHighlevelArchitectureoftheApplication"  >
+        <h3>Examine the High-level Architecture of the Application</h3>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-JVMVersion"  >
+        <h4>JVM Version</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Frameworks"  >
+        <h4>Frameworks</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    Portal            </p>
+    </li><li class=" ">            <p>
+    Rules Engine            </p>
+    </li><li class=" ">            <p>
+    Workflow            </p>
+    </li><li class=" ">            <p>
+    ESB            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-IDE%28EclipsePlugins%29"  >
+        <h4>IDE (Eclipse Plugins)</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Database"  >
+        <h4>Database</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    JDBC compliant drivers            </p>
+    </li><li class=" ">            <p>
+    Hibernate            </p>
+    </li><li class=" ">            <p>
+    Persistence frameworks            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-LDAP"  >
+        <h4>LDAP</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-RequirementsforHighAvailablity%2CClusting%2CFailover%2CCaching"  >
+        <h4>Requirements for High-Availablity, Clusting, Failover, Caching</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ThirdpartyLibraries"  >
+        <h4>Third-party Libraries</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExternalSystems"  >
+        <h4>External Systems</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-WebLogicProprietaryLibrariesandAPIs"  >
+        <h4>WebLogic Proprietary Libraries and APIs</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExaminetheCurrentBuildProcess"  >
+        <h4>Examine the Current Build Process</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    Consider conversion to Maven            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-AnalyzeandUnderstandtheApplicationCode"  >
+        <h4>Analyze and Understand the Application Code</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ServicesandComponents"  >
+        <h4>Services and Components</h4>
+    
+            <p>
+    Look for uses of the following components or services.            </p>
+    <ul class=" "><li class=" ">            <p>
+    Cache            </p>
+    </li><li class=" ">            <p>
+    Clustering            </p>
+    </li><li class=" ">            <p>
+    Data sources - JDBC or proprietary            </p>
+    </li><li class=" ">            <p>
+    EJB            </p>
+    </li><li class=" ">            <p>
+    JMS - Queues, Topics, Messages to Migrate            </p>
+    </li><li class=" ">            <p>
+    JNDI            </p>
+    </li><li class=" ">            <p>
+    JTA            </p>
+    </li><li class=" ">            <p>
+    LDAP            </p>
+    </li><li class=" ">            <p>
+    Logging - Map WebLogic Debug options to the equivalent Java EE or JBoss classes for logging            </p>
+    </li><li class=" ">            <p>
+    MDB            </p>
+    </li><li class=" ">            <p>
+    Resource adapters            </p>
+    </li><li class=" ">            <p>
+    RMI            </p>
+    </li><li class=" ">            <p>
+    Security - JAAS, Encryption            </p>
+    </li><li class=" ">            <p>
+    Web Services            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ProprietaryWebLogicFeaturesorLibraries"  >
+        <h4>Proprietary WebLogic Features or Libraries</h4>
+    
+<ul class=" "><li class=" ">            <p>
+    jCOM - Bridge to ActiveX            </p>
+    </li><li class=" ">            <p>
+    JSP tag extensions            </p>
+    </li><li class=" ">            <p>
+    WebLogic Helper Classes            </p>
+    </li></ul>    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-PackagingandDeployment"  >
+        <h4>Packaging and Deployment</h4>
+    
+    <div class="section-5"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-StructureoftheArchives"  >
+        <h5>Structure of the Archives</h5>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DeploymentDescriptorsandPlans"  >
+        <h4>Deployment Descriptors and Plans</h4>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-EvaluatetheWebLogicDevelopmentTools"  >
+        <h3>Evaluate the WebLogic Development Tools</h3>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-EclipseandPlugins"  >
+        <h4>Eclipse and Plugins</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-NetBeans"  >
+        <h4>NetBeans</h4>
+    
+    </div>
+    
+    <div class="section-4"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ADF"  >
+        <h4>ADF</h4>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DataMigration"  >
+        <h3>Data Migration</h3>
+    
+<ul class=" "><li class=" ">            <p>
+    Database            </p>
+    </li><li class=" ">            <p>
+    LDAP            </p>
+    </li><li class=" ">            <p>
+    JMS            </p>
+    </li></ul>    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-DetermineNeedforJBossModules"  >
+        <h3>Determine Need for JBoss Modules</h3>
+    
+<ul class=" "><li class=" ">            <p>
+    Third-party libraries            </p>
+    </li><li class=" ">            <p>
+    Library versions not provided with JBoss            </p>
+    </li></ul>    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ConfiguretheEnvironmentfortheMigratedApplications"  >
+        <h2>Configure the Environment for the Migrated Applications</h2>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-InstallJBoss"  >
+        <h3>Install JBoss</h3>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-VerifytheInstallationUsingtheHelloworldQuickstart"  >
+        <h3>Verify the Installation Using the Helloworld Quickstart</h3>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MigratetheApplication"  >
+        <h2>Migrate the Application</h2>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ExecutetheMigrationPlan"  >
+        <h3>Execute the Migration Plan</h3>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Test"  >
+        <h3>Test</h3>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-MovetoProduction"  >
+        <h3>Move to Production</h3>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ToolsandTips"  >
+        <h2>Tools and Tips</h2>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-Debugging"  >
+        <h3>Debugging</h3>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-AutomatedTools"  >
+        <h3>Automated Tools</h3>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-FAQs"  >
+        <h3>FAQs</h3>
+    
+    </div>
+    
+    <div class="section-3"  id="66322827_HowdoImigratemyapplicationfromWebLogictoWildFly-ConsultingService"  >
+        <h3>Consulting Service</h3>
+    
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

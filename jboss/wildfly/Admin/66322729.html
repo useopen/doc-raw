@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Authentication Modules</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Authentication Modules</h1>
+        </div>
+        
+        <div id="66322729" class="content prepend-top">
+            <p>
+    In this section we will describe each login module's options available.            </p>
+        <div class="section-2"  id="66322729_AuthenticationModules-Client"  >
+        <h2>Client</h2>
+    
+            <p>
+    This login module is designed to establish caller identity and credentials when WildFly&nbsp;is acting a client. It should never be used as part of a security domain used for actual server authentication.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Options            </td>
+                <td rowspan="1" colspan="1">
+    Usage            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    multi-threaded            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    Set to <strong class=" ">true</strong> if each thread has its own principal and credential storage. Set to <strong class=" ">false</strong> to indicate that all threads in the VM share the same identity and credential. Default is <strong class=" ">false</strong>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    restore-login-identity            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    Set to <strong class=" ">true</strong> if the identity and credential seen at the start of the login() method should be restored after the logout() method is invoked. Default is <strong class=" ">false</strong>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    password-stacking            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    Set to <strong class=" ">useFirstPass</strong> to indicate that this login module should look for information stored in the LoginContext to use as the identity. This option can be used when stacking other login modules with this one. Default is <strong class=" ">false</strong>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-2"  id="66322729_AuthenticationModules-Database"  >
+        <h2>Database</h2>
+    
+            <p>
+    This login module is designed to be used for authenticating users against a database backend.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Options            </td>
+                <td rowspan="1" colspan="1">
+    Usage            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    dsJndiName            </td>
+                <td rowspan="1" colspan="1">
+    required            </td>
+                <td rowspan="1" colspan="1">
+    JNDI name of the datasource containing the tables for users and roles            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    principalsQuery            </td>
+                <td rowspan="1" colspan="1">
+    required            </td>
+                <td rowspan="1" colspan="1">
+    SQL prepared statement to be executed in order to match the password. Default is <strong class=" ">select Password from Principals where PrincipalID=?</strong>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    rolesQuery            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    SQL prepared statement to be executed in order to map roles. It should be an equivalent to <strong class=" ">select Role, RoleGroup from Roles where PrincipalID=?</strong>, where Role is the role name and RoleGroup column value should always be &quot;Roles&quot; with capital R.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    suspendResume            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    A boolean flag that specifies that any existing JTA transaction be suspended during DB operations. The default is <strong class=" ">true</strong>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-2"  id="66322729_AuthenticationModules-Certificate"  >
+        <h2>Certificate</h2>
+    
+            <p>
+    This login module is designed to authenticate users based on X509Certificates. A use case for this is CLIENT-CERT authentication of a web application.            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Options            </td>
+                <td rowspan="1" colspan="1">
+    Usage            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    securityDomain            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    Name of the security domain that has the jsse configuration for the truststore holding the trusted certificates            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    verifier            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    The class name of the org.jboss.security.auth.certs.X509CertificateVerifier to use for verification of the login certificate            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    If there is no verifier set, this login module will try to validate the user's certificate with a public certificate stored in the truststore. The public certificate must be stored in the truststore using the DN of the certificate as the truststore alias.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322729_AuthenticationModules-CertificateRoles"  >
+        <h2>CertificateRoles</h2>
+    
+            <p>
+    This login module extends the Certificate login module to add role mapping capabilities from a properties file. It has the same options plus these additional options:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Options            </td>
+                <td rowspan="1" colspan="1">
+    Usage            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    rolesProperties            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    Name of the resource/file containing the roles to assign to each user. Default is <strong class=" ">roles.properties</strong>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    defaultRolesProperties            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    Name of the resource/file to fall back to if the rolesProperties file can't be found. Default is <strong class=" ">defaultRoles.properties</strong>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    roleGroupSeperator            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    Character to use as the role group separator in the role properties file. Default character is '.' (period)            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The role properties file must be in the format username=role1,role2 where the username is the DN of the certificate, escaping any equals and space characters. Here is an example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>CN\=unit-tests-client,\ OU\=JBoss\ Inc.,\ O\=JBoss\ Inc.,\ ST\=Washington,\ C\=US=JBossAdmin</code></pre>
+        </div>
+    </div>
+            <p>
+    This would assign the <i class=" ">JBossAdmin</i> role to an user that presents a certificate with <i class=" ">CN=unit-tests-client, OU=JBoss Inc., O=JBoss Inc., ST=Washington, C=US</i> as the DN.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322729_AuthenticationModules-DatabaseCertificate"  >
+        <h2>DatabaseCertificate</h2>
+    
+            <p>
+    This login module extends the Certificate login to add role mapping capabilities from a database table. It has the same options plus these additional options:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Options            </td>
+                <td rowspan="1" colspan="1">
+    Usage            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+                <td rowspan="1" colspan="1">
+                </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    dsJndiName            </td>
+                <td rowspan="1" colspan="1">
+    required            </td>
+                <td rowspan="1" colspan="1">
+    JNDI name of the datasource containing the tables for users and roles            </td>
+                <td rowspan="1" colspan="1">
+                </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    rolesQuery            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    SQL prepared statement to be executed in order to map roles. It should be an equivalent to <strong class=" ">select Role, RoleGroup from Roles where PrincipalID=?</strong>, where Role is the role name and RoleGroup column value should always be &quot;Roles&quot; with capital R. Default is <strong class=" ">select Role, RoleGroup from Roles where PrincipalID=?</strong>            </td>
+                <td rowspan="1" colspan="1">
+                </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    suspendResume            </td>
+                <td rowspan="1" colspan="1">
+    optional            </td>
+                <td rowspan="1" colspan="1">
+    A boolean flag that specifies that any existing JTA transaction be suspended during DB operations. The default is <strong class=" ">true</strong>            </td>
+                <td rowspan="1" colspan="1">
+    select Role, RoleGroup from Roles where PrincipalID=?            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

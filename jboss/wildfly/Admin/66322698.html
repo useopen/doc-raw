@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>JVM settings</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>JVM settings</h1>
+        </div>
+        
+        <div id="66322698" class="content prepend-top">
+            <p>
+    Configuration of the JVM settings is different for a managed domain and a standalone server. In a managed domain, the domain controller components are responsible for starting and stoping server processes and hence determine the JVM settings. For a standalone server, it's the responsibility of the process that started the server (e.g. passing them as command line arguments).            </p>
+        <div class="section-2"  id="66322698_JVMsettings-ManagedDomain"  >
+        <h2>Managed Domain</h2>
+    
+            <p>
+    In a managed domain the JVM settings can be declared at different scopes: For a specific server group, for a host or for a particular server. If not declared, the settings are inherited from the parent scope. This allows you to customize or extend the JVM settings within every layer.            </p>
+                <p>
+    Let's take a look at the JVM declaration for a server group:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;server-groups&gt;
+       &lt;server-group name=&quot;main-server-group&quot; profile=&quot;default&quot;&gt;
+           &lt;jvm name=&quot;default&quot;&gt;
+               &lt;heap size=&quot;64m&quot; max-size=&quot;512m&quot;/&gt;
+           &lt;/jvm&gt;
+           &lt;socket-binding-group ref=&quot;standard-sockets&quot;/&gt;
+       &lt;/server-group&gt;
+       &lt;server-group name=&quot;other-server-group&quot; profile=&quot;default&quot;&gt;
+           &lt;jvm name=&quot;default&quot;&gt;
+               &lt;heap size=&quot;64m&quot; max-size=&quot;512m&quot;/&gt;
+           &lt;/jvm&gt;
+           &lt;socket-binding-group ref=&quot;standard-sockets&quot;/&gt;
+       &lt;/server-group&gt;
+&lt;/server-groups&gt;
+</code></pre>
+        </div>
+    </div>
+            <p>
+    <sub class=" ">(See</sub> <tt class=" ">domain/configuration/domain.xml</tt><sub class=" ">)</sub>            </p>
+                <p>
+    In this example the server group &quot;main-server-group&quot; declares a heap size of <tt class=" ">64m</tt> and a maximum heap size of <tt class=" ">512m</tt>. Any server that belongs to this group will inherit these settings. You can change these settings for the group as a whole, or a specific server or host:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;servers&gt;
+       &lt;server name=&quot;server-one&quot; group=&quot;main-server-group&quot; auto-start=&quot;true&quot;&gt;
+           &lt;jvm name=&quot;default&quot;/&gt;
+       &lt;/server&gt;
+       &lt;server name=&quot;server-two&quot; group=&quot;main-server-group&quot; auto-start=&quot;true&quot;&gt;
+           &lt;jvm name=&quot;default&quot;&gt;
+               &lt;heap size=&quot;64m&quot; max-size=&quot;256m&quot;/&gt;
+           &lt;/jvm&gt;
+           &lt;socket-binding-group ref=&quot;standard-sockets&quot; port-offset=&quot;150&quot;/&gt;
+       &lt;/server&gt;
+       &lt;server name=&quot;server-three&quot; group=&quot;other-server-group&quot; auto-start=&quot;false&quot;&gt;
+           &lt;socket-binding-group ref=&quot;standard-sockets&quot; port-offset=&quot;250&quot;/&gt;
+       &lt;/server&gt;
+&lt;/servers&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    <sub class=" ">(See domain/configuration/host.xml)</sub>            </p>
+                <p>
+    In this case, <i class=" ">server-two</i>, belongs to the <i class=" ">main-server-group</i> and inherits the JVM settings named <i class=" ">default</i>, but declares a lower maximum heap size.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9999 /] /host=local/server-config=server-two/jvm=default:read-resource
+{
+   &quot;outcome&quot; =&gt; &quot;success&quot;,
+   &quot;result&quot; =&gt; {
+       &quot;heap-size&quot; =&gt; &quot;64m&quot;,
+       &quot;max-heap-size&quot; =&gt; &quot;256m&quot;,
+   }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322698_JVMsettings-StandaloneServer"  >
+        <h2>Standalone Server</h2>
+    
+            <p>
+    For a standalone sever you have to pass in the JVM settings either as command line arguments when executing the <tt class=" ">$JBOSS_HOME/bin/standalone.sh</tt> script, or by declaring them in <tt class=" ">$JBOSS_HOME/bin/standalone.conf</tt>. (For Windows users, the script to execute is <tt class=" ">%JBOSS_HOME%/bin/standalone.bat</tt> while the JVM settings can be declared in <tt class=" ">%JBOSS_HOME%/bin/standalone.conf.bat.)</tt>            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

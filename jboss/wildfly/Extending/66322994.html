@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Transformers</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Transformers</h1>
+        </div>
+        
+        <div id="66322994" class="content prepend-top">
+            <p>
+        <span style="color: #ff0000;">
+This guide is work in progress    </span>
+            </p>
+                <p>
+    ----            </p>
+        <div class="section-2"  id="66322994_Transformers-Whataretransformers"  >
+        <h2>What are transformers</h2>
+    
+            <p>
+    Transformers are mechanism used in domain mode, to support scenarios where you have host controllers (HC) joined to domain controller (DC) running different version of subsystem (server).            </p>
+                <p>
+    When HC registers itself against DC and it is running different version of some subsystem that is present on DC, DC performs transformation of model (ModelTransformer) and sends it back to HC as configuration it has too run.            </p>
+                <p>
+    Also when operations are performed on DC, for example call ADD for some resource, DC also transforms that operation (OperationTransformer) into target version of HC.            </p>
+                <p>
+    Transformers are primarily used for upgrade migration paths. General idea behind this migration period is that there are numerous HC and one DC deployed. First, DC is upgraded. Afterwards, HC are upgraded in steps as needed without breaking configuration.            </p>
+        <div class="section-3"  id="66322994_Transformers-Whenaretheyinvoked"  >
+        <h3>When are they invoked</h3>
+    
+            <p>
+    When Host controller registers to Domain Controller. HC does not know about conversions, they are done on DC as follows:            </p>
+    <ol class=" "><li class=" ">            <p>
+    HC -&gt; connect -&gt; DC            </p>
+    </li><li class=" ">            <p>
+    HC &lt;- list of subsystems to sent supported versions for &lt;- DC            </p>
+    </li><li class=" ">            <p>
+    HC -&gt; list of supported versions for requested subsystems -&gt; DC            </p>
+    </li><li class=" ">            <p>
+    <strong class=" ">transformations happen on DC</strong>            </p>
+    </li><li class=" ">            <p>
+    HC &lt;- complete model in supported model versions &lt;- DC            </p>
+    </li></ol>    </div>
+    
+    <div class="section-3"  id="66322994_Transformers-Whenshouldtheybeimplemented"  >
+        <h3>When should they be implemented</h3>
+    
+            <p>
+    When model in your subsystem has changed in incompatible way.            </p>
+                <p>
+    Rule of thumb would be if current model is applied to previous version of subsystem model would it work? If not, model version must be increased and transformers implemented.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322994_Transformers-ModelTransformer"  >
+        <h3>Model Transformer</h3>
+    
+            <p>
+    Model transformer, works on top of current model and transforms its model to target version.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322994_Transformers-OperationTransformer"  >
+        <h3>Operation Transformer</h3>
+    
+            <p>
+    Operation transformer works on top of operations instead of model.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322994_Transformers-Testingtransformers"  >
+        <h3>Testing transformers</h3>
+    
+            <p>
+    There is testing framework in place for testing proper behavior of transformers            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

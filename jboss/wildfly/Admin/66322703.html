@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>AJP listeners</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>AJP listeners</h1>
+        </div>
+        
+        <div id="66322703" class="content prepend-top">
+            <p>
+    The AJP listeners are child resources of the subsystem undertow. They are used with mod_jk, mod_proxy and mod_cluster of the Apache httpd front-end. Each listener does reference a particular socket binding:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=undertow/server=default-server:read-children-names(child-type=ajp-listener)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        &quot;ajp-listener&quot;,
+    ]
+}
+
+[standalone@localhost:9999 /] /subsystem=undertow/server=default-server/ajp-listener=*:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;enabled&quot; =&gt; &quot;true&quot;,
+        &quot;scheme&quot; =&gt; &quot;http&quot;,
+        &quot;socket-binding&quot; =&gt; &quot;ajp&quot;,
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Creating a new <tt class=" ">ajp-listener</tt> requires you to declare a new <tt class=" ">socket binding</tt> first:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /socket-binding-group=standard-sockets/socket-binding=ajp:add(port=8009)
+</code></pre>
+        </div>
+    </div>
+            <p>
+    The newly created, unused socket binding can then be used to create a new connector configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /subsystem=undertow/server=default-server/ajp-listener=myListener:add(socket-binding=ajp, scheme=http, enabled=true)</code></pre>
+        </div>
+    </div>
+        </div>
+    </div>
+</body>
+</html>

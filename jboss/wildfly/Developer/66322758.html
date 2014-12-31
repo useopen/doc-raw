@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Securing EJBs</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Securing EJBs</h1>
+        </div>
+        
+        <div id="66322758" class="content prepend-top">
+    <div class="section-2"  id="66322758_SecuringEJBs-Overview"  >
+        <h2>Overview</h2>
+    
+            <p>
+    The Java EE spec specifies certain annotations (like @RolesAllowed, @PermitAll, @DenyAll) which can be used on EJB implementation classes and/or the business method implementations of the beans. Like with all other configurations, these security related configurations can also be done via the deployment descriptor (ejb-jar.xml). We <i class=" ">won't</i> be going into the details of Java EE specific annotations/deployment descriptor configurations in this chapter but instead will be looking at the vendor specific extensions to the security configurations.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322758_SecuringEJBs-SecurityDomain"  >
+        <h2>Security Domain</h2>
+    
+            <p>
+    The Java EE spec doesn't mandate a specific way to configure security domain for a bean. It leaves it to the vendor implementations to allow such configurations, the way they wish. In WildFly 8,&nbsp;the use of <tt class=" ">@org.jboss.ejb3.annotation.SecurityDomain</tt> annotation allows the developer to configure the security domain for a bean. Here's an example:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import org.jboss.ejb3.annotation.SecurityDomain;
+
+import javax.ejb.Stateless;
+
+@Stateless
+
+@SecurityDomain(&quot;other&quot;)
+
+&#65279;public class MyBean ...
+
+{
+
+....</code></pre>
+        </div>
+    </div>
+            <p>
+    The use of @SecurityDomain annotation lets the developer to point the container to the name of the security domain which is configured in the EJB3 subsystem in the standalone/domain configuration. The configuration of the security domain in the EJB3 subsystem is out of the scope of this chapter.            </p>
+                <p>
+    An alternate way of configuring a security domain, instead of using annotation, is to use jboss-ejb3.xml deployment descriptor. Here's an example of how the configuration will look like:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;jboss:jboss
+        xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+        xmlns:jboss=&quot;http://www.jboss.com/xml/ns/javaee&quot;
+        xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+        xmlns:s=&quot;urn:security:1.1&quot;
+        version=&quot;3.1&quot; impl-version=&quot;2.0&quot;&gt;
+
+    &lt;assembly-descriptor&gt;
+        &lt;s:security&gt;
+			&lt;!-- Even wildcard * is supported --&gt;
+            &lt;ejb-name&gt;MyBean&lt;/ejb-name&gt;
+            &lt;!-- Name of the security domain which is configured in the EJB3 subsystem --&gt;
+            &lt;s:security-domain&gt;other&lt;/s:security-domain&gt;
+        &lt;/s:security&gt;
+    &lt;/assembly-descriptor&gt;
+&lt;/jboss:jboss&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see we use the security-domain element to configure the security domain.            </p>
+        <div class="confbox admonition admonition-info">
+        
+            <p>
+    The jboss-ejb3.xml is expected to be placed in the .jar/META-INF folder of a .jar deployment or .war/WEB-INF folder of a .war deployment.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322758_SecuringEJBs-Absenceofsecuritydomainconfigurationbutpresenceofothersecuritymetadata"  >
+        <h2>Absence of security domain configuration but presence of other security metadata</h2>
+    
+            <p>
+    Let's consider the following example bean:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Stateless
+public class FooBean {
+
+	@RolesAllowed(&quot;bar&quot;)
+	public void doSomething() {
+		..
+	}
+...
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see the <tt class=" ">doSomething</tt> method is configured to be accessible for users with role &quot;bar&quot;. However, the bean isn't configured for any specific security domain. Prior to WildFly 8,&nbsp;the absence of an explicitly configured security domain on the bean would leave the bean unsecured, which meant that even if the <tt class=" ">doSomething</tt> method was configured with <tt class=" ">@RolesAllowed(&quot;bar&quot;)</tt> anyone even without the &quot;bar&quot; role could invoke on the bean.            </p>
+                <p>
+    In WildFly 8, the presence of any security metadata (like @RolesAllowed, @PermitAll, @DenyAll, @RunAs, @RunAsPrincipal) on the bean or any business method of the bean, makes the bean secure, even in the absence of an explicitly configured security domain. In such cases, the security domain name is default to &quot;other&quot;. Users can explicitly configure an security domain for the bean if they want to using either the annotation or deployment descriptor approach explained earlier.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322758_SecuringEJBs-Accesstomethodswithoutexplicitsecuritymetadata%2Conasecuredbean"  >
+        <h2>Access to methods without explicit security metadata, on a secured bean</h2>
+    
+            <p>
+    Consider this example bean:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Stateless
+public class FooBean {
+
+	@RolesAllowed(&quot;bar&quot;)
+	public void doSomething() {
+		..
+	}
+
+
+	public void helloWorld() {
+		...
+    }
+}	</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see the <tt class=" ">doSomething</tt> method is marked for access for only users with role &quot;bar&quot;. That enables security on the bean (with security domain defaulted to &quot;other&quot;). However, notice that the method <tt class=" ">helloWorld</tt> doesn't have any specific security configurations.            </p>
+                <p>
+    In WildFly 8, such methods which have no explicit security configurations, in a secured bean, will be treated similar to a method with <tt class=" ">@DenyAll</tt> configuration. What that means is, no one is allowed access to the <tt class=" ">helloWorld</tt> method. This behaviour can be controlled via the jboss-ejb3.xml deployment descriptor at a per bean level or a per deployment level as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;jboss:jboss
+        xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot;
+        xmlns:jboss=&quot;http://www.jboss.com/xml/ns/javaee&quot;
+        xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+        xmlns:s=&quot;urn:security:1.1&quot;
+        version=&quot;3.1&quot; impl-version=&quot;2.0&quot;&gt;
+
+    &lt;assembly-descriptor&gt;
+        &lt;s:security&gt;
+			&lt;!-- Even wildcard * is supported where * is equivalent to all EJBs in the deployment --&gt;
+            &lt;ejb-name&gt;FooBean&lt;/ejb-name&gt;
+            &lt;s:missing-method-permissions-deny-access&gt;false&lt;/s:missing-method-permissions-deny-access&gt;
+        &lt;/s:security&gt;
+    &lt;/assembly-descriptor&gt;
+&lt;/jboss:jboss&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Notice the use of <tt class=" ">&lt;missing-method-permissions-deny-access&gt;</tt> element. The value for this element can either be true or false. If this element isn't configured then it is equivalent to a value of true i.e. no one is allowed access to methods, which have no explicit security configurations, on secured beans. Setting this to false allows access to such methods for all users i.e. the behaviour will be switched to be similar to <tt class=" ">@PermitAll</tt>.            </p>
+                <p>
+    This behaviour can also be configured at the EJB3 subsystem level so that it applies to all EJB3 deployments on the server, as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:ejb3:1.4&quot;&gt;
+...
+            &lt;default-missing-method-permissions-deny-access value=&quot;true&quot;/&gt;
+...
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Again, the <tt class=" ">default-missing-method-permissions-deny-access</tt> element accepts either a true or false value. A value of true makes the behaviour similar to <tt class=" ">@DenyAll</tt> and a value of false makes it behave like <tt class=" ">@PermitAll</tt>            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

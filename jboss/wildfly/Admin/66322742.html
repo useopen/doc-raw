@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Global operations</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Global operations</h1>
+        </div>
+        
+        <div id="66322742" class="content prepend-top">
+            <p>
+    The WildFly management API includes a number of operations that apply to every resource.            </p>
+        <div class="section-2"  id="66322742_Globaloperations-The%7B%7Breadresource%7D%7Doperation"  >
+        <h2>The  read-resource  operation</h2>
+    
+            <p>
+    Reads a management resource's attribute values along with either basic or complete information about any child resources. Supports the<br/>following parameters, none of which are required:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">recursive</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include complete information about child resources, recursively.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">recursive-depth</tt> &ndash; (int) &ndash; The depth to which information about child resources should be included if <tt class=" ">recursive</tt> is {{true}. If not set, the depth will be unlimited; i.e. all descendant resources will be included.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">proxies</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include remote resources in a recursive query (i.e. host level resources from slave Host Controllers in a query of the Domain Controller; running server resources in a query of a host).            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-runtime</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include runtime attributes (i.e. those whose value does not come from the persistent configuration) in the response.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-defaults</tt> &ndash; (boolean, default is <tt class=" ">true</tt>) &ndash; whether to include in the result default values not set by users. Many attributes have a default value that will be used in the runtime if the users have not provided an explicit value. If this parameter is <tt class=" ">false</tt> the value for such attributes in the result will be <tt class=" ">undefined</tt>. If <tt class=" ">true</tt> the result will include the default value for such parameters.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-The%7B%7Breadattribute%7D%7Doperation"  >
+        <h2>The  read-attribute  operation</h2>
+    
+            <p>
+    Reads the value of an individual attribute. Takes a single, required, parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> &ndash; (string) &ndash; the name of the attribute to read.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-defaults</tt> &ndash; (boolean, default is <tt class=" ">true</tt>) &ndash; whether to include in the result default values not set by users. Many attributes have a default value that will be used in the runtime if the users have not provided an explicit value. If this parameter is <tt class=" ">false</tt> the value for such attributes in the result will be <tt class=" ">undefined</tt>. If <tt class=" ">true</tt> the result will include the default value for such parameters.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-The%7B%7Bwriteattribute%7D%7Doperation"  >
+        <h2>The  write-attribute  operation</h2>
+    
+            <p>
+    Writes the value of an individual attribute. Takes two required parameters:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> &ndash; (string) &ndash; the name of the attribute to write.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">value</tt> &ndash; (type depends on the attribute being written) &ndash; the new value.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-The%7B%7Bunsetattribute%7D%7Doperation"  >
+        <h2>The  unset-attribute  operation</h2>
+    
+            <p>
+    Sets the value of an individual attribute to the <tt class=" ">undefined</tt> value, if such a value is allowed for the attribute. The operation will fail if the <tt class=" ">undefined</tt> value is not allowed. Takes a single required parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> &ndash; (string) &ndash; the name of the attribute to write.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-The%7B%7Breadresourcedescription%7D%7Doperation"  >
+        <h2>The  read-resource-description  operation</h2>
+    
+            <p>
+    Returns the description of a resource's attributes, types of children and, optionally, operations. Supports the<br/>following parameters, none of which are required:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">recursive</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include information about child resources, recursively.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">proxies</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include remote resources in a recursive query (i.e. host level resources from slave Host Controllers in a query of the Domain Controller; running server resources in a query of a host)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">operations</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include descriptions of the resource's operations            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">inherited</tt> &ndash; (boolean, default is <tt class=" ">true</tt>) &ndash; if <tt class=" ">operations</tt> is <tt class=" ">true</tt>, whether to include descriptions of operations inherited from higher level resources. The global operations described in this section are themselves inherited from the root resource, so the primary effect of setting <tt class=" ">inherited</tt> to <tt class=" ">false</tt> is to exclude the descriptions of the global operations from the output.            </p>
+    </li></ul>            <p>
+    See <a href="66322746.html">Description of the Management Model</a> for details on the result of this operation.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-The%7B%7Breadoperationnames%7D%7Doperation"  >
+        <h2>The  read-operation-names  operation</h2>
+    
+            <p>
+    Returns a list of the names of all the operations the resource supports. Takes no parameters.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-The%7B%7Breadoperationdescription%7D%7Doperation"  >
+        <h2>The  read-operation-description  operation</h2>
+    
+            <p>
+    Returns the description of an operation, along with details of its parameter types and its return value. Takes a single, required, parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">name</tt> &ndash; (string) &ndash; the name of the operation            </p>
+    </li></ul>            <p>
+    See <a href="66322746.html">Description of the Management Model</a> for details on the result of this operation.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-The%7B%7Breadchildrentypes%7D%7Doperation"  >
+        <h2>The  read-children-types  operation</h2>
+    
+            <p>
+    Returns a list of the <a href="66322693.html#66322693_Managementresources-Address">types of child resources</a> the resource supports. Takes no parameters.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-The%7B%7Breadchildrennames%7D%7Doperation"  >
+        <h2>The  read-children-names  operation</h2>
+    
+            <p>
+    Returns a list of the names of all child resources of a given <a href="66322693.html#66322693_Managementresources-Address">type</a>.  Takes a single, required, parameter:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">child-type</tt> &ndash; (string) &ndash; the name of the type            </p>
+    </li></ul>    </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-The%7B%7Breadchildrenresources%7D%7Doperation"  >
+        <h2>The  read-children-resources  operation</h2>
+    
+            <p>
+    Returns information about all of a resource's children that are of a given <a href="66322693.html#66322693_Managementresources-Address">type</a>. For each child resource, the returned information is equivalent to executing the <tt class=" ">read-resource</tt> operation on that resource. Takes the following parameters, of which only {{child-type} is required:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <tt class=" ">child-type</tt> &ndash; (string) &ndash; the name of the type of child resource            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">recursive</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include complete information about child resources, recursively.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">recursive-depth</tt> &ndash; (int) &ndash; The depth to which information about child resources should be included if <tt class=" ">recursive</tt> is {{true}. If not set, the depth will be unlimited; i.e. all descendant resources will be included.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">proxies</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include remote resources in a recursive query (i.e. host level resources from slave Host Controllers in a query of the Domain Controller; running server resources in a query of a host)            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-runtime</tt> &ndash; (boolean, default is <tt class=" ">false</tt>) &ndash; whether to include runtime attributes (i.e. those whose value does not come from the persistent configuration) in the response.            </p>
+    </li><li class=" ">            <p>
+    <tt class=" ">include-defaults</tt> &ndash; (boolean, default is <tt class=" ">true</tt>) &ndash; whether to include in the result default values not set by users. Many attributes have a default value that will be used in the runtime if the users have not provided an explicit value. If this parameter is <tt class=" ">false</tt> the value for such attributes in the result will be <tt class=" ">undefined</tt>. If <tt class=" ">true</tt> the result will include the default value for such parameters.            </p>
+    </li></ul>    </div>
+    
+    <div class="section-2"  id="66322742_Globaloperations-StandardOperations"  >
+        <h2>Standard Operations</h2>
+    
+            <p>
+    Besides the global operations described above, by convention nearly every resource should expose an <tt class=" ">add</tt> operation and a <tt class=" ">remove</tt> operation. Exceptions to this convention are the root resource, and resources that do not store persistent configuration and are created dynamically at runtime (e.g. resources representing the JVM's platform mbeans or resources representing aspects of the running state of a deployment.)            </p>
+        <div class="section-3"  id="66322742_Globaloperations-The%7B%7Badd%7D%7Doperation"  >
+        <h3>The  add  operation</h3>
+    
+            <p>
+    The operation that creates a new resource must be named <tt class=" ">add</tt>. The operation may take zero or more parameters; what those parameters are depends on the resource being created.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322742_Globaloperations-The%7B%7Bremove%7D%7Doperation"  >
+        <h3>The  remove  operation</h3>
+    
+            <p>
+    The operation that removes an existing resource must be named <tt class=" ">remove</tt>. The operation should take no parameters.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

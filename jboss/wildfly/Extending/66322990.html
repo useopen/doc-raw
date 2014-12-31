@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Parsing and marshalling of the subsystem xml</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Parsing and marshalling of the subsystem xml</h1>
+        </div>
+        
+        <div id="66322990" class="content prepend-top">
+            <p>
+    JBoss AS 7 uses the Stax API to parse the xml files. This is initialized in <tt class=" ">SubsystemExtension</tt> by mapping our parser onto our namespace:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class SubsystemExtension implements Extension {
+
+    /** The name space used for the {@code subsystem} element */
+    public static final String NAMESPACE = &quot;urn:com.acme.corp.tracker:1.0&quot;;
+    ...
+    protected static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
+&nbsp;&nbsp;&nbsp; protected static final PathElement TYPE_PATH = PathElement.pathElement(TYPE);
+
+  &nbsp;/** The parser used for parsing our subsystem */
+    private final SubsystemParser parser = new SubsystemParser();
+
+  &nbsp;@Override
+    public void initializeParsers(ExtensionParsingContext context) {
+        context.setSubsystemXmlMapping(NAMESPACE, parser);
+    }
+    ...</code></pre>
+        </div>
+    </div>
+            <p>
+    We then need to write the parser. The contract is that we read our subsystem's xml and create the operations that will populate the model with the state contained in the xml. These operations will then be executed on our behalf as part of the parsing process. The entry point is the <tt class=" ">readElement()</tt> method.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>public class SubsystemExtension implements Extension {
+
+    /**
+     * The subsystem parser, which uses stax to read and write to and from xml
+     */
+    private static class SubsystemParser implements XMLStreamConstants, XMLElementReader&lt;List&lt;ModelNode&gt;&gt;, XMLElementWriter&lt;SubsystemMarshallingContext&gt; {
+
+        /** {@inheritDoc} */
+        @Override
+        public void readElement(XMLExtendedStreamReader reader, List&lt;ModelNode&gt; list) throws XMLStreamException {
+            // Require no attributes
+            ParseUtils.requireNoAttributes(reader);
+
+            //Add the main subsystem 'add' operation
+            final ModelNode subsystem = new ModelNode();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; subsystem.get(OP).set(ADD);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; subsystem.get(OP_ADDR).set(PathAddress.pathAddress(SUBSYSTEM_PATH).toModelNode());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; list.add(subsystem);
+
+            //Read the children
+            while (reader.hasNext() &amp;&amp; reader.nextTag() != END_ELEMENT) {
+                if (!reader.getLocalName().equals(&quot;deployment-types&quot;)) {
+                    throw ParseUtils.unexpectedElement(reader);
+                }
+                while (reader.hasNext() &amp;&amp; reader.nextTag() != END_ELEMENT) {
+                    if (reader.isStartElement()) {
+                        readDeploymentType(reader, list);
+                    }
+                }
+            }
+        }
+
+        private void readDeploymentType(XMLExtendedStreamReader reader, List&lt;ModelNode&gt; list) throws XMLStreamException {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (!reader.getLocalName().equals(&quot;deployment-type&quot;)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; throw ParseUtils.unexpectedElement(reader);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ModelNode addTypeOperation = new ModelNode();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; addTypeOperation.get(OP).set(ModelDescriptionConstants.ADD);
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String suffix = null;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for (int i = 0; i &lt; reader.getAttributeCount(); i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String attr = reader.getAttributeLocalName(i);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; String value = reader.getAttributeValue(i);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (attr.equals(&quot;tick&quot;)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TypeDefinition.TICK.parseAndSetParameter(value, addTypeOperation, reader);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else if (attr.equals(&quot;suffix&quot;)) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; suffix = value;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; } else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; throw ParseUtils.unexpectedAttribute(reader, i);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ParseUtils.requireNoContent(reader);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if (suffix == null) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; throw ParseUtils.missingRequiredElement(reader, Collections.singleton(&quot;suffix&quot;));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //Add the 'add' operation for each 'type' child
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(TYPE, suffix));
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; addTypeOperation.get(OP_ADDR).set(addr.toModelNode());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; list.add(addTypeOperation);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+        ...</code></pre>
+        </div>
+    </div>
+            <p>
+    So in the above we always create the add operation for our subsystem. Due to its address <tt class=" ">/subsystem=tracker</tt> defined by <tt class=" ">SUBSYSTEM_PATH</tt> this will trigger the <tt class=" ">SubsystemAddHandler</tt> we created earlier when we invoke <tt class=" ">/subsystem=tracker:add</tt>. We then parse the child elements and create an add operation for the child address for each <tt class=" ">type</tt> child. Since the address will for example be <tt class=" ">/subsystem=tracker/type=sar</tt> (defined by <tt class=" ">TYPE_PATH</tt> ) and <tt class=" ">TypeAddHandler</tt> is registered for all <tt class=" ">type</tt> subaddresses the <tt class=" ">TypeAddHandler</tt> will get invoked for those operations. Note that when we are parsing attribute <tt class=" ">tick</tt> we are using definition of attribute that we defined in TypeDefintion to parse attribute value and apply all rules that we specified for this attribute, this also enables us to property support expressions on attributes.            </p>
+                <p>
+    The parser is also used to marshal the model to xml whenever something modifies the model, for which the entry point is the <tt class=" ">writeContent()</tt> method:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>private static class SubsystemParser implements XMLStreamConstants, XMLElementReader&lt;List&lt;ModelNode&gt;&gt;, XMLElementWriter&lt;SubsystemMarshallingContext&gt; {
+        ...
+        /** {@inheritDoc} */
+        @Override
+        public void writeContent(final XMLExtendedStreamWriter writer, final SubsystemMarshallingContext context) throws XMLStreamException {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //Write out the main subsystem element
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; context.startSubsystemElement(TrackerExtension.NAMESPACE, false);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; writer.writeStartElement(&quot;deployment-types&quot;);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ModelNode node = context.getModelNode();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ModelNode type = node.get(TYPE);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; for (Property property : type.asPropertyList()) {
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //write each child element to xml
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; writer.writeStartElement(&quot;deployment-type&quot;);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; writer.writeAttribute(&quot;suffix&quot;, property.getName());
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ModelNode entry = property.getValue();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TypeDefinition.TICK.marshallAsAttribute(entry, true, writer);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; writer.writeEndElement();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //End deployment-types
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; writer.writeEndElement();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; //End subsystem
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; writer.writeEndElement();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    Then we have to implement the <tt class=" ">SubsystemDescribeHandler</tt> which translates the current state of the model into operations similar to the ones created by the parser. The <tt class=" ">SubsystemDescribeHandler</tt> is only used when running in a managed domain, and is used when the host controller queries the domain controller for the configuration of the profile used to start up each server. In our case the <tt class=" ">SubsystemDescribeHandler</tt> adds the operation to add the subsystem and then adds the operation to add each <tt class=" ">type</tt> child. Since we are using ResourceDefinitinon for defining subsystem all that is generated for us, but if you want to customize that you can do it by implementing it like this.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>private static class SubsystemDescribeHandler implements OperationStepHandler, DescriptionProvider {
+        static final SubsystemDescribeHandler INSTANCE = new SubsystemDescribeHandler();
+
+        public void execute(OperationContext context, ModelNode operation) throws OperationFailedException {
+            //Add the main operation
+            context.getResult().add(createAddSubsystemOperation());
+
+            //Add the operations to create each child
+
+            ModelNode node = context.readModel(PathAddress.EMPTY_ADDRESS);
+            for (Property property : node.get(&quot;type&quot;).asPropertyList()) {
+
+                ModelNode addType = new ModelNode();
+                addType.get(OP).set(ModelDescriptionConstants.ADD);
+                PathAddress addr = PathAddress.pathAddress(SUBSYSTEM_PATH, PathElement.pathElement(&quot;type&quot;, property.getName()));
+                addType.get(OP_ADDR).set(addr.toModelNode());
+                if (property.getValue().hasDefined(&quot;tick&quot;)) {
+                  &nbsp;TypeDefinition.TICK.validateAndSet(property,addType);
+                }
+                context.getResult().add(addType);
+            }
+            context.completeStep();
+        }
+
+
+}</code></pre>
+        </div>
+    </div>
+            <p>
+        <span id="66322990_Parsingandmarshallingofthesubsystemxml-Testingtheparsers"><a name="66322990_Parsingandmarshallingofthesubsystemxml-Testingtheparsers"></a></span>
+            </p>
+        <div class="section-2"  id="66322990_Parsingandmarshallingofthesubsystemxml-Testingtheparsers"  >
+        <h2>Testing the parsers</h2>
+    
+    <div class="confbox admonition admonition-note">
+            <div class="title">Changes to tests between 7.0.0 and 7.0.1</div>
+        
+            <p>
+    The testing framework was moved from the archetype into the core JBoss AS 7 sources between JBoss AS 7.0.0 and JBoss AS 7.0.1, and has been improved upon and is used internally for testing JBoss AS 7's subsystems. The differences between the two versions is that in 7.0.0.Final the testing framework is bundled with the code generated by the archetype (in a sub-package of the package specified for your subsystem, e.g. <tt class=" ">com.acme.corp.tracker.support</tt>), and the test extends the <tt class=" ">AbstractParsingTest</tt> class.            </p>
+                <p>
+    From 7.0.1 the testing framework is now brought in via the <tt class=" ">org.jboss.as:jboss-as-subsystem-test</tt> maven artifact, and the test's superclass is <tt class=" ">org.jboss.as.subsystem.test.AbstractSubsystemTest</tt>. The concepts are the same but more and more functionality will be available as JBoss AS 7 is developed.            </p>
+        </div>
+    
+            <p>
+    Now that we have modified our parsers we need to update our tests to reflect the new model. There are currently three tests testing the basic functionality, something which is a lot easier to debug from your IDE before you plug it into the application server. We will talk about these tests in turn and they all live in <tt class=" ">com.acme.corp.tracker.extension.SubsystemParsingTestCase</tt>. <tt class=" ">SubsystemParsingTestCase</tt> extends <tt class=" ">AbstractSubsystemTest</tt> which does a lot of the setup for you and contains utility methods for verifying things from your test. See the javadoc of that class for more information about the functionality available to you. And by all means feel free to add more tests for your subsystem, here we are only testing for the best case scenario while you will probably want to throw in a few tests for edge cases.            </p>
+                <p>
+    The first test we need to modify is <tt class=" ">testParseSubsystem()</tt>. It tests that the parsed xml becomes the expected operations that will be parsed into the server, so let us tweak this test to match our subsystem. First we tell the test to parse the xml into operations            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Test
+    public void testParseSubsystem() throws Exception {
+        //Parse the subsystem xml into operations
+        String subsystemXml =
+                &quot;&lt;subsystem xmlns=\&quot;&quot; + SubsystemExtension.NAMESPACE + &quot;\&quot;&gt;&quot; +
+                &quot;   &lt;deployment-types&gt;&quot; +
+                &quot;       &lt;deployment-type suffix=\&quot;tst\&quot; tick=\&quot;12345\&quot;/&gt;&quot; +
+                &quot;   &lt;/deployment-types&gt;&quot; +
+                &quot;&lt;/subsystem&gt;&quot;;
+        List&lt;ModelNode&gt; operations = super.parse(subsystemXml);</code></pre>
+        </div>
+    </div>
+            <p>
+    There should be one operation for adding the subsystem itself and an operation for adding the <tt class=" ">deployment-type</tt>, so check we got two operations            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>///Check that we have the expected number of operations
+        Assert.assertEquals(2, operations.size());</code></pre>
+        </div>
+    </div>
+            <p>
+    Now check that the first operation is <tt class=" ">add</tt> for the address <tt class=" ">/subsystem=tracker</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Check that each operation has the correct content
+        //The add subsystem operation will happen first
+        ModelNode addSubsystem = operations.get(0);
+        Assert.assertEquals(ADD, addSubsystem.get(OP).asString());
+        PathAddress addr = PathAddress.pathAddress(addSubsystem.get(OP_ADDR));
+        Assert.assertEquals(1, addr.size());
+        PathElement element = addr.getElement(0);
+        Assert.assertEquals(SUBSYSTEM, element.getKey());
+        Assert.assertEquals(SubsystemExtension.SUBSYSTEM_NAME, element.getValue());</code></pre>
+        </div>
+    </div>
+            <p>
+    Then check that the second operation is <tt class=" ">add</tt> for the address <tt class=" ">/subsystem=tracker</tt>, and that <tt class=" ">12345</tt> was picked up for the value of the <tt class=" ">tick</tt> parameter:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Then we will get the add type operation
+        ModelNode addType = operations.get(1);
+        Assert.assertEquals(ADD, addType.get(OP).asString());
+        Assert.assertEquals(12345, addType.get(&quot;tick&quot;).asLong());
+        addr = PathAddress.pathAddress(addType.get(OP_ADDR));
+        Assert.assertEquals(2, addr.size());
+        element = addr.getElement(0);
+        Assert.assertEquals(SUBSYSTEM, element.getKey());
+        Assert.assertEquals(SubsystemExtension.SUBSYSTEM_NAME, element.getValue());
+        element = addr.getElement(1);
+        Assert.assertEquals(&quot;type&quot;, element.getKey());
+        Assert.assertEquals(&quot;tst&quot;, element.getValue());
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    The second test we need to modify is <tt class=" ">testInstallIntoController()</tt> which tests that the xml installs properly into the controller. In other words we are making sure that the <tt class=" ">add</tt> operations we created earlier work properly. First we create the xml and install it into the controller. Behind the scenes this will parse the xml into operations as we saw in the last test, but it will also create a new controller and boot that up using the created operations            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Test
+    public void testInstallIntoController() throws Exception {
+        //Parse the subsystem xml and install into the controller
+        String subsystemXml =
+                &quot;&lt;subsystem xmlns=\&quot;&quot; + SubsystemExtension.NAMESPACE + &quot;\&quot;&gt;&quot; +
+                &quot;   &lt;deployment-types&gt;&quot; +
+                &quot;       &lt;deployment-type suffix=\&quot;tst\&quot; tick=\&quot;12345\&quot;/&gt;&quot; +
+                &quot;   &lt;/deployment-types&gt;&quot; +
+                &quot;&lt;/subsystem&gt;&quot;;
+        KernelServices services = super.installInController(subsystemXml);</code></pre>
+        </div>
+    </div>
+            <p>
+    The returned <tt class=" ">KernelServices</tt> allow us to execute operations on the controller, and to read the whole model.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Read the whole model and make sure it looks as expected
+        ModelNode model = services.readWholeModel();
+        //Useful for debugging :-)
+        //System.out.println(model);</code></pre>
+        </div>
+    </div>
+            <p>
+    Now we make sure that the structure of the model within the controller has the expected format and values            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(SubsystemExtension.SUBSYSTEM_NAME));
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME).hasDefined(&quot;type&quot;));
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, &quot;type&quot;).hasDefined(&quot;tst&quot;));
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, &quot;type&quot;, &quot;tst&quot;).hasDefined(&quot;tick&quot;));
+        Assert.assertEquals(12345, model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, &quot;type&quot;, &quot;tst&quot;, &quot;tick&quot;).asLong());
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    The last test provided is called <tt class=" ">testParseAndMarshalModel()</tt>. It's main purpose is to make sure that our <tt class=" ">SubsystemParser.writeContent()</tt> works as expected. This is achieved by starting a controller in the same way as before            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Test
+    public void testParseAndMarshalModel() throws Exception {
+        //Parse the subsystem xml and install into the first controller
+        String subsystemXml =
+                &quot;&lt;subsystem xmlns=\&quot;&quot; + SubsystemExtension.NAMESPACE + &quot;\&quot;&gt;&quot; +
+                &quot;   &lt;deployment-types&gt;&quot; +
+                &quot;       &lt;deployment-type suffix=\&quot;tst\&quot; tick=\&quot;12345\&quot;/&gt;&quot; +
+                &quot;   &lt;/deployment-types&gt;&quot; +
+                &quot;&lt;/subsystem&gt;&quot;;
+        KernelServices servicesA = super.installInController(subsystemXml);</code></pre>
+        </div>
+    </div>
+            <p>
+    Now we read the model and the xml that was persisted from the first controller, and use that xml to start a second controller            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Get the model and the persisted xml from the first controller
+        ModelNode modelA = servicesA.readWholeModel();
+        String marshalled = servicesA.getPersistedSubsystemXml();
+
+        //Install the persisted xml from the first controller into a second controller
+        KernelServices servicesB = super.installInController(marshalled);</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally we read the model from the second controller, and make sure that the models are identical by calling <tt class=" ">compare()</tt> on the test superclass.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode modelB = servicesB.readWholeModel();
+
+        //Make sure the models from the two controllers are identical
+        super.compare(modelA, modelB);
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    We then have a test that needs no changing from what the archetype provides us with. As we have seen before we start a controller            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Test
+    public void testDescribeHandler() throws Exception {
+        //Parse the subsystem xml and install into the first controller
+        String subsystemXml =
+                &quot;&lt;subsystem xmlns=\&quot;&quot; + SubsystemExtension.NAMESPACE + &quot;\&quot;&gt;&quot; +
+                &quot;&lt;/subsystem&gt;&quot;;
+        KernelServices servicesA = super.installInController(subsystemXml);</code></pre>
+        </div>
+    </div>
+            <p>
+    We then call <tt class=" ">/subsystem=tracker:describe</tt> which outputs the subsystem as operations needed to reach the current state (Done by our <tt class=" ">SubsystemDescribeHandler</tt>)            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Get the model and the describe operations from the first controller
+        ModelNode modelA = servicesA.readWholeModel();
+        ModelNode describeOp = new ModelNode();
+        describeOp.get(OP).set(DESCRIBE);
+        describeOp.get(OP_ADDR).set(
+                PathAddress.pathAddress(
+                        PathElement.pathElement(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME)).toModelNode());
+        List&lt;ModelNode&gt; operations = super.checkResultAndGetContents(servicesA.executeOperation(describeOp)).asList();</code></pre>
+        </div>
+    </div>
+            <p>
+    Then we create a new controller using those operations            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Install the describe options from the first controller into a second controller
+        KernelServices servicesB = super.installInController(operations);</code></pre>
+        </div>
+    </div>
+            <p>
+    And then we read the model from the second controller and make sure that the two subsystems are identical<br/>ModelNode modelB = servicesB.readWholeModel();            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Make sure the models from the two controllers are identical
+        super.compare(modelA, modelB);
+
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    To test the removal of the the subsystem and child resources we modify the <tt class=" ">testSubsystemRemoval()</tt> test provided by the archetype:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/**
+     * Tests that the subsystem can be removed
+     */
+    @Test
+    public void testSubsystemRemoval() throws Exception {
+        //Parse the subsystem xml and install into the first controller</code></pre>
+        </div>
+    </div>
+            <p>
+    We provide xml for the subsystem installing a child, which in turn installs a TrackerService            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>String subsystemXml =
+                &quot;&lt;subsystem xmlns=\&quot;&quot; + SubsystemExtension.NAMESPACE + &quot;\&quot;&gt;&quot; +
+                &quot;   &lt;deployment-types&gt;&quot; +
+                &quot;       &lt;deployment-type suffix=\&quot;tst\&quot; tick=\&quot;12345\&quot;/&gt;&quot; +
+                &quot;   &lt;/deployment-types&gt;&quot; +
+                &quot;&lt;/subsystem&gt;&quot;;
+        KernelServices services = super.installInController(subsystemXml);</code></pre>
+        </div>
+    </div>
+            <p>
+    Having installed the xml into the controller we make sure the TrackerService is there            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Sanity check to test the service for 'tst' was there
+        services.getContainer().getRequiredService(TrackerService.createServiceName(&quot;tst&quot;));</code></pre>
+        </div>
+    </div>
+            <p>
+    This call from the subsystem test harness will call remove for each level in our subsystem, children first and validate<br/>that the subsystem model is empty at the end.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Checks that the subsystem was removed from the model
+        super.assertRemoveSubsystemResources(services);</code></pre>
+        </div>
+    </div>
+            <p>
+    Finally we check that all the services were removed by the remove handlers            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Check that any services that were installed were removed here
+        try {
+            services.getContainer().getRequiredService(TrackerService.createServiceName(&quot;tst&quot;));
+            Assert.fail(&quot;Should have removed services&quot;);
+        } catch (Exception expected) {
+        }
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    For good measure let us throw in another test which adds a <tt class=" ">deployment-type</tt> and also changes its attribute at runtime. So first of all boot up the controller with the same xml we have been using so far            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@Test
+    public void testExecuteOperations() throws Exception {
+        String subsystemXml =
+                &quot;&lt;subsystem xmlns=\&quot;&quot; + SubsystemExtension.NAMESPACE + &quot;\&quot;&gt;&quot; +
+                &quot;   &lt;deployment-types&gt;&quot; +
+                &quot;       &lt;deployment-type suffix=\&quot;tst\&quot; tick=\&quot;12345\&quot;/&gt;&quot; +
+                &quot;   &lt;/deployment-types&gt;&quot; +
+                &quot;&lt;/subsystem&gt;&quot;;
+        KernelServices services = super.installInController(subsystemXml);</code></pre>
+        </div>
+    </div>
+            <p>
+    Now create an operation which does the same as the following CLI command <tt class=" ">/subsystem=tracker/type=foo:add(tick=1000)</tt>            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Add another type
+        PathAddress fooTypeAddr = PathAddress.pathAddress(
+                PathElement.pathElement(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME),
+                PathElement.pathElement(&quot;type&quot;, &quot;foo&quot;));
+        ModelNode addOp = new ModelNode();
+        addOp.get(OP).set(ADD);
+        addOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
+        addOp.get(&quot;tick&quot;).set(1000);</code></pre>
+        </div>
+    </div>
+            <p>
+    Execute the operation and make sure it was successful            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode result = services.executeOperation(addOp);
+        Assert.assertEquals(SUCCESS, result.get(OUTCOME).asString());</code></pre>
+        </div>
+    </div>
+            <p>
+    Read the whole model and make sure that the original data is still there (i.e. the same as what was done by <tt class=" ">testInstallIntoController()</tt>            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ModelNode model = services.readWholeModel();
+        Assert.assertTrue(model.get(SUBSYSTEM).hasDefined(SubsystemExtension.SUBSYSTEM_NAME));
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME).hasDefined(&quot;type&quot;));
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, &quot;type&quot;).hasDefined(&quot;tst&quot;));
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, &quot;type&quot;, &quot;tst&quot;).hasDefined(&quot;tick&quot;));
+        Assert.assertEquals(12345, model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, &quot;type&quot;, &quot;tst&quot;, &quot;tick&quot;).asLong());</code></pre>
+        </div>
+    </div>
+            <p>
+    Then make sure our new <tt class=" ">type</tt> has been added:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, &quot;type&quot;).hasDefined(&quot;foo&quot;));
+        Assert.assertTrue(model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, &quot;type&quot;, &quot;foo&quot;).hasDefined(&quot;tick&quot;));
+        Assert.assertEquals(1000, model.get(SUBSYSTEM, SubsystemExtension.SUBSYSTEM_NAME, &quot;type&quot;, &quot;foo&quot;, &quot;tick&quot;).asLong());</code></pre>
+        </div>
+    </div>
+            <p>
+    Then we call <tt class=" ">write-attribute</tt> to change the <tt class=" ">tick</tt> value of <tt class=" ">/subsystem=tracker/type=foo</tt>:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Call write-attribute
+        ModelNode writeOp = new ModelNode();
+        writeOp.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
+        writeOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
+        writeOp.get(NAME).set(&quot;tick&quot;);
+        writeOp.get(VALUE).set(3456);
+        result = services.executeOperation(writeOp);
+        Assert.assertEquals(SUCCESS, result.get(OUTCOME).asString());</code></pre>
+        </div>
+    </div>
+            <p>
+    To give you exposure to other ways of doing things, now instead of reading the whole model to check the attribute, we call <tt class=" ">read-attribute</tt> instead, and make sure it has the value we set it to.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>//Check that write attribute took effect, this time by calling read-attribute instead of reading the whole model
+        ModelNode readOp = new ModelNode();
+        readOp.get(OP).set(READ_ATTRIBUTE_OPERATION);
+        readOp.get(OP_ADDR).set(fooTypeAddr.toModelNode());
+        readOp.get(NAME).set(&quot;tick&quot;);
+        result = services.executeOperation(readOp);
+        Assert.assertEquals(3456, checkResultAndGetContents(result).asLong());</code></pre>
+        </div>
+    </div>
+            <p>
+    Since each <tt class=" ">type</tt> installs its own copy of <tt class=" ">TrackerService</tt>, we get the <tt class=" ">TrackerService</tt> for <tt class=" ">type=foo</tt> from the service container exposed by the kernel services and make sure it has the right value            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>TrackerService service = (TrackerService)services.getContainer().getService(TrackerService.createServiceName(&quot;foo&quot;)).getValue();
+        Assert.assertEquals(3456, service.getTick());
+    }</code></pre>
+        </div>
+    </div>
+            <p>
+    TypeDefinition.TICK.            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,644 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Audit logging</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Audit logging</h1>
+        </div>
+        
+        <div id="69536296" class="content prepend-top">
+            <p>
+    WildFly comes with audit logging built in for management operations affecting the management model. By default it is turned off. The information is output as JSON records.            </p>
+                <p>
+    The default configuration of audit logging in standalone.xml looks as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>    &lt;management&gt;
+        &lt;security-realms&gt;
+...
+        &lt;/security-realms&gt;
+        &lt;audit-log&gt;
+            &lt;formatters&gt;
+                &lt;json-formatter name=&quot;json-formatter&quot;/&gt;
+            &lt;/formatters&gt;
+            &lt;handlers&gt;
+                &lt;file-handler name=&quot;file&quot; formatter=&quot;json-formatter&quot; path=&quot;audit-log.log&quot; relative-to=&quot;jboss.server.data.dir&quot;/&gt;
+            &lt;/handlers&gt;
+            &lt;logger log-boot=&quot;true&quot; log-read-only=&quot;true&quot; enabled=&quot;false&quot;&gt;
+                &lt;handlers&gt;
+                    &lt;handler name=&quot;file&quot;/&gt;
+                &lt;/handlers&gt;
+            &lt;/logger&gt;
+        &lt;/audit-log&gt;
+...</code></pre>
+        </div>
+    </div>
+            <p>
+    Looking at this via the CLI it looks like            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9990 /] /core-service=management/access=audit:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;file-handler&quot; =&gt; {&quot;file&quot; =&gt; {
+            &quot;formatter&quot; =&gt; &quot;json-formatter&quot;,
+            &quot;max-failure-count&quot; =&gt; 10,
+            &quot;path&quot; =&gt; &quot;audit-log.log&quot;,
+            &quot;relative-to&quot; =&gt; &quot;jboss.server.data.dir&quot;
+        }},
+        &quot;json-formatter&quot; =&gt; {&quot;json-formatter&quot; =&gt; {
+            &quot;compact&quot; =&gt; false,
+            &quot;date-format&quot; =&gt; &quot;yyyy-MM-dd HH:mm:ss&quot;,
+            &quot;date-separator&quot; =&gt; &quot; - &quot;,
+            &quot;escape-control-characters&quot; =&gt; false,
+            &quot;escape-new-line&quot; =&gt; false,
+            &quot;include-date&quot; =&gt; true
+        }},
+        &quot;logger&quot; =&gt; {&quot;audit-log&quot; =&gt; {
+            &quot;enabled&quot; =&gt; false,
+            &quot;log-boot&quot; =&gt; true,
+            &quot;log-read-only&quot; =&gt; false,
+            &quot;handler&quot; =&gt; {&quot;file&quot; =&gt; {}}
+        }},
+        &quot;syslog-handler&quot; =&gt; undefined
+    }
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    The audit logging subsystem has a lot of internal dependencies, and it logs operations changing, enabling and disabling its components. When configuring or changing things at runtime it is a good idea to make these changes as part of a CLI batch. For example if you are adding a syslog handler you need to add the handler and its information as one step. Similarly if you are using a file handler, and want to change its <tt class=" ">path</tt> and <tt class=" ">relative-to</tt> attributes, that needs to happen as one step.            </p>
+        </div>
+    
+    <div class="section-2"  id="69536296_Auditlogging-JSONFormatter"  >
+        <h2>JSON Formatter</h2>
+    
+            <p>
+    The first thing that needs configuring is the formatter, we currently support outputting log records as JSON. You can define several formatters, for use with different handlers. A log record has the following format, and it is the formatter's job to format the data presented:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>2013-08-12 11:01:12 - {
+    &quot;type&quot; : &quot;core&quot;,
+    &quot;r/o&quot; : false,
+    &quot;booting&quot; : false,
+    &quot;version&quot; : &quot;8.0.0.Alpha4&quot;,
+    &quot;user&quot; : &quot;$local&quot;,
+    &quot;domainUUID&quot; : null,
+    &quot;access&quot; : &quot;NATIVE&quot;,
+    &quot;remote-address&quot; : &quot;127.0.0.1/127.0.0.1&quot;,
+    &quot;success&quot; : true,
+    &quot;ops&quot; : [JMX|WFLY8:JMX subsystem configuration],
+        &quot;operation&quot; : &quot;write-attribute&quot;,
+        &quot;name&quot; : &quot;enabled&quot;,
+        &quot;value&quot; : true,
+        &quot;operation-headers&quot; : {&quot;caller-type&quot; : &quot;user&quot;}
+    }]
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    It includes an optional timestamp and then the following information in the json record            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Field name            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">type</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This can have the values <tt class=" ">core</tt>, meaning it is a management operation, or <tt class=" ">jmx</tt> meaning it comes from the jmx subsystem (see the jmx subsystem for configuration of the jmx subsystem's audit logging)            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">r/o</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> if the operation does not change the management model, <tt class=" ">false</tt> otherwise            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">booting</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> if the operation was executed during the bootup process, <tt class=" ">false</tt> if it was executed once the server is up and running            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">version</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The version number of the WildFly instance            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">user</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The username of the authenticated user. In this case the operation has been logged via the CLI on the same machine as the running server, so the special <tt class=" ">$local</tt> user is used            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">domainUUID</tt>            </td>
+                <td rowspan="1" colspan="1">
+    An ID to link together all operations as they are propagated from the Doman Controller to it servers, slave Host Controllers, and slave Host Controller servers            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">access</tt>            </td>
+                <td rowspan="1" colspan="1">
+    This can have one of the following values:<br/>*<tt class=" ">NATIVE</tt> - The operation came in through the native management interface, for example the CLI<br/>*<tt class=" ">HTTP</tt> - The operation came in through the domain HTTP interface, for example the admin console<br/>*<tt class=" ">JMX</tt> - The operation came in through the JMX subsystem. See <a href="66322718.html">JMX</a> for how to configure audit logging for JMX.            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">remote-address</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The address of the client executing this operation            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">success</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> if the operation succeeded, <tt class=" ">false</tt> if it was rolled back            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">ops</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The operations being executed. This is a list of the operations serialized to JSON. At boot this will be all the operations resulting from parsing the xml. Once booted the list will typically just contain a single entry            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    The json formatter resource has the following attributes:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">include-date</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Boolan toggling whether or not to include the timestamp in the formatted log records            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">date-separator</tt>            </td>
+                <td rowspan="1" colspan="1">
+    A string containing characters to separate the date and the rest of the formatted log message. Will be ignored if <tt class=" ">include-date=false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">date-format</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The date format to use for the timestamp as understood by <tt class=" ">java.text.SimpleDateFormat</tt>. Will be ignored if <tt class=" ">include-date=false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">compact</tt>            </td>
+                <td rowspan="1" colspan="1">
+    If true will format the JSON on one line. There may still be values containing new lines, so if having the whole record on one line is important, set escape-new-line or escape-control-characters to true            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">escape-control-characters</tt>            </td>
+                <td rowspan="1" colspan="1">
+    If <tt class=" ">true</tt> it will escape all control characters (ascii entries with a decimal value &lt; 32) with the ascii code in octal, e.g. a new line becomes '#012'. If this is <tt class=" ">true</tt>, it will override <tt class=" ">escape-new-line=false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">escape-new-line</tt>            </td>
+                <td rowspan="1" colspan="1">
+    If <tt class=" ">true</tt> it will escape all new lines with the ascii code in octal, e.g. &quot;#012&quot;.            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-2"  id="69536296_Auditlogging-Handlers"  >
+        <h2>Handlers</h2>
+    
+            <p>
+    A handler is responsible for taking the formatted data and logging it to a location. There are currently two types of handlers, File and Syslog. You can configure several of each type of handler and use them to log information.            </p>
+        <div class="section-3"  id="69536296_Auditlogging-Filehandler"  >
+        <h3>File handler</h3>
+    
+            <p>
+    The file handlers log the audit log records to a file on the server. The attributes for the file handler are            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+                <td rowspan="1" colspan="1">
+    Read Only            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">formatter</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The name of a JSON formatter to use to format the log records            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">path</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The path of the audit log file            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">relative-to</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The name of another previously named path, or of one of the standard paths provided by the system. If <tt class=" ">relative-to</tt> is provided, the value of the <tt class=" ">path</tt> attribute is treated as relative to the path specified by this attribute            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">failure-count</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The number of logging failures since the handler was initialized            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">max-failure-count</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The maximum number of logging failures before disabling this handler            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">disabled-due-to-failure</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> if this handler was disabled due to logging failures            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    In our standard configuration <tt class=" ">path=audit-log.log</tt> and <tt class=" ">relative-to=jboss.server.data.dir</tt>, typically this will be <tt class=" ">$JBOSS_HOME/standalone/data/audit-log.log</tt>            </p>
+        </div>
+    
+    <div class="section-3"  id="69536296_Auditlogging-Sysloghandler"  >
+        <h3>Syslog handler</h3>
+    
+            <p>
+    The default configuration does not have syslog audit logging set up. Syslog is a better choice for audit logging since you can log to a remote syslog server, and secure the authentication to happen over TLS with client certificate authentication. Syslog servers vary a lot in their capabilities so not all settings in this section apply to all syslog servers. We have tested with <a href="http://www.rsyslog.com">rsyslog</a>.            </p>
+                <p>
+    The address for the syslog handler is <tt class=" ">/core-service=management/access=audit/syslog-handler=*</tt> and just like file handlers you can add as many syslog entries as you like. The syslog handler resources reference the main RFC's for syslog a fair bit, for reference they can be found at:<br/>*<a href="http://www.ietf.org/rfc/rfc3164.txt">http://www.ietf.org/rfc/rfc3164.txt</a><br/>*<a href="http://www.ietf.org/rfc/rfc5424.txt">http://www.ietf.org/rfc/rfc5424.txt</a><br/>*<a href="http://www.ietf.org/rfc/rfc6587.txt">http://www.ietf.org/rfc/rfc6587.txt</a>            </p>
+                <p>
+    The syslog handler resource has the following attributes:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" "></thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">formatter</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The name of a JSON formatter to use to format the log records            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">failure-count</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The number of logging failures since the handler was initialized            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">max-failure-count</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The maximum number of logging failures before disabling this handler            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">disabled-due-to-failure</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> if this handler was disabled due to logging failures            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">syslog-format</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Whether to set the syslog format to the one specified in RFC-5424 or RFC-3164            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">max-length</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The maximum length in bytes a log message, including the header, is allowed to be. If undefined, it will default to 1024 bytes if the syslog-format is RFC3164, or 2048 bytes if the syslog-format is RFC5424.            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">false</tt>            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">truncate</tt>            </td>
+                <td rowspan="1" colspan="1">
+    Whether or not a message, including the header, should truncate the message if the length in bytes is greater than the maximum length. If set to false messages will be split and sent with the same header values            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">false</tt>            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    When adding a syslog handler you also need to add the protocol it will use to communicate with the syslog server. The valid choices for protocol are <tt class=" ">UDP</tt>,<tt class=" ">TCP</tt> and <tt class=" ">TLS</tt>. The protocol must be added at the same time as you add the syslog handler, or it will fail. Also, you can only add one protocol for the handler.            </p>
+        <div class="section-4"  id="69536296_Auditlogging-UDP"  >
+        <h4>UDP</h4>
+    
+            <p>
+    Configures the handler to use UDP to communicate with the syslog server. The address of the <tt class=" ">UDP</tt> resource is <tt class=" ">/core-service=management/access=audit/syslog-handler=*/protocol=udp</tt>. The attributes of the <tt class=" ">UDP</tt> resource are:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">host</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The host of the syslog server for the udp requests            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">port</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The port of the syslog server listening for the udp requests            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-4"  id="69536296_Auditlogging-TCP"  >
+        <h4>TCP</h4>
+    
+            <p>
+    Configures the handler to use TCP to communicate with the syslog server. The address of the <tt class=" ">TCP</tt> resource is <tt class=" ">/core-service=management/access=audit/syslog-handler=*/protocol=tcp</tt>. The attributes of the <tt class=" ">TCP</tt> resource are:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">host</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The host of the syslog server for the tcp requests            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">port</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The port of the syslog server listening for the tcp requests            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">message-transfer</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The message transfer setting as described in section 3.4 of RFC-6587. This can either be OCTET_COUNTING as described in section 3.4.1 of RFC-6587, or NON_TRANSPARENT_FRAMING as described in section 3.4.1 of RFC-6587            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    <div class="section-4"  id="69536296_Auditlogging-TLS"  >
+        <h4>TLS</h4>
+    
+            <p>
+    Configures the handler to use TLC to communicate securely with the syslog server. The address of the <tt class=" ">TLS</tt> resource is <tt class=" ">/core-service=management/access=audit/syslog-handler=*/protocol=tls</tt>. The attributes of the <tt class=" ">TLS</tt> resource are the same as for <tt class=" ">TCP</tt>:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">host</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The host of the syslog server for the tls requests            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">port</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The port of the syslog server listening for the tls requests            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">message-transfer</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The message transfer setting as described in section 3.4 of RFC-6587. This can either be OCTET_COUNTING as described in section 3.4.1 of RFC-6587, or NON_TRANSPARENT_FRAMING as described in section 3.4.1 of RFC-6587            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    If the syslog server's TLS certificate is not signed by a certificate signing authority, you will need to set up a truststore to trust the certificate. The resource for the trust store is a child of the <tt class=" ">TLS</tt> resource, and the full address is <tt class=" ">/core-service=management/access=audit/syslog-handler=*/protocol=tls/authentication=truststore</tt>. The attributes of the truststore resource are:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">keystore-password</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The password for the truststore            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">keystore-path</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The path of the truststore            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">keystore-relative-to</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The name of another previously named path, or of one of the standard paths provided by the system. If <tt class=" ">keystore-relative-to</tt> is provided, the value of the <tt class=" ">keystore-path</tt> attribute is treated as relative to the path specified by this attribute            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    <div class="section-5"  id="69536296_Auditlogging-TLSwithClientcertificateauthentication."  >
+        <h5>TLS with Client certificate authentication.</h5>
+    
+            <p>
+    If you have set up the syslog server to require client certificate authentication, when creating your handler you will also need to set up a client certificate store containing the certificate to be presented to the syslog server. The address of the client certificate store resource is <tt class=" ">/core-service=management/access=audit/syslog-handler=*/protocol=tls/authentication=client-certificate-store</tt> and its attributes are:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">keystore-password</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The password for the keystore            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">key-password</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The password for the keystore key            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">keystore-path</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The path of the keystore            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">keystore-relative-to</tt>            </td>
+                <td rowspan="1" colspan="1">
+    The name of another previously named path, or of one of the standard paths provided by the system. If <tt class=" ">keystore-relative-to</tt> is provided, the value of the <tt class=" ">keystore-path</tt> attribute is treated as relative to the path specified by this attribute            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="69536296_Auditlogging-Loggerconfiguration"  >
+        <h2>Logger configuration</h2>
+    
+            <p>
+    The final part that needs configuring is the logger for the management operations. This references one or more handlers and is configured at <tt class=" ">/core-service=management/access=audit/logger=audit-log</tt>. The attributes for this resource are:            </p>
+        <div class="tablewrap">
+        <table>
+<thead class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    Attribute            </td>
+                <td rowspan="1" colspan="1">
+    Description            </td>
+        </tr>
+</thead><tfoot class=" "></tfoot><tbody class=" ">    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">enabled</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> to enable logging of the management operations            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">log-boot</tt>            </td>
+                <td rowspan="1" colspan="1">
+    <tt class=" ">true</tt> to log the management operations when booting the server, <tt class=" ">false</tt> otherwise            </td>
+        </tr>
+    <tr>
+            <td rowspan="1" colspan="1">
+    <tt class=" ">log-read-only</tt>            </td>
+                <td rowspan="1" colspan="1">
+    If <tt class=" ">true</tt> all operations will be audit logged, if <tt class=" ">false</tt> only operations that change the model will be logged            </td>
+        </tr>
+</tbody>        </table>
+            </div>
+            <p>
+    Then which handlers are used to log the management operations are configured as <tt class=" ">handler=*</tt> children of the logger.            </p>
+        </div>
+    
+    <div class="section-2"  id="69536296_Auditlogging-DomainMode%28hostspecificconfiguration%29"  >
+        <h2>Domain Mode (host specific configuration)</h2>
+    
+            <p>
+    In domain mode audit logging is configured for each host in its <tt class=" ">host.xml</tt> file. This means that when connecting to the DC, the configuration of the audit logging is under the host's entry, e.g. here is the default configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9990 /] /host=master/core-service=management/access=audit:read-resource(recursive=true)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;file-handler&quot; =&gt; {
+            &quot;host-file&quot; =&gt; {
+                &quot;formatter&quot; =&gt; &quot;json-formatter&quot;,
+                &quot;max-failure-count&quot; =&gt; 10,
+                &quot;path&quot; =&gt; &quot;audit-log.log&quot;,
+                &quot;relative-to&quot; =&gt; &quot;jboss.domain.data.dir&quot;
+            },
+            &quot;server-file&quot; =&gt; {
+                &quot;formatter&quot; =&gt; &quot;json-formatter&quot;,
+                &quot;max-failure-count&quot; =&gt; 10,
+                &quot;path&quot; =&gt; &quot;audit-log.log&quot;,
+                &quot;relative-to&quot; =&gt; &quot;jboss.server.data.dir&quot;
+            }
+        },
+        &quot;json-formatter&quot; =&gt; {&quot;json-formatter&quot; =&gt; {
+            &quot;compact&quot; =&gt; false,
+            &quot;date-format&quot; =&gt; &quot;yyyy-MM-dd HH:mm:ss&quot;,
+            &quot;date-separator&quot; =&gt; &quot; - &quot;,
+            &quot;escape-control-characters&quot; =&gt; false,
+            &quot;escape-new-line&quot; =&gt; false,
+            &quot;include-date&quot; =&gt; true
+        }},
+        &quot;logger&quot; =&gt; {&quot;audit-log&quot; =&gt; {
+            &quot;enabled&quot; =&gt; false,
+            &quot;log-boot&quot; =&gt; true,
+            &quot;log-read-only&quot; =&gt; false,
+            &quot;handler&quot; =&gt; {&quot;host-file&quot; =&gt; {}}
+        }},
+        &quot;server-logger&quot; =&gt; {&quot;audit-log&quot; =&gt; {
+            &quot;enabled&quot; =&gt; false,
+            &quot;log-boot&quot; =&gt; true,
+            &quot;log-read-only&quot; =&gt; false,
+            &quot;handler&quot; =&gt; {&quot;server-file&quot; =&gt; {}}
+        }},
+        &quot;syslog-handler&quot; =&gt; undefined
+    }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    We now have two file handlers, one called <tt class=" ">host-file</tt> used to configure the file to log management operations on the host, and one called <tt class=" ">server-file</tt> used to log management operations executed on the servers. Then <tt class=" ">logger=audit-log</tt> is used to configure the logger for the host controller, referencing the <tt class=" ">host-file</tt> handler. <tt class=" ">server-logger=audit-log</tt> is used to configure the logger for the managed servers, referencing the <tt class=" ">server-file</tt> handler. The attributes for <tt class=" ">server-logger=audit-log</tt> are the same as for <tt class=" ">server-logger=audit-log</tt> in the previous section. Having the host controller and server loggers configured independently means we can control audit logging for managed servers and the host controller independently.&nbsp;            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

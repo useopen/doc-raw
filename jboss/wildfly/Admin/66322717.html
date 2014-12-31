@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>How To</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>How To</h1>
+        </div>
+        
+        <div id="66322717" class="content prepend-top">
+<ul class=" "><li class=" ">            <p>
+    <a href="66322717.html#66322717_HowTo-HowdoIaddalogcategory%3F">How do I add a log category?</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322717.html#66322717_HowTo-HowdoIchangealoglevel%3F">How do I change a log level?</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322717.html#66322717_HowTo-HowdoIlogmyapplicationsmessagestotheirownfile%3F">How do I log my applications messages to their own file?</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322717.html#66322717_HowTo-HowdoIuselog4j.propertiesorlog4j.xmlinsteadofusingtheloggingsubsystemconfiguration%3F">How do I use log4j.properties or log4j.xml instead of using the logging subsystem configuration?</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322717.html#66322717_HowTo-HowdoIusemyownversionoflog4j%3F">How do I use my own version of log4j?</a>            </p>
+    </li></ul>    <div class="section-2"  id="66322717_HowTo-HowdoIaddalogcategory%3F"  >
+        <h2>How do I add a log category?</h2>
+    
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=logging/logger=com.your.category:add</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322717_HowTo-HowdoIchangealoglevel%3F"  >
+        <h2>How do I change a log level?</h2>
+    
+            <p>
+    To change a handlers log level:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=logging/console-handler=CONSOLE:write-attribute(name=level,value=DEBUG)</code></pre>
+        </div>
+    </div>
+            <p>
+    Changing the level on a log category is the same:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=logging/logger=com.your.category:write-attribute(name=level,value=ALL)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322717_HowTo-HowdoIlogmyapplicationsmessagestotheirownfile%3F"  >
+        <h2>How do I log my applications messages to their own file?</h2>
+    
+<ol class=" "><li class=" ">            <p>
+    Create a file handler. There are 3 different types of file handlers to choose from; <tt class=" ">file-handler</tt>, <tt class=" ">periodic-rotating-file-handler</tt> and <tt class=" ">size-rotating-file-handler</tt>. In this example we'll just use a simple <tt class=" ">file-handler</tt>.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=logging/file-handler=fh:add(level=INFO, file={&quot;relative-to&quot;=&gt;&quot;jboss.server.log.dir&quot;, &quot;path&quot;=&gt;&quot;fh.log&quot;}, append=false, autoflush=true)</code></pre>
+        </div>
+    </div>
+</li><li class=" ">            <p>
+    Now create the log category.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=logging/logger=org.your.company:add(use-parent-handlers=false,handlers=\[&quot;fh&quot;\])</code></pre>
+        </div>
+    </div>
+</li></ol>    </div>
+    
+    <div class="section-2"  id="66322717_HowTo-HowdoIuselog4j.propertiesorlog4j.xmlinsteadofusingtheloggingsubsystemconfiguration%3F"  >
+        <h2>How do I use log4j.properties or log4j.xml instead of using the logging subsystem configuration?</h2>
+    
+            <p>
+    First note that if you choose to use a log4j configuration file, you will no longer be able to make runtime logging changes to your deployments logging configuration.            </p>
+                <p>
+    If that is acceptable you can use <a href="66322712.html#66322712_LoggingConfiguration-PerdeploymentLogging">per-deployment logging</a> and just include a configuration file in your deployment.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322717_HowTo-HowdoIusemyownversionoflog4j%3F"  >
+        <h2>How do I use my own version of log4j?</h2>
+    
+            <p>
+    If you need/want to include your version of log4j then you need to do the following two steps.            </p>
+    <ol class=" "><li class=" ">            <p>
+    Disable the adding of the logging dependencies to all your deployments with the <a href="66322712.html#66322712_LoggingConfiguration-addloggingapidependencies">add-logging-api-dependencies</a> attribute and disable the <a href="66322712.html#66322712_LoggingConfiguration-usedeploymentloggingconfig">use-deployment-logging-config</a> attribute <strong class=" ">OR</strong> exclude the logging subsystem in a <a href="https://docs.jboss.org/author/display/WFLY8/Class+Loading+in+WildFly#ClassLoadinginWildFly-JBossDeploymentStructureFile">jboss-deployment-structure.xml</a>.            </p>
+    </li><li class=" ">            <p>
+    Then need to include a log4j library in your deployment.            </p>
+    </li></ol>            <p>
+    This only works for logging in your deployment. Server logs will continue to use the logging subsystem configuration.            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

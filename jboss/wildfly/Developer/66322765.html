@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Porting the Order Application from EAP 5.1 to&nbsp;WildFly 8</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Porting the Order Application from EAP 5.1 to&nbsp;WildFly 8</h1>
+        </div>
+        
+        <div id="66322765" class="content prepend-top">
+            <p>
+    Andy Miller ported an example Order application that was used for performance testing from EAP 5.1 to WildFly 8. These are the notes he made during the migration process.            </p>
+        <div class="section-2"  id="66322765_OrderApplicationMigrationfromEAP5.1toWildFly8-Overviewoftheapplication"  >
+        <h2>Overview of the application</h2>
+    
+            <p>
+    The application is relatively simple. it contains three servlets, some stateless session beans, a stateful session bean, and some entities.            </p>
+                <p>
+    In addition to application code changes, modifications were made to the way the EAR was packaged. This is because WildFly&nbsp;removed support of some proprietary features that were available in EAP 5.1.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322765_OrderApplicationMigrationfromEAP5.1toWildFly8-Summaryofchanges"  >
+        <h2>Summary of changes</h2>
+    
+    <div class="section-3"  id="66322765_OrderApplicationMigrationfromEAP5.1toWildFly8-CodeChanges"  >
+        <h3>Code Changes</h3>
+    
+    <div class="section-4"  id="66322765_OrderApplicationMigrationfromEAP5.1toWildFly8-ModifyJNDIlookupcode"  >
+        <h4>Modify JNDI lookup code</h4>
+    
+            <p>
+    Since this application was first written for EAP 4.2/4.3, which did not support EJB reference injection, the servlets were using pre-EE 5 methods for looking up stateless and stateful session bean interfaces. While migrating to WildFly, it seemed a good time to change the code to use the @EJB annotation, although this was not a required change.            </p>
+                <p>
+    The real difference is in the lookup name. WildFly&nbsp;only supports the new EE 6 portable JNDI names rather than the old EAR structure based names. The JNDI lookup code changed as follows:            </p>
+                <p>
+    Example of code in the EAP 5.1 version:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>try {
+    context = new InitialContext();
+    distributionCenterManager = (DistributionCenterManager) context.lookup(&quot;OrderManagerApp/DistributionCenterManagerBean/local&quot;);
+} catch(Exception lookupError) {
+    throw new ServletException(&quot;Couldn't find DistributionCenterManager bean&quot;, lookupError);
+}
+try {
+    customerManager = (CustomerManager) context.lookup(&quot;OrderManagerApp/CustomerManagerBean/local&quot;);
+} catch(Exception lookupError) {
+    throw new ServletException(&quot;Couldn't find CustomerManager bean&quot;, lookupError);
+}
+
+try {
+    productManager = (ProductManager) context.lookup(&quot;OrderManagerApp/ProductManagerBean/local&quot;);
+} catch(Exception lookupError) {
+    throw new ServletException(&quot;Couldn't find the ProductManager bean&quot;, lookupError);
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Example of how this is now coded in WildFly:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@EJB(lookup=&quot;java:app/OrderManagerEJB/DistributionCenterManagerBean!services.ejb.DistributionCenterManager&quot;)
+private DistributionCenterManager distributionCenterManager;
+
+@EJB(lookup=&quot;java:app/OrderManagerEJB/CustomerManagerBean!services.ejb.CustomerManager&quot;)
+private CustomerManager customerManager;
+
+@EJB(lookup=&quot;java:app/OrderManagerEJB/ProductManagerBean!services.ejb.ProductManager&quot;)
+private ProductManager productManager;</code></pre>
+        </div>
+    </div>
+            <p>
+    In addition to the change to injection, which was supported in EAP 5.1.0, the lookup name changed from:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>OrderManagerApp/DistributionCenterManagerBean/local</code></pre>
+        </div>
+    </div>
+            <p>
+    to:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>java:app/OrderManagerEJB/DistributionCenterManagerBean!services.ejb.DistributionCenterManager</code></pre>
+        </div>
+    </div>
+            <p>
+    All the other beans were changed in a similar manner. They are now based on the portable JNDI names described in EE 6.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-3"  id="66322765_OrderApplicationMigrationfromEAP5.1toWildFly8-Modifyloggingcode"  >
+        <h3>Modify logging code</h3>
+    
+            <p>
+    The next major change was to logging within the application.  The old version was using the commons logging infrastructure and Log4J that is bundled in the application server. Rather than bundling third-party logging, the application was modified to use the new WildFly&nbsp;Logging infrastructure.            </p>
+                <p>
+    The code changes themselves are rather trivial, as this example illustrates:            </p>
+                <p>
+    Old JBoss Commons Logging/Log4J:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>private static Log log = LogFactory.getLog(CustomerManagerBean.class);</code></pre>
+        </div>
+    </div>
+            <p>
+    New WildFly&nbsp;Logging            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>private static Logger logger = Logger.getLogger(CustomerManagerBean.class.toString());</code></pre>
+        </div>
+    </div>
+            <p>
+    Old JBoss Commons Logging/Log4J:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>if(log.isTraceEnabled()) {
+    log.trace(&quot;Just flushed &quot; + batchSize + &quot; rows to the database.&quot;);
+    log.trace(&quot;Total rows flushed is &quot; + (i+1));
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    New WildFly&nbsp;Logging:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>if(logger.isLoggable(Level.TRACE)) {
+    logger.log(Level.TRACE, &quot;Just flushed &quot; + batchSize + &quot; rows to the database.&quot;);
+    logger.log(Level.TRACE, &quot;Total rows flushed is &quot; + (i+1));
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    In addition to the code changes made to use the new AS7 JBoss log manager module, you must add this dependency to the <tt class=" ">MANIFEST.MF</tt> file as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Manifest-Version: 1.0
+Dependencies: org.jboss.logmanager</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322765_OrderApplicationMigrationfromEAP5.1toWildFly8-ModifythecodetouseInfinispanfor2ndlevelcache"  >
+        <h3>Modify the code to use Infinispan for 2nd level cache</h3>
+    
+            <p>
+    Jboss Cache has been replaced by Infinispan for 2nd level cache. This requires modification of the <tt class=" ">persistence.xml</tt> file.            </p>
+                <p>
+    This is what the file looked like in EAP 5.1:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;properties&gt;
+&lt;property name=&quot;hibernate.cache.region.factory_class&quot; value=&quot;org.hibernate.cache.jbc2.JndiMultiplexedJBossCacheRegionFactory&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.region.jbc2.cachefactory&quot; value=&quot;java:CacheManager&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.use_second_level_cache&quot; value=&quot;true&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.use_query_cache&quot; value=&quot;false&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.use_minimal_puts&quot; value=&quot;true&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.region.jbc2.cfg.entity&quot; value=&quot;mvcc-entity&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.region_prefix&quot; value=&quot;services&quot;/&gt;
+&lt;/properties&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    This is how it was modified to use Infinispan for the same configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;properties&gt;
+&lt;property name=&quot;hibernate.cache.use_second_level_cache&quot; value=&quot;true&quot;/&gt;
+&lt;property name=&quot;hibernate.cache.use_minimal_puts&quot; value=&quot;true&quot;/&gt;
+&lt;/properties&gt;
+&lt;shared-cache-mode&gt;ENABLE_SELECTIVE&lt;/shared-cache-mode&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    Most of the properties are removed since they will default to the correct values for the second level cache.&nbsp; See <a href="https://docs.jboss.org/author/display/AS71/JPA+Reference+Guide#JPAReferenceGuide-UsingtheInfinispansecondlevelcache">&quot;Using the Infinispan second level cache&quot;</a> for more details.            </p>
+                <p>
+    That was the extent of the code changes required to migrate the application to AS7.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322765_OrderApplicationMigrationfromEAP5.1toWildFly8-EARPackagingChanges"  >
+        <h3>EAR Packaging Changes</h3>
+    
+            <p>
+    Due to modular class loading changes, the structure of the existing EAR failed to deploy successfully in WildFly.            </p>
+                <p>
+    The old structure of the EAR was as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ jar tf OrderManagerApp.ear
+META-INF/MANIFEST.MF
+META-INF/application.xml
+OrderManagerWeb.war
+OrderManagerEntities.jar
+OrderManagerEJB.jar
+META-INF/</code></pre>
+        </div>
+    </div>
+            <p>
+    In this structure, the entities and the <tt class=" ">persistence.xml</tt> were in one jar file, <tt class=" ">OrderManagerEntities.jar</tt>, and the stateless and stateful session beans were in another jar file, <tt class=" ">OrderManagerEJB.jar</tt>. This did not work due to modular class loading changes in WildFly.&nbsp;There are a couple of ways to resolve this issue:            </p>
+    <ol class=" "><li class=" ">            <p>
+    Modify the class path in the <tt class=" ">MANIFEST.MF</tt>            </p>
+    </li><li class=" ">            <p>
+    Flatten the code and put all the beans in one JAR file.            </p>
+    </li></ol>            <p>
+    The second approach was selected because it simplified the EAR structure:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ jar tf OrderManagerApp.ear
+META-INF/application.xml
+OrderManagerWeb.war
+OrderManagerEJB.jar
+META-INF/</code></pre>
+        </div>
+    </div>
+            <p>
+    Since there is no longer an <tt class=" ">OrderManagerEntities.jar</tt> file, the <tt class=" ">applcation.xml</tt> file was modified to remove the entry.            </p>
+                <p>
+    An entry was added to the <tt class=" ">MANIFEST.MF</tt> file in the <tt class=" ">OrderManagerWeb.war</tt> to resolve another class loading issue resulting from the modification to use EJB reference injection in the servlets.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Manifest-Version: 1.0
+Dependencies: org.jboss.logmanager
+Class-Path: OrderManagerEJB.jar</code></pre>
+        </div>
+    </div>
+            <p>
+    The <tt class=" ">Class-Path</tt> entry tells the application to look in the <tt class=" ">OrderManagerEJB.jar</tt> file for the injected beans.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322765_OrderApplicationMigrationfromEAP5.1toWildFly8-Summary"  >
+        <h3>Summary</h3>
+    
+            <p>
+    Although the existing EAR structure could have worked with additional modifications to the <tt class=" ">MANIFEST.MF</tt> file, this approach seemed more appealing because it simplified the structure while maintaining the web tier in its own WAR.            </p>
+                <p>
+    The source files for both versions is attached so you can view the changes that were made to the application.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

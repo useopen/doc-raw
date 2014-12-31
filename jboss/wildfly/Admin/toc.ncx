@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+    <head>
+        <meta name="dtb:uid" content="AdminGuide"/>
+                <meta name="dtb:depth" content="5"/>
+        <meta name="dtb:totalPageCount" content="0"/>
+        <meta name="dtb:maxPageNumber" content="0"/>
+    </head>
+    <docTitle>
+        <text>Admin Guide</text>
+    </docTitle>
+    <navMap>
+
+        
+                <navPoint id="_66322684" playOrder="1">
+            <navLabel>
+                <text>Admin Guide</text>
+            </navLabel>
+            <content src="66322684.html"/>
+                                                        <navPoint id="_66322747" playOrder="2">
+                    <navLabel>
+                        <text>CLI Recipes</text>
+                    </navLabel>
+                    <content src="66322747.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322690" playOrder="3">
+                    <navLabel>
+                        <text>Core management concepts</text>
+                    </navLabel>
+                    <content src="66322690.html"/>
+                                                                        <navPoint id="_66322692" playOrder="4">
+                    <navLabel>
+                        <text>General configuration concepts</text>
+                    </navLabel>
+                    <content src="66322692.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322693" playOrder="5">
+                    <navLabel>
+                        <text>Management resources</text>
+                    </navLabel>
+                    <content src="66322693.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322691" playOrder="6">
+                    <navLabel>
+                        <text>Operating modes</text>
+                    </navLabel>
+                    <content src="66322691.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_66322740" playOrder="7">
+                    <navLabel>
+                        <text>Domain Setup</text>
+                    </navLabel>
+                    <content src="66322740.html"/>
+                </navPoint>
+                                                                            <navPoint id="_66322741" playOrder="8">
+                    <navLabel>
+                        <text>Management API reference</text>
+                    </navLabel>
+                    <content src="66322741.html"/>
+                                                                        <navPoint id="_66322746" playOrder="9">
+                    <navLabel>
+                        <text>Description of the Management Model</text>
+                    </navLabel>
+                    <content src="66322746.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322745" playOrder="10">
+                    <navLabel>
+                        <text>Detyped management and the jboss-dmr library</text>
+                    </navLabel>
+                    <content src="66322745.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322742" playOrder="11">
+                    <navLabel>
+                        <text>Global operations</text>
+                    </navLabel>
+                    <content src="66322742.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322743" playOrder="12">
+                    <navLabel>
+                        <text>The HTTP management API</text>
+                    </navLabel>
+                    <content src="66322743.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322744" playOrder="13">
+                    <navLabel>
+                        <text>The native management API</text>
+                    </navLabel>
+                    <content src="66322744.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_66322687" playOrder="14">
+                    <navLabel>
+                        <text>Management Clients</text>
+                    </navLabel>
+                    <content src="66322687.html"/>
+                                                                        <navPoint id="_66322688" playOrder="15">
+                    <navLabel>
+                        <text>Default HTTP Interface Security</text>
+                    </navLabel>
+                    <content src="66322688.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322689" playOrder="16">
+                    <navLabel>
+                        <text>Default Native Interface Security</text>
+                    </navLabel>
+                    <content src="66322689.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_66322694" playOrder="17">
+                    <navLabel>
+                        <text>Management tasks</text>
+                    </navLabel>
+                    <content src="66322694.html"/>
+                                                                        <navPoint id="_66322732" playOrder="18">
+                    <navLabel>
+                        <text>Application deployment</text>
+                    </navLabel>
+                    <content src="66322732.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_69536296" playOrder="19">
+                    <navLabel>
+                        <text>Audit logging</text>
+                    </navLabel>
+                    <content src="69536296.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322695" playOrder="20">
+                    <navLabel>
+                        <text>Command line parameters</text>
+                    </navLabel>
+                    <content src="66322695.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322696" playOrder="21">
+                    <navLabel>
+                        <text>Configuration file history</text>
+                    </navLabel>
+                    <content src="66322696.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322739" playOrder="22">
+                    <navLabel>
+                        <text>Deployment Overlays</text>
+                    </navLabel>
+                    <content src="66322739.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_84836565" playOrder="23">
+                    <navLabel>
+                        <text>Getting Server-specific Metrics in a Managed Domain</text>
+                    </navLabel>
+                    <content src="84836565.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322697" playOrder="24">
+                    <navLabel>
+                        <text>Interfaces and ports</text>
+                    </navLabel>
+                    <content src="66322697.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322698" playOrder="25">
+                    <navLabel>
+                        <text>JVM settings</text>
+                    </navLabel>
+                    <content src="66322698.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322733" playOrder="26">
+                    <navLabel>
+                        <text>Security Realms</text>
+                    </navLabel>
+                    <content src="66322733.html"/>
+                                                                        <navPoint id="_66322734" playOrder="27">
+                    <navLabel>
+                        <text>add-user utility</text>
+                    </navLabel>
+                    <content src="66322734.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322736" playOrder="28">
+                    <navLabel>
+                        <text>Detailed Configuration</text>
+                    </navLabel>
+                    <content src="66322736.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322735" playOrder="29">
+                    <navLabel>
+                        <text>Examples</text>
+                    </navLabel>
+                    <content src="66322735.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322737" playOrder="30">
+                    <navLabel>
+                        <text>Plug Ins</text>
+                    </navLabel>
+                    <content src="66322737.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                                            <navPoint id="_66322731" playOrder="31">
+                    <navLabel>
+                        <text>Starting & stopping Servers in a Managed Domain</text>
+                    </navLabel>
+                    <content src="66322731.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322700" playOrder="32">
+                    <navLabel>
+                        <text>Subsystem configuration</text>
+                    </navLabel>
+                    <content src="66322700.html"/>
+                                                                        <navPoint id="_66322706" playOrder="33">
+                    <navLabel>
+                        <text>DataSource configuration</text>
+                    </navLabel>
+                    <content src="66322706.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322707" playOrder="34">
+                    <navLabel>
+                        <text>Deployment Scanner configuration</text>
+                    </navLabel>
+                    <content src="66322707.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_79986741" playOrder="35">
+                    <navLabel>
+                        <text>EE Subsystem Configuration</text>
+                    </navLabel>
+                    <content src="79986741.html"/>
+                                                                        <navPoint id="_80150852" playOrder="36">
+                    <navLabel>
+                        <text>Default EE Bindings Configuration</text>
+                    </navLabel>
+                    <content src="80150852.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_80150850" playOrder="37">
+                    <navLabel>
+                        <text>EE Concurrency Utilities Configuration</text>
+                    </navLabel>
+                    <content src="80150850.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_80150848" playOrder="38">
+                    <navLabel>
+                        <text>Java EE Application Deployment Configuration</text>
+                    </navLabel>
+                    <content src="80150848.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                                            <navPoint id="_66322718" playOrder="39">
+                    <navLabel>
+                        <text>JMX subsystem configuration</text>
+                    </navLabel>
+                    <content src="66322718.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322712" playOrder="40">
+                    <navLabel>
+                        <text>Logging Configuration</text>
+                    </navLabel>
+                    <content src="66322712.html"/>
+                                                                        <navPoint id="_75990929" playOrder="41">
+                    <navLabel>
+                        <text>Handlers</text>
+                    </navLabel>
+                    <content src="75990929.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322717" playOrder="42">
+                    <navLabel>
+                        <text>How To</text>
+                    </navLabel>
+                    <content src="66322717.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_75990873" playOrder="43">
+                    <navLabel>
+                        <text>Loggers</text>
+                    </navLabel>
+                    <content src="75990873.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                                            <navPoint id="_66322709" playOrder="44">
+                    <navLabel>
+                        <text>Messaging configuration</text>
+                    </navLabel>
+                    <content src="66322709.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_80150931" playOrder="45">
+                    <navLabel>
+                        <text>Naming Subsystem Configuration</text>
+                    </navLabel>
+                    <content src="80150931.html"/>
+                                                                        <navPoint id="_80150944" playOrder="46">
+                    <navLabel>
+                        <text>Global Bindings Configuration</text>
+                    </navLabel>
+                    <content src="80150944.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_80150952" playOrder="47">
+                    <navLabel>
+                        <text>Remote JNDI Configuration</text>
+                    </navLabel>
+                    <content src="80150952.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                                            <navPoint id="_66322708" playOrder="48">
+                    <navLabel>
+                        <text>OSGi subsystem configuration</text>
+                    </navLabel>
+                    <content src="66322708.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322730" playOrder="49">
+                    <navLabel>
+                        <text>Resource adapters</text>
+                    </navLabel>
+                    <content src="66322730.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322728" playOrder="50">
+                    <navLabel>
+                        <text>Security subsystem configuration</text>
+                    </navLabel>
+                    <content src="66322728.html"/>
+                                                                        <navPoint id="_66322729" playOrder="51">
+                    <navLabel>
+                        <text>Authentication Modules</text>
+                    </navLabel>
+                    <content src="66322729.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                                            <navPoint id="_66322726" playOrder="52">
+                    <navLabel>
+                        <text>Simple configuration subsystems</text>
+                    </navLabel>
+                    <content src="66322726.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_67502317" playOrder="53">
+                    <navLabel>
+                        <text>Threads subsystem configuration</text>
+                    </navLabel>
+                    <content src="67502317.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_66322701" playOrder="54">
+                    <navLabel>
+                        <text>Undertow (web) subsystem configuration</text>
+                    </navLabel>
+                    <content src="66322701.html"/>
+                                                                        <navPoint id="_66322703" playOrder="55">
+                    <navLabel>
+                        <text>AJP listeners</text>
+                    </navLabel>
+                    <content src="66322703.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                                            <navPoint id="_66322711" playOrder="56">
+                    <navLabel>
+                        <text>Web services configuration</text>
+                    </navLabel>
+                    <content src="66322711.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_66322686" playOrder="57">
+                    <navLabel>
+                        <text>Target Audience</text>
+                    </navLabel>
+                    <content src="66322686.html"/>
+                </navPoint>
+                                        </navPoint>
+    </navMap>
+</ncx>

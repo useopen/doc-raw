@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Remote JNDI Access</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Remote JNDI Access</h1>
+        </div>
+        
+        <div id="80151133" class="content prepend-top">
+            <p>
+    WildFly supports two different types of remote JNDI.            </p>
+        <div class="section-2"  id="80151133_RemoteJNDIReferenceUpdateDraft-httpremoting%3A"  >
+        <h2>http-remoting:</h2>
+    
+            <p>
+    The <tt class=" ">http-remoting:</tt> protocol implementation is provided by JBoss Remote Naming project, and uses http upgrade to lookup items from the servers local JNDI. To use it, you must have the appropriate jars on the class path, if you are maven user can be done simply by adding the following to your <tt class=" ">pom.xml</tt> dependencies:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.wildfly&lt;/groupId&gt;
+  &lt;artifactId&gt;wildfly-ejb-client-bom&lt;/artifactId&gt;
+  &lt;version&gt;8.0.0.Final&lt;/version&gt;
+  &lt;type&gt;pom&lt;/type&gt;
+&lt;/dependency&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    If you are not using maven a shaded jar that contains all required classes<br/>can be found in the <tt class=" ">bin/client</tt> directory of WildFly's distribution.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>final Properties env = new Properties();
+env.put(Context.INITIAL_CONTEXT_FACTORY, &quot;org.jboss.naming.remote.client.InitialContextFactory&quot;);
+env.put(Context.PROVIDER_URL, &quot;http-remoting://localhost:8080&quot;);
+// the property below is required ONLY if there is no ejb client configuration loaded (such as a
+// jboss-ejb-client.properties in the class path) and the context will be used to lookup EJBs
+env.put(&quot;jboss.naming.client.ejb.context&quot;, true);
+InitialContext remoteContext = new InitialContext(env);
+RemoteCalculator ejb = (RemoteCalculator) remoteContext.lookup(&quot;wildfly-http-remoting-ejb/CalculatorBean!&quot;
+                + RemoteCalculator.class.getName());</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    The http-remoting client assumes JNDI names in remote lookups are relative to java:jboss/exported namespace, a lookup of an absolute JNDI name will fail.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="80151133_RemoteJNDIReferenceUpdateDraft-ejb%3A"  >
+        <h2>ejb:</h2>
+    
+            <p>
+    The ejb: namespace implementation is provided by the jboss-ejb-client library, and allows the lookup of EJB's using their application name, module name, ejb name and interface type. To use it, you must have the appropriate jars on the class path, if you are maven user can be done simply by adding the following to your <tt class=" ">pom.xml</tt> dependencies:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;org.wildfly&lt;/groupId&gt;
+  &lt;artifactId&gt;wildfly-ejb-client-bom&lt;/artifactId&gt;
+  &lt;version&gt;8.0.0.Final&lt;/version&gt;
+  &lt;type&gt;pom&lt;/type&gt;
+&lt;/dependency&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    If you are not using maven a shaded jar that contains all required classes<br/>can be found in the <tt class=" ">bin/client</tt> directory of WildFly's distribution.            </p>
+                <p>
+    This is a client side JNDI implementation. Instead of looking up an EJB on the server the lookup name contains enough information for the client side library to generate a proxy with the EJB information. When you invoke a method on this proxy it will use the current EJB client context to perform the invocation. If the current context does not have a connection to a server with the specified EJB deployed then an error will occur. Using this protocol it is possible to look up EJB's that do not actually exist, and no error will be thrown until the proxy is actually used. The exception to this is stateful session beans, which need to connect to a server when they are created in order to create the session bean instance on the server.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>final Properties env = new Properties();
+env.put(Context.URL_PKG_PREFIXES, &quot;org.jboss.ejb.client.naming&quot;);
+InitialContext remoteContext = new InitialContext(env);
+MyRemoteInterface myRemote = (MyRemoteInterface) remoteContext.lookup(&quot;ejb:myapp/myejbjar/MyEjbName\!com.test.MyRemoteInterface&quot;);
+MyStatefulRemoteInterface myStatefulRemote = (MyStatefulRemoteInterface) remoteContext.lookup(&quot;ejb:myapp/myejbjar/MyStatefulName\!comp.test.MyStatefulRemoteInterface?stateful&quot;);</code></pre>
+        </div>
+    </div>
+            <p>
+    The first example is a lookup of a singleton, stateless or EJB 2.x home interface. This lookup will not hit the server, instead a proxy will be generated for the remote interface specified in the name. The second example is for a stateful session bean, in this case the JNDI lookup will hit the server, in order to tell the server to create the SFSB session.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    For more details on how the server connections are configured, including the <strong class=" ">required</strong> jboss ejb client setup, please see <a href="66322770.html">EJB invocations from a remote client using JNDI</a>.            </p>
+        </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

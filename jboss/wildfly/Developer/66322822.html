@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Predefined client and endpoint configurations</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Predefined client and endpoint configurations</h1>
+        </div>
+        
+        <div id="66322822" class="content prepend-top">
+    <div class="section-2"  id="66322822_Predefinedclientandendpointconfigurations-Overview"  >
+        <h2>Overview</h2>
+    
+            <p>
+    JBossWS enables extra setup configuration data to be predefined and associated with an endpoint.&nbsp; Endpoint configurations can include JAX-WS handlers and key/value properties declarations that control JBossWS and Apache CXF internals.&nbsp; Predefined endpoint configurations can be used for JAX-WS client and JAX-WS endpoint setup.            </p>
+                <p>
+    Endpoint configurations can be defined in the webservice subsystem and in a deployment descriptor file within the application.&nbsp;&nbsp; There can be many endpoint configuration definitions in the webservice subsystem and in an application.&nbsp; Each endpoint configuration must have a name that is unique within the server.&nbsp; Configurations defined in an application are local to the application.&nbsp; Endpoint implementations declare the use of a specific configuration through the used of the org.jboss.ws.api.annotation.EndpointConfig annotation.&nbsp; An endpoint configuration defined in the webservices subsystem is available to all deployed applications on the system and can be referenced by name in the annotation. An endpoint configuration defined in an application must be referenced by deployment descriptor file name and the configuration name in the annotation.            </p>
+        <div class="section-3"  id="66322822_Predefinedclientandendpointconfigurations-Handlers"  >
+        <h3>Handlers</h3>
+    
+            <p>
+    Each endpoint configuration may be associated with zero or more PRE and  POST handler chains.&nbsp; Each handler chain may include JAXWS handlers.&nbsp;  For outbound messages the PRE handler chains are executed before any  handler that is attached to the endpoint using the standard means, such  as with annotation @HandlerChain, and POST handler chains are executed  after those objects have executed.&nbsp; For inbound messages the POST  handler chains are executed before any handler that is attached to the  endpoint using the standard means and the PRE handler chains are  executed after those objects have executed.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>* Server inbound messages
+Client --&gt; ... --&gt; POST HANDLER --&gt; ENDPOINT HANDLERS --&gt; PRE HANDLERS --&gt; Endpoint
+
+* Server outbound messages
+Endpoint --&gt; PRE HANDLER --&gt; ENDPOINT HANDLERS --&gt; POST HANDLERS --&gt; ... --&gt; Client</code></pre>
+        </div>
+    </div>
+            <p>
+    The same applies for client configurations.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322822_Predefinedclientandendpointconfigurations-Properties"  >
+        <h3>Properties</h3>
+    
+            <p>
+    Key/value properties are used for controlling both some Apache CXF internals and some JBossWS options. Specific supported values are mentioned where relevant in the rest of the documentation.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322822_Predefinedclientandendpointconfigurations-Assigningconfigurations"  >
+        <h2>Assigning configurations</h2>
+    
+    <div class="section-3"  id="66322822_Predefinedclientandendpointconfigurations-Endpointconfigurationassignment"  >
+        <h3>Endpoint configuration assignment</h3>
+    
+            <p>
+    Annotation, org.jboss.ws.api.annotation.EndpointConfig is used to assign an endpoint configuration to a JAX-WS endpoint implementation.&nbsp; When assigning a configuration that is defined in the webservices subsystem only the configuration name is specified.&nbsp; When assigning a configuration that is defined in the application, the relative path to the deployment descriptor and the configuration name must be specified.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>@EndpointConfig(configFile = &quot;WEB-INF/jaxws-endpoint-config.xml&quot;, configName = &quot;Custom WS-Security Endpoint&quot;)
+public class ServiceImpl implements ServiceIface
+{
+   public String sayHello()
+   {
+      return &quot;Secure Hello World!&quot;;
+   }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322822_Predefinedclientandendpointconfigurations-EndpointConfigurationDeploymentDescriptor"  >
+        <h3>Endpoint Configuration Deployment Descriptor</h3>
+    
+            <p>
+    Java EE archives that can contain JAX-WS endpoint implementations can also contain predefined endpoint configurations.&nbsp; All endpoint configuration definitions for a given archive must be provided in a single deployment descriptor file. The file must reside in directory WEB-INF for a web application and directory META-INF for a client and EJB application.&nbsp; The file name must end with extension .xml and be an implementation of schema <a href="http://anonsvn.jboss.org/repos/jbossws/spi/tags/jbossws-spi-2.1.0.Beta1/src/main/resources/schema/jbossws-jaxws-config_4_0.xsd">jbossws-jaxws-config </a>&nbsp; Common practice is to use the file name jaxws-endpoint-config.xml but this is not required.            </p>
+                <p>
+    Many  endpoint configurations can be defined within the deployment descriptor  file.&nbsp; Each configuration must have a name that is unique within the  server on which the application is deployed.&nbsp; The configuration name is  not referencable by endpoint implementations outside the application.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322822_Predefinedclientandendpointconfigurations-Clientconfigurationassignment"  >
+        <h3>Client configuration assignment</h3>
+    
+    <div class="section-4"  id="66322822_Predefinedclientandendpointconfigurations-JAXWSFeature"  >
+        <h4>JAXWS Feature</h4>
+    
+            <p>
+    The most practical way of setting a configuration is using <tt class=" ">org.jboss.ws.api.configuration.ClientConfigFeature</tt>, a JAXWS <tt class=" ">Feature</tt> extension provided by JBossWS:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import org.jboss.ws.api.configuration.ClientConfigFeature;
+
+...
+
+Service service = Service.create(wsdlURL, serviceName);
+Endpoint port = service.getPort(Endpoint.class, new ClientConfigFeature(&quot;META-INF/jaxws-client-config.xml&quot;, &quot;Custom Client Config&quot;));
+port.echo(&quot;Kermit&quot;);
+
+... or ....
+
+port = service.getPort(Endpoint.class, new ClientConfigFeature(&quot;META-INF/jaxws-client-config.xml&quot;, &quot;Custom Client Config&quot;), true); //setup properties too from the configuration
+port.echo(&quot;Kermit&quot;);
+... or ...
+
+port = service.getPort(Endpoint.class, new ClientConfigFeature(null, testConfigName)); //reads from current container configurations if available
+port.echo(&quot;Kermit&quot;);</code></pre>
+        </div>
+    </div>
+            <p>
+    JBossWS parses the specified configuration file.&nbsp; The configuration file must be found as a resource by the classloader of the current thread.&nbsp; The&nbsp;<a href="http://anonsvn.jboss.org/repos/jbossws/spi/tags/jbossws-spi-2.1.0.Beta1/src/main/resources/schema/jbossws-jaxws-config_4_0.xsd">jbossws-jaxws-config schema</a>&nbsp;defines the descriptor contents and is included in the&nbsp;<i class=" ">jbossws-spi</i>&nbsp;artifact.            </p>
+        </div>
+    
+    <div class="section-4"  id="66322822_Predefinedclientandendpointconfigurations-Explicitsetup"  >
+        <h4>Explicit setup</h4>
+    
+            <p>
+    Alternatively, JBossWS API comes with facility classes that can be used for assigning configurations when building a client.&nbsp; JAXWS handlers read from client configurations as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import org.jboss.ws.api.configuration.ClientConfigUtil;
+import org.jboss.ws.api.configuration.ClientConfigurer;
+
+...
+
+Service service = Service.create(wsdlURL, serviceName);
+Endpoint port = service.getPort(Endpoint.class);
+BindingProvider bp = (BindingProvider)port;
+ClientConfigUtil.setConfigHandlers(bp, &quot;META-INF/jaxws-client-config.xml&quot;, &quot;Custom Client Config 1&quot;);
+port.echo(&quot;Kermit&quot;);
+
+...
+
+ClientConfigurer configurer = ClientConfigUtil.resolveClientConfigurer();
+configurer.setConfigHandlers(bp, &quot;META-INF/jaxws-client-config.xml&quot;, &quot;Custom Client Config 2&quot;);
+port.echo(&quot;Kermit&quot;);
+
+...
+
+configurer.setConfigHandlers(bp, &quot;META-INF/jaxws-client-config.xml&quot;, &quot;Custom Client Config 3&quot;);
+port.echo(&quot;Kermit&quot;);
+
+
+...
+
+configurer.setConfigHandlers(bp, null, &quot;Container Custom Client Config&quot;); //reads from current container configurations if available
+port.echo(&quot;Kermit&quot;);</code></pre>
+        </div>
+    </div>
+            <p>
+    ... similarly, properties are read from client configurations as follows:    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import org.jboss.ws.api.configuration.ClientConfigUtil;
+import org.jboss.ws.api.configuration.ClientConfigurer;
+
+...
+
+Service service = Service.create(wsdlURL, serviceName);
+Endpoint port = service.getPort(Endpoint.class);
+
+ClientConfigUtil.setConfigProperties(port, &quot;META-INF/jaxws-client-config.xml&quot;, &quot;Custom Client Config 1&quot;);
+port.echo(&quot;Kermit&quot;);
+
+...
+
+ClientConfigurer configurer = ClientConfigUtil.resolveClientConfigurer();
+configurer.setConfigProperties(port, &quot;META-INF/jaxws-client-config.xml&quot;, &quot;Custom Client Config 2&quot;);
+port.echo(&quot;Kermit&quot;);
+
+...
+
+configurer.setConfigProperties(port, &quot;META-INF/jaxws-client-config.xml&quot;, &quot;Custom Client Config 3&quot;);
+port.echo(&quot;Kermit&quot;);
+
+
+...
+
+configurer.setConfigProperties(port, null, &quot;Container Custom Client Config&quot;); //reads from current container configurations if available
+port.echo(&quot;Kermit&quot;);</code></pre>
+        </div>
+    </div>
+            </p>
+                <p>
+    The default <tt class=" ">ClientConfigurer</tt> implementation parses the specified configuration file, if any, after having resolved it as a resources using the current thread context classloader. The&nbsp;<a href="http://anonsvn.jboss.org/repos/jbossws/spi/tags/jbossws-spi-2.1.0.Beta1/src/main/resources/schema/jbossws-jaxws-config_4_0.xsd">jbossws-jaxws-config schema</a>&nbsp;defines the descriptor contents and is included in the&nbsp;<i class=" ">jbossws-spi</i>&nbsp;artifact.            </p>
+        </div>
+    
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322822_Predefinedclientandendpointconfigurations-Applicationserverconfigurations"  >
+        <h2>Application server configurations</h2>
+    
+            <p>
+    WildFly allows declaring JBossWS client and server predefined configurations in the <i class=" ">webservices</i> subsystem section of the server model. As a consequence it is possible to declare server-wide handlers to be added to the chain of each endpoint or client assigned to a given configuration.            </p>
+                <p>
+    Please refer to the <a href="https://docs.jboss.org/author/display/WFLY8/Web+services+configuration">webservices subsystem documentation</a> for any detail on managing the <i class=" ">webservices</i> subsystem to add, remove or modify handlers and properties.            </p>
+                <p>
+    The allowed contents in the <i class=" ">webservices</i> subsystem are defined by the <a href="https://github.com/jbossas/jboss-as/blob/master/build/src/main/resources/docs/schema/jboss-as-webservices_1_2.xsd">schema</a> included in the application server.            </p>
+        <div class="section-3"  id="66322822_Predefinedclientandendpointconfigurations-Standardconfigurations"  >
+        <h3>Standard configurations</h3>
+    
+            <p>
+    Clients running in-container as well as endpoints are assigned standard configurations by default. Those are used unless different configurations are set as previously described. This way administrators can tune default handler chains for client and endpoints developers did not assign a specific configuration to. The name for such default configuration, to be used in the WildFly webservices subsystem are&nbsp;<tt class=" ">Standard-Client-Config</tt> and <tt class=" ">Standard-Endpoint-Config</tt>.            </p>
+        </div>
+    
+    <div class="section-3"  id="66322822_Predefinedclientandendpointconfigurations-Handlersclassloading"  >
+        <h3>Handlers classloading</h3>
+    
+            <p>
+    When setting a server-wide handler, please note the handler class needs to be available either through each ws deployment classloader or the&nbsp;<tt class=" ">org.jboss.as.webservices.server.integration:main</tt>&nbsp;module classloader. As a consequence proper module dependencies might need to be specified either in the deployments that are going to leverage a given predefined configuration or directly in the previously mentioned AS7 module.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322822_Predefinedclientandendpointconfigurations-Examples"  >
+        <h2>Examples</h2>
+    
+    <div class="confbox programlisting">
+                    <div class="title">JBoss AS 7.2 default configurations</div>
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:webservices:1.2&quot;&gt;
+    &lt;!-- ... --&gt;
+    &lt;endpoint-config name=&quot;Standard-Endpoint-Config&quot;/&gt;
+    &lt;endpoint-config name=&quot;Recording-Endpoint-Config&quot;&gt;
+        &lt;pre-handler-chain name=&quot;recording-handlers&quot; protocol-bindings=&quot;##SOAP11_HTTP ##SOAP11_HTTP_MTOM ##SOAP12_HTTP ##SOAP12_HTTP_MTOM&quot;&gt;
+            &lt;handler name=&quot;RecordingHandler&quot; class=&quot;org.jboss.ws.common.invocation.RecordingServerHandler&quot;/&gt;
+        &lt;/pre-handler-chain&gt;
+    &lt;/endpoint-config&gt;
+    &lt;client-config name=&quot;Standard-Client-Config&quot;/&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                    <div class="title">A configuration file for a deployment specific ws-security endpoint setup</div>
+                <div class="content">
+        <pre><code>&lt;jaxws-config xmlns=&quot;urn:jboss:jbossws-jaxws-config:4.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+  xmlns:javaee=&quot;http://java.sun.com/xml/ns/javaee&quot; xsi:schemaLocation=&quot;urn:jboss:jbossws-jaxws-config:4.0 schema/jbossws-jaxws-config_4_0.xsd&quot;&gt;
+  &lt;endpoint-config&gt;
+    &lt;config-name&gt;Custom WS-Security Endpoint&lt;/config-name&gt;
+    &lt;property&gt;
+      &lt;property-name&gt;ws-security.signature.properties&lt;/property-name&gt;
+      &lt;property-value&gt;bob.properties&lt;/property-value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+      &lt;property-name&gt;ws-security.encryption.properties&lt;/property-name&gt;
+      &lt;property-value&gt;bob.properties&lt;/property-value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+      &lt;property-name&gt;ws-security.signature.username&lt;/property-name&gt;
+      &lt;property-value&gt;bob&lt;/property-value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+      &lt;property-name&gt;ws-security.encryption.username&lt;/property-name&gt;
+      &lt;property-value&gt;alice&lt;/property-value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+      &lt;property-name&gt;ws-security.callback-handler&lt;/property-name&gt;
+      &lt;property-value&gt;org.jboss.test.ws.jaxws.samples.wsse.policy.basic.KeystorePasswordCallback&lt;/property-value&gt;
+    &lt;/property&gt;
+  &lt;/endpoint-config&gt;
+&lt;/jaxws-config&gt;</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                    <div class="title">JBoss AS 7.2 default configurations modified to default to SOAP messages schema-validation on</div>
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:webservices:1.2&quot;&gt;
+    &lt;!-- ... --&gt;
+    &lt;endpoint-config name=&quot;Standard-Endpoint-Config&quot;&gt;
+        &lt;property name=&quot;schema-validation-enabled&quot; value=&quot;true&quot;/&gt;
+    &lt;/endpoint-config&gt;
+    &lt;!-- ... --&gt;
+    &lt;client-config name=&quot;Standard-Client-Config&quot;&gt;
+        &lt;property name=&quot;schema-validation-enabled&quot; value=&quot;true&quot;/&gt;
+    &lt;/client-config&gt;
+&lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>

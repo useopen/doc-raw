@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>EJB invocations from a remote server instance</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>EJB invocations from a remote server instance</h1>
+        </div>
+        
+        <div id="66322798" class="content prepend-top">
+            <p>
+    The purpose of this chapter is to demonstrate how to lookup and invoke on EJBs deployed on an WildFly&nbsp;server instance <strong class=" ">from another</strong> WildFly&nbsp;server instance. This is different from invoking the EJBs <a href="https://docs.jboss.org/author/display/AS71/EJB+invocations+from+a+remote+client+using+JNDI">from a remote standalone client</a>            </p>
+                <p>
+    Let's call the server, from which the invocation happens to the EJB, as   &quot;Client Server&quot; and the server on which the bean is deployed as the   &quot;Destination Server&quot;.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Note that this chapter deals with the case where the bean is deployed on the &quot;Destination Server&quot; but <strong class=" ">not</strong> on the &quot;Client Server&quot;.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Applicationpackaging"  >
+        <h2>Application packaging</h2>
+    
+            <p>
+    In this example, we'll consider a EJB which is packaged in a myejb.jar which is within a myapp.ear. Here's how it would look like:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>myapp.ear
+|
+|---- myejb.jar
+|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|
+|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|---- &lt;org.myapp.ejb.*&gt; // EJB classes</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    Note that packaging itself isn't really important in the context of this article. You can deploy the EJBs in any standard way (.ear, .war or .jar).            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Beans"  >
+        <h2>Beans</h2>
+    
+            <p>
+    In our example, we'll consider a simple stateless session bean which is as follows:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package org.myapp.ejb;
+
+public interface Greeter {
+&nbsp;&nbsp; &nbsp;
+&nbsp;&nbsp;&nbsp; String greet(String user);
+}</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>package org.myapp.ejb;
+
+import javax.ejb.Remote;
+import javax.ejb.Stateless;
+
+@Stateless
+@Remote (Greeter.class)
+public class GreeterBean implements Greeter {
+
+&nbsp;&nbsp;&nbsp; @Override
+&nbsp;&nbsp;&nbsp; public String greet(String user) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; return &quot;Hello &quot; + user + &quot;, have a pleasant day!&quot;;
+&nbsp;&nbsp;&nbsp; }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Security"  >
+        <h2>Security</h2>
+    
+            <p>
+    WildFly 8&nbsp;is secure by default. What this means is that no communication can happen with an WildFly&nbsp;instance from a remote client (irrespective of whether it is a standalone client or another server instance) without passing the appropriate credentials. Remember that in this example, our &quot;client server&quot; will be communicating with the &quot;destination server&quot;. So in order to allow this communication to happen successfully, we'll have to configure user credentials which we will be using during this communication. So let's start with the necessary configurations for this.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Configuringauseronthe%22DestinationServer%22"  >
+        <h2>Configuring a user on the &quot;Destination Server&quot;</h2>
+    
+            <p>
+    As a first step we'll configure a user on the destination server who will be allowed to access the destination server. We create the user using the <tt class=" ">add-user</tt> script that's available in the JBOSS_HOME/bin folder. In this example, we'll be configuring a <tt class=" ">Application User</tt> named <tt class=" ">ejb</tt> and with a password <tt class=" ">test</tt> in the <tt class=" ">ApplicationRealm</tt>. Running the <tt class=" ">add-user</tt> script is an interactive process and you will see questions/output as follows:            </p>
+        <div class="confbox programlisting">
+                    <div class="title">add-user</div>
+                <div class="content">
+        <pre><code>jpai@jpai-laptop:bin$ ./add-user.sh
+
+What type of user do you wish to add?
+&amp;nbsp;a) Management User (mgmt-users.properties)
+&amp;nbsp;b) Application User (application-users.properties)
+(a): b
+
+Enter the details of the new user to add.
+Realm (ApplicationRealm) :
+Username : ejb
+Password :
+Re-enter Password :
+What roles do you want this user to belong to? (Please enter a comma separated list, or leave blank for none)\[&amp;nbsp; \]:
+About to add user 'ejb' for realm 'ApplicationRealm'
+Is this correct yes/no? yes
+Added user 'ejb' to file '/jboss-as-7.1.1.Final/standalone/configuration/application-users.properties'
+Added user 'ejb' to file '/jboss-as-7.1.1.Final/domain/configuration/application-users.properties'
+Added user 'ejb' with roles to file '/jboss-as-7.1.1.Final/standalone/configuration/application-roles.properties'
+Added user 'ejb' with roles to file '/jboss-as-7.1.1.Final/domain/configuration/application-roles.properties'</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see in the output above we have now configured a user on the destination server who'll be allowed to access this server. We'll use this user credentials later on in the client server for communicating with this server. The important bits to remember are the user we have created in this example is <tt class=" ">ejb</tt> and the password&nbsp; is <tt class=" ">test.</tt>            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    Note that you can use any username and password combination you want to.            </p>
+        </div>
+    
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    You do <strong class=" ">not</strong> require the server to be started to add a user using the add-user script.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Startthe%22DestinationServer%22"  >
+        <h2>Start the &quot;Destination Server&quot;</h2>
+    
+            <p>
+    As a next step towards running this example, we'll start the &quot;Destination Server&quot;. In this example, we'll use the standalone server and use the <i class=" ">standalone-full.xml</i> configuration. The startup command will look like:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./standalone.sh -server-config=standalone-full.xml</code></pre>
+        </div>
+    </div>
+            <p>
+    Ensure that the server has started without any errors.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    It's very important to note that if you are starting both the server instances on the same machine, then each of those server instances <strong class=" ">must</strong> have a unique <tt class=" ">jboss.node.name</tt> system property. You can do that by passing an appropriate value for <tt class=" ">-Djboss.node.name</tt> system property to the startup script:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./standalone.sh -server-config=standalone-full.xml -Djboss.node.name=&lt;add appropriate value here&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Deployingtheapplication"  >
+        <h2>Deploying the application</h2>
+    
+            <p>
+    The application (<i class=" ">myapp.ear</i> in our case) will be deployed to &quot;Destination Server&quot;. The process of deploying the application is out of scope of this chapter. You can either use the Command Line Interface or the Admin console or any IDE or manually copy it to JBOSS_HOME/standalone/deployments folder (for standalone server). Just ensure that the application has been deployed successfully.            </p>
+                <p>
+    So far, we have built a EJB application and deployed it on the &quot;Destination Server&quot;. Now let's move to the &quot;Client Server&quot; which acts as the client for the deployed EJBs on the &quot;Destination Server&quot;.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Configuringthe%22ClientServer%22topointtotheEJBremotingconnectoronthe%22DestinationServer%22"  >
+        <h2>Configuring the &quot;Client Server&quot; to point to the EJB remoting connector on the &quot;Destination Server&quot;</h2>
+    
+            <p>
+    As a first step on the &quot;Client Server&quot;, we need to let the server know about the &quot;Destination Server&quot;'s EJB remoting connector, over which it can communicate during the EJB invocations. To do that, we'll have to add a &quot;<i class=" ">remote-outbound-connection</i>&quot; to the remoting subsystem on the &quot;Client Server&quot;. The &quot;<i class=" ">remote-outbound-connection</i>&quot; configuration indicates that a outbound connection will be created to a remote server instance from that server. The &quot;<i class=" ">remote-outbound-connection</i>&quot; will be backed by a &quot;<i class=" ">outbound-socket-binding</i>&quot; which will point to a remote host and a remote port (of the &quot;Destination Server&quot;). So let's see how we create these configurations.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Startthe%22ClientServer%22"  >
+        <h2>Start the &quot;Client Server&quot;</h2>
+    
+            <p>
+    In this example, we'll start the &quot;Client Server&quot; on the same machine as the &quot;Destination Server&quot;. We have copied the entire server installation to a different folder and while starting the &quot;Client Server&quot; we'll use a port-offset (of 100 in this example) to avoid port conflicts:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./standalone.sh -server-config=standalone-full.xml -Djboss.socket.binding.port-offset=100</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Createasecurityrealmontheclientserver"  >
+        <h2>Create a security realm on the client server</h2>
+    
+            <p>
+    Remember that we need to communicate with a secure destination server. In order to do that the client server has to pass the user credentials to the destination server. Earlier we created a user on the destination server who'll be allowed to communicate with that server. Now on the &quot;client server&quot; we'll create a security-realm which will be used to pass the user information.            </p>
+                <p>
+    In this example we'll use a security realm which stores a Base64 encoded password and then passes on that credentials when asked for. Earlier we created a user named <tt class=" ">ejb</tt> and password <tt class=" ">test</tt>. So our first task here would be to create the base64 encoded version of the password <tt class=" ">test</tt>. You can use any utility which generates you a base64 version for a string. I used <a href="http://www.base64encode.org/">this online site</a> which generates the base64 encoded string. So for the <tt class=" ">test</tt> password, the base64 encoded version is <tt class=" ">dGVzdA==</tt>            </p>
+        <div class="confbox admonition admonition-tip">
+        
+            <p>
+    While generating the base64 encoded string make sure that you don't have any trailing or leading spaces for the original password. That can lead to incorrect encoded versions being generated.            </p>
+        </div>
+    
+    <div class="confbox admonition admonition-tip">
+        
+            <p>
+    With new versions the add-user script will show the base64 password if you type 'y' if you've been ask            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>Is this new user going to be used for one AS process to connect to another AS process e.g. slave domain controller?</code></pre>
+        </div>
+    </div>
+    </div>
+    
+            <p>
+    Now that we have generated that base64 encoded password, let's use in the in the security realm that we are going to configure on the &quot;client server&quot;. I'll first shutdown the client server and edit the standlaone-full.xml file to add the following in the <tt class=" ">&lt;management&gt;</tt> section            </p>
+                <p>
+    Now let's create a &quot;<i class=" ">security-realm</i>&quot; for the base64 encoded password.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/core-service=management/security-realm=ejb-security-realm:add()
+/core-service=management/security-realm=ejb-security-realm/server-identity=secret:add(value=dGVzdA==)</code></pre>
+        </div>
+    </div>
+    <div class="confbox admonition admonition-note">
+        
+            <p>
+    Notice that the CLI show the message <i class=" ">&quot;process-state&quot; =&gt; &quot;reload-required&quot;</i>, so you have to restart the server before you can use this change.            </p>
+        </div>
+    
+            <p>
+    upon successful invocation of this command, the following configuration will be created in the <i class=" ">management</i> section:            </p>
+        <div class="confbox programlisting">
+                    <div class="title">standalone-full.xml</div>
+                <div class="content">
+        <pre><code>&lt;management&gt;
+        &lt;security-realms&gt;
+            ...
+            &lt;security-realm name=&quot;ejb-security-realm&quot;&gt;
+                &lt;server-identities&gt;
+                    &lt;secret value=&quot;dGVzdA==&quot;/&gt;
+                &lt;/server-identities&gt;
+            &lt;/security-realm&gt;
+        &lt;/security-realms&gt;
+...</code></pre>
+        </div>
+    </div>
+            <p>
+    As you can see I have created a security realm named &quot;ejb-security-realm&quot; (you can name it anything) with the base64 encoded password. So that completes the security realm configuration for the client server. Now let's move on to the next step.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Createaoutboundsocketbindingonthe%22ClientServer%22"  >
+        <h2>Create a outbound-socket-binding on the &quot;Client Server&quot;</h2>
+    
+            <p>
+    Let's first create a <i class=" ">outbound-socket-binding</i> which points the &quot;Destination Server&quot;'s host and port. We'll use the CLI to create this configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=remote-ejb:add(host=localhost, port=8080)</code></pre>
+        </div>
+    </div>
+            <p>
+    The above command will create a outbound-socket-binding named &quot;<i class=" ">remote-ejb</i>&quot; (we can name it anything) which points to &quot;localhost&quot; as the host and port 8080 as the destination port. Note that the host information should match the host/IP of the &quot;Destination Server&quot; (in this example we are running on the same machine so we use &quot;localhost&quot;) and&nbsp; the port information should match the http-remoting connector port used by the EJB subsystem (by default it's 8080). When this command is run successfully, we'll see that the standalone-full.xml (the file which we used to start the server) was updated with the following outbound-socket-binding in the socket-binding-group:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;socket-binding-group name=&quot;standard-sockets&quot; default-interface=&quot;public&quot; port-offset=&quot;${jboss.socket.binding.port-offset:0}&quot;&gt;
+        ...
+        &lt;outbound-socket-binding name=&quot;remote-ejb&quot;&gt;
+            &lt;remote-destination host=&quot;localhost&quot; port=&quot;8080&quot;/&gt;
+        &lt;/outbound-socket-binding&gt;
+    &lt;/socket-binding-group&gt;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Createa%22remoteoutboundconnection%22whichusesthisnewlycreated%22outboundsocketbinding%22"  >
+        <h2>Create a &quot;remote-outbound-connection&quot; which uses this newly created &quot;outbound-socket-binding&quot;</h2>
+    
+            <p>
+    Now let's create a &quot;<i class=" ">remote-outbound-connection</i>&quot; which will use the newly created outbound-socket-binding (pointing to the EJB remoting connector of the &quot;Destination Server&quot;). We'll continue to use the CLI to create this configuration:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=remoting/remote-outbound-connection=remote-ejb-connection:add(outbound-socket-binding-ref=remote-ejb, protocol=http-remoting, security-realm=ejb-security-realm, username=ejb)</code></pre>
+        </div>
+    </div>
+            <p>
+    The above command creates a remote-outbound-connection, named &quot;<i class=" ">remote-ejb-connection</i>&quot; (we can name it anything), in the remoting subsystem and uses the previously created &quot;<i class=" ">remote-ejb</i>&quot; outbound-socket-binding (notice the outbound-socket-binding-ref in that command) with the http-remoting protocol. Furthermore, we also set the security-realm attribute to point to the security-realm that we created in the previous step. Also notice that we have set the username attribute to use the user name who is allowed to communicate with the destination server.            </p>
+                <p>
+    What this step does is, it creates a outbound connection, on the client server, to the remote destination server and sets up the username to the user who allowed to communicate with that destination server and also sets up the security-realm to a pre-configured security-realm capable of passing along the user credentials (in this case the password). This way when a connection has to be established from the client server to the destination server, the connection creation logic will have the necessary security credentials to pass along and setup a successful secured connection.            </p>
+                <p>
+    Now let's run the following two operations to set some default connection creation options for the outbound connection:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=remoting/remote-outbound-connection=remote-ejb-connection/property=SASL_POLICY_NOANONYMOUS:add(value=false)</code></pre>
+        </div>
+    </div>
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=remoting/remote-outbound-connection=remote-ejb-connection/property=SSL_ENABLED:add(value=false)</code></pre>
+        </div>
+    </div>
+            <p>
+    Ultimately, upon successful invocation of this command, the following configuration will be created in the remoting subsystem:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;subsystem xmlns=&quot;urn:jboss:domain:remoting:1.1&quot;&gt;
+....
+            &lt;outbound-connections&gt;
+                &lt;remote-outbound-connection name=&quot;remote-ejb-connection&quot; outbound-socket-binding-ref=&quot;remote-ejb&quot; protocol=&quot;http-remoting&quot; security-realm=&quot;ejb-security-realm&quot; username=&quot;ejb&quot;&gt;
+                    &lt;properties&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name=&quot;SASL_POLICY_NOANONYMOUS&quot; value=&quot;false&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property name=&quot;SSL_ENABLED&quot; value=&quot;false&quot;/&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/properties&gt;
+                &lt;/remote-outbound-connection&gt;
+            &lt;/outbound-connections&gt;
+        &lt;/subsystem&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    From a server configuration point of view, that's all we need on the &quot;Client Server&quot;. Our next step is to deploy an application on the &quot;Client Server&quot; which will invoke on the bean deployed on the &quot;Destination Server&quot;.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Packagingtheclientapplicationonthe%22ClientServer%22"  >
+        <h2>Packaging the client application on the &quot;Client Server&quot;</h2>
+    
+            <p>
+    Like on the &quot;Destination Server&quot;, we'll use .ear packaging for the client application too. But like previously mentioned, that's not mandatory. You can even use a .war or .jar deployments. Here's how our client application packaging will look like:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>client-app.ear
+|
+|--- META-INF
+|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|
+|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|--- jboss-ejb-client.xml
+|
+|--- web.war
+|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|
+|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|--- WEB-INF/classes
+|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|
+|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;|---- &lt;org.myapp.FooServlet&gt; // classes in the web app</code></pre>
+        </div>
+    </div>
+            <p>
+    In the client application we'll use a servlet which invokes on the bean deployed on the &quot;Destination Server&quot;. We can even invoke the bean on the &quot;Destination Server&quot; from a EJB on the &quot;Client Server&quot;. The code remains the same (JNDI lookup, followed by invocation on the proxy). The important part to notice in this client application is the file <i class=" ">jboss-ejb-client.xml</i> which is packaged in the META-INF folder of a top level deployment (in this case our client-app.ear). This <i class=" ">jboss-ejb-client.xml</i> contains the EJB client configurations which will be used during the EJB invocations for finding the appropriate destinations (also known as, EJB receivers). The contents of the jboss-ejb-client.xml are explained next.            </p>
+        <div class="confbox admonition admonition-note">
+        
+            <p>
+    If your application is deployed as a top level .war  deployment, then the jboss-ejb-client.xml is expected to be placed in  .war/WEB-INF/ folder (i.e. the same location where you place any web.xml  file).            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Contentsonjbossejbclient.xml"  >
+        <h2>Contents on jboss-ejb-client.xml</h2>
+    
+            <p>
+    The jboss-ejb-client.xml will look like:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>&lt;jboss-ejb-client xmlns=&quot;urn:jboss:ejb-client:1.0&quot;&gt;
+    &lt;client-context&gt;
+        &lt;ejb-receivers&gt;
+            &lt;remoting-ejb-receiver outbound-connection-ref=&quot;remote-ejb-connection&quot;/&gt;
+        &lt;/ejb-receivers&gt;
+    &lt;/client-context&gt;
+&lt;/jboss-ejb-client&gt;</code></pre>
+        </div>
+    </div>
+            <p>
+    You'll notice that we have configured the EJB client context (for this application) to use a remoting-ejb-receiver which points to our earlier created &quot;<i class=" ">remote-outbound-connection</i>&quot; named &quot;<i class=" ">remote-ejb-connection</i>&quot;. This links the EJB client context to use the &quot;<i class=" ">remote-ejb-connection</i>&quot; which ultimately points to the EJB remoting connector on the &quot;Destination Server&quot;.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Deploytheclientapplication"  >
+        <h2>Deploy the client application</h2>
+    
+            <p>
+    Let's deploy the client application on the &quot;Client Server&quot;. The process of deploying the application is out of scope, of this chapter. You can use either the CLI or the admin console or a IDE or deploy manually to JBOSS_HOME/standalone/deployments folder. Just ensure that the application is deployed successfully.            </p>
+        </div>
+    
+    <div class="section-2"  id="66322798_EJBinvocationsfromaremoteserverinstance-Clientcodeinvokingthebean"  >
+        <h2>Client code invoking the bean</h2>
+    
+            <p>
+    We mentioned that we'll be using a servlet to invoke on the bean, but the code to invoke the bean isn't servlet specific and can be used in other components (like EJB) too. So let's see how it looks like:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>import javax.naming.Context;
+import java.util.Hashtable;
+import javax.naming.InitialContext;
+
+...
+public void invokeOnBean() {
+        try {
+            final Hashtable props = new Hashtable();
+            // setup the ejb: namespace URL factory
+            props.put(Context.URL_PKG_PREFIXES, &quot;org.jboss.ejb.client.naming&quot;);
+            // create the InitialContext
+            final Context context = new javax.naming.InitialContext(props);
+
+            // Lookup the Greeter bean using the ejb: namespace syntax which is explained here https://docs.jboss.org/author/display/AS71/EJB+invocations+from+a+remote+client+using+JNDI
+            final Greeter bean = (Greeter) context.lookup(&quot;ejb:&quot; + &quot;myapp&quot; + &quot;/&quot; + &quot;myejb&quot; + &quot;/&quot; + &quot;&quot; + &quot;/&quot; + &quot;GreeterBean&quot; + &quot;!&quot; + org.myapp.ejb.Greeter.class.getName());
+
+			// invoke on the bean
+			final String greeting = bean.greet(&quot;Tom&quot;);
+
+            System.out.println(&quot;Received greeting: &quot; + greeting);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    That's it! The above code will invoke on the bean deployed on the &quot;Destination Server&quot; and return the result.            </p>
+        </div>
+    
+        </div>
+    </div>
+</body>
+</html>

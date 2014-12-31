@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>CLI Recipes</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>CLI Recipes</h1>
+        </div>
+        
+        <div id="66322747" class="content prepend-top">
+<ul class=" "><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Properties">Properties</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Adding%2CreadingandremovingsystempropertyusingCLI">Adding, reading and removing system property using CLI</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Overviewofallsystemproperties">Overview of all system properties</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Configuration">Configuration</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-ListSubsystems">List Subsystems</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Listdescriptionofavailableattributesandchilds">List description of available attributes and childs</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-ViewconfigurationasXMLfordomainmodelorhostmodel">View configuration as XML for domain model or host model</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Takeasnapshotofwhatthecurrentdomainis">Take a snapshot of what the current domain is</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Takethelatestsnapshotofthehost.xmlforaparticularhost">Take the latest snapshot of the host.xml for a particular host</a>            </p>
+    </li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Howtogetinterfaceaddress">How to get interface address</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Runtime">Runtime</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-GetallconfigurationandruntimedetailsfromCLI">Get all configuration and runtime details from CLI</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Scripting">Scripting</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Windowsand%22Pressanykeytocontinue...%22issue">Windows and &quot;Press any key to continue ...&quot; issue</a>            </p>
+    </li></ul></li><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Statistics">Statistics</a>            </p>
+    <ul class=" "><li class=" ">            <p>
+    <a href="66322747.html#66322747_CLIRecipes-Readstatisticsofactivedatasources">Read statistics of active datasources</a>            </p>
+    </li></ul></li></ul>    <div class="section-2"  id="66322747_CLIRecipes-Properties"  >
+        <h2>Properties</h2>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-Adding%2CreadingandremovingsystempropertyusingCLI"  >
+        <h3>Adding, reading and removing system property using CLI</h3>
+    
+            <p>
+    For standalone mode:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>$ ./bin/jboss-cli.sh --connect controller=IP_ADDRESS
+[standalone@IP_ADDRESS:9999 /] /system-property=foo:add(value=bar)
+[standalone@IP_ADDRESS:9999 /] /system-property=foo:read-resource
+{
+&nbsp;&nbsp;&nbsp; &quot;outcome&quot;
+}
+[standalone@IP_ADDRESS:9999 /] /system-property=foo:remove
+{&quot;outcome&quot; =&gt; &quot;success&quot;}</code></pre>
+        </div>
+    </div>
+            <p>
+    For domain mode the same commands are used, you can add/read/remove system properties for:<br/>All hosts and server instances in domain            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@IP_ADDRESS:9999 /] /system-property=foo:add(value=bar)
+[domain@IP_ADDRESS:9999 /] /system-property=foo:read-resource
+[domain@IP_ADDRESS:9999 /] /system-property=foo:remove</code></pre>
+        </div>
+    </div>
+            <p>
+    Host and its server instances            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@IP_ADDRESS:9999 /] /host=master/system-property=foo:add(value=bar)
+[domain@IP_ADDRESS:9999 /] /host=master/system-property=foo:read-resource
+[domain@IP_ADDRESS:9999 /] /host=master/system-property=foo:remove</code></pre>
+        </div>
+    </div>
+            <p>
+    Just one server instance            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@IP_ADDRESS:9999 /] /host=master/server-config=server-one/system-property=foo:add(value=bar)
+[domain@IP_ADDRESS:9999 /] /host=master/server-config=server-one/system-property=foo:read-resource
+[domain@IP_ADDRESS:9999 /] /host=master/server-config=server-one/system-property=foo:remove</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-Overviewofallsystemproperties"  >
+        <h3>Overview of all system properties</h3>
+    
+            <p>
+    Overview of all system properties in WildFly 8 including OS system properties and properties specified on command line using -D, -P or --properties arguments.            </p>
+                <p>
+    Standalone            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@IP_ADDRESS:9999 /] /core-service=platform-mbean/type=runtime:read-attribute(name=system-properties)</code></pre>
+        </div>
+    </div>
+            <p>
+    Domain            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@IP_ADDRESS:9999 /] /host=master/core-service=platform-mbean/type=runtime:read-attribute(name=system-properties)
+[domain@IP_ADDRESS:9999 /] /host=master/server=server-one/core-service=platform-mbean/type=runtime:read-attribute(name=system-properties)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322747_CLIRecipes-Configuration"  >
+        <h2>Configuration</h2>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-ListSubsystems"  >
+        <h3>List Subsystems</h3>
+    
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[standalone@localhost:9999 /] /:read-children-names(child-type=subsystem)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; [
+        &quot;batch&quot;,
+        &quot;datasources&quot;,
+        &quot;deployment-scanner&quot;,
+        &quot;ee&quot;,
+        &quot;ejb3&quot;,
+        &quot;infinispan&quot;,
+        &quot;io&quot;,
+        &quot;jaxrs&quot;,
+        &quot;jca&quot;,
+        &quot;jdr&quot;,
+        &quot;jmx&quot;,
+        &quot;jpa&quot;,
+        &quot;jsf&quot;,
+        &quot;logging&quot;,
+        &quot;mail&quot;,
+        &quot;naming&quot;,
+        &quot;pojo&quot;,
+        &quot;remoting&quot;,
+        &quot;resource-adapters&quot;,
+        &quot;sar&quot;,
+        &quot;security&quot;,
+        &quot;threads&quot;,
+        &quot;transactions&quot;,
+        &quot;undertow&quot;,
+        &quot;webservices&quot;,
+        &quot;weld&quot;
+    ]
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-Listdescriptionofavailableattributesandchilds"  >
+        <h3>List description of available attributes and childs</h3>
+    
+            <p>
+    Descriptions, possible attribute type and values, permission and whether expressions ( <i class=" ">${ ... }</i> ) are allowed from the underlying model are shown by the read-resource-description command.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=datasources/data-source=ExampleDS:read-resource-description
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;description&quot; =&gt; &quot;A JDBC data-source configuration&quot;,
+        &quot;head-comment-allowed&quot; =&gt; true,
+        &quot;tail-comment-allowed&quot; =&gt; true,
+        &quot;attributes&quot; =&gt; {
+            &quot;connection-url&quot; =&gt; {
+                &quot;type&quot; =&gt; STRING,
+                &quot;description&quot; =&gt; &quot;The JDBC driver connection URL&quot;,
+                &quot;expressions-allowed&quot; =&gt; true,
+                &quot;nillable&quot; =&gt; false,
+                &quot;min-length&quot; =&gt; 1L,
+                &quot;max-length&quot; =&gt; 2147483647L,
+                &quot;access-type&quot; =&gt; &quot;read-write&quot;,
+                &quot;storage&quot; =&gt; &quot;configuration&quot;,
+                &quot;restart-required&quot; =&gt; &quot;no-services&quot;
+            },
+            &quot;driver-class&quot; =&gt; {
+                &quot;type&quot; =&gt; STRING,
+                &quot;description&quot; =&gt; &quot;The fully qualified name of the JDBC driver class&quot;,
+                &quot;expressions-allowed&quot; =&gt; true,
+                &quot;nillable&quot; =&gt; true,
+                &quot;min-length&quot; =&gt; 1L,
+                &quot;max-length&quot; =&gt; 2147483647L,
+                &quot;access-type&quot; =&gt; &quot;read-write&quot;,
+                &quot;storage&quot; =&gt; &quot;configuration&quot;,
+                &quot;restart-required&quot; =&gt; &quot;no-services&quot;
+            },
+            &quot;datasource-class&quot; =&gt; {
+                &quot;type&quot; =&gt; STRING,
+                &quot;description&quot; =&gt; &quot;The fully qualified name of the JDBC datasource class&quot;,
+                &quot;expressions-allowed&quot; =&gt; true,
+                &quot;nillable&quot; =&gt; true,
+                &quot;min-length&quot; =&gt; 1L,
+                &quot;max-length&quot; =&gt; 2147483647L,
+                &quot;access-type&quot; =&gt; &quot;read-write&quot;,
+                &quot;storage&quot; =&gt; &quot;configuration&quot;,
+                &quot;restart-required&quot; =&gt; &quot;no-services&quot;
+            },
+            &quot;jndi-name&quot; =&gt; {
+                &quot;type&quot; =&gt; STRING,
+                &quot;description&quot; =&gt; &quot;Specifies the JNDI name for the datasource&quot;,
+                &quot;expressions-allowed&quot; =&gt; true,
+                &quot;nillable&quot; =&gt; false,
+                &quot;access-type&quot; =&gt; &quot;read-write&quot;,
+                &quot;storage&quot; =&gt; &quot;configuration&quot;,
+                &quot;restart-required&quot; =&gt; &quot;no-services&quot;
+            },
+           ...</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-ViewconfigurationasXMLfordomainmodelorhostmodel"  >
+        <h3>View configuration as XML for domain model or host model</h3>
+    
+            <p>
+    Assume you have a host that is called master            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9999 /] /host=master:read-config-as-xml</code></pre>
+        </div>
+    </div>
+            <p>
+    Just for the domain or standalone            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9999 /] :read-config-as-xml</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-Takeasnapshotofwhatthecurrentdomainis"  >
+        <h3>Take a snapshot of what the current domain is</h3>
+    
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9999 /] :take-snapshot()
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;domain-results&quot; =&gt; {&quot;step-1&quot; =&gt; {&quot;name&quot; =&gt; &quot;JBOSS_HOME/domain/configuration/domain_xml_history/snapshot/20110908-165222603domain.xml&quot;}},
+        &quot;server-operations&quot; =&gt; undefined
+    }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-Takethelatestsnapshotofthehost.xmlforaparticularhost"  >
+        <h3>Take the latest snapshot of the host.xml for a particular host</h3>
+    
+            <p>
+    Assume you have a host that is called master            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9999 /]  /host=master:take-snapshot
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; {
+        &quot;domain-results&quot; =&gt; {&quot;step-1&quot; =&gt; {&quot;name&quot; =&gt; &quot;JBOSS_HOME/domain/configuration/host_xml_history/snapshot/20110908-165640215host.xml&quot;}},
+        &quot;server-operations&quot; =&gt; undefined
+    }
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-Howtogetinterfaceaddress"  >
+        <h3>How to get interface address</h3>
+    
+            <p>
+    The attribute for interface is named &quot;resolved-address&quot;.  It's a runtime attribute so it does not show up in :read-resource by default. You have to add the &quot;include-runtime&quot; parameter.            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./jboss-cli.sh --connect
+Connected to standalone controller at localhost:9999
+[standalone@localhost:9999 /] cd interface=public
+[standalone@localhost:9999 interface=public] :read-resource(include-runtime=true)
+{
+     &quot;outcome&quot; =&gt; &quot;success&quot;,
+     &quot;result&quot; =&gt; {
+         &quot;any&quot; =&gt; undefined,
+         &quot;any-address&quot; =&gt; undefined,
+         &quot;any-ipv4-address&quot; =&gt; undefined,
+         &quot;any-ipv6-address&quot; =&gt; undefined,
+         &quot;criteria&quot; =&gt; [(&quot;inet-address&quot; =&gt; expression &quot;${jboss.bind.address:127.0.0.1}&quot;)],
+         &quot;inet-address&quot; =&gt; expression &quot;${jboss.bind.address:127.0.0.1}&quot;,
+         &quot;link-local-address&quot; =&gt; undefined,
+         &quot;loopback&quot; =&gt; undefined,
+         &quot;loopback-address&quot; =&gt; undefined,
+         &quot;multicast&quot; =&gt; undefined,
+         &quot;name&quot; =&gt; &quot;public&quot;,
+         &quot;nic&quot; =&gt; undefined,
+         &quot;nic-match&quot; =&gt; undefined,
+         &quot;not&quot; =&gt; undefined,
+         &quot;point-to-point&quot; =&gt; undefined,
+         &quot;public-address&quot; =&gt; undefined,
+         &quot;resolved-address&quot; =&gt; &quot;127.0.0.1&quot;,
+         &quot;site-local-address&quot; =&gt; undefined,
+         &quot;subnet-match&quot; =&gt; undefined,
+         &quot;up&quot; =&gt; undefined,
+         &quot;virtual&quot; =&gt; undefined
+     }
+}
+[standalone@localhost:9999 interface=public] :read-attribute(name=resolved-address)
+{
+     &quot;outcome&quot; =&gt; &quot;success&quot;,
+     &quot;result&quot; =&gt; &quot;127.0.0.1&quot;
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    It's similar for domain, just specify path to server instance:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>[domain@localhost:9999 /] /host=master/server=server-one/interface=public:read-attribute(name=resolved-address)
+{
+    &quot;outcome&quot; =&gt; &quot;success&quot;,
+    &quot;result&quot; =&gt; &quot;127.0.0.1&quot;
+}</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322747_CLIRecipes-Runtime"  >
+        <h2>Runtime</h2>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-GetallconfigurationandruntimedetailsfromCLI"  >
+        <h3>Get all configuration and runtime details from CLI</h3>
+    
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>./bin/jboss-cli.sh -c command=&quot;:read-resource(include-runtime=true, recursive=true, recursive-depth=10)&quot;</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322747_CLIRecipes-Scripting"  >
+        <h2>Scripting</h2>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-Windowsand%22Pressanykeytocontinue...%22issue"  >
+        <h3>Windows and &quot;Press any key to continue ...&quot; issue</h3>
+    
+            <p>
+    WildFly 8 scripts for Windows end with &quot;Press any key to continue ...&quot;. This behavior is useful when script is executed by double clicking the script but not when you need to invoke several commands from custom script (e.g. 'bin/jboss-admin.bat --connect command=:shutdown').            </p>
+                <p>
+    To avoid &quot;Press any key to continue ...&quot; message you need to specify NOPAUSE variable. Call 'set NOPAUSE=true' in command line before running any WildFly 8&nbsp;.bat script or include it in your custom script before invoking scripts from WildFly 8.            </p>
+        </div>
+    
+    </div>
+    
+    <div class="section-2"  id="66322747_CLIRecipes-Statistics"  >
+        <h2>Statistics</h2>
+    
+    <div class="section-3"  id="66322747_CLIRecipes-Readstatisticsofactivedatasources"  >
+        <h3>Read statistics of active datasources</h3>
+    
+    <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=datasources/data-source=ExampleDS/statistics=pool:read-resource(include-runtime=true)
+/subsystem=datasources/data-source=ExampleDS/statistics=jdbc:read-resource(include-runtime=true)</code></pre>
+        </div>
+    </div>
+            <p>
+    or            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>/subsystem=datasources/data-source=ExampleDS:read-resource(include-runtime=true,recursive=true)</code></pre>
+        </div>
+    </div>
+    </div>
+    
+    </div>
+    
+        </div>
+    </div>
+</body>
+</html>
