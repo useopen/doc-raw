@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Zero-Copy Transfers</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Zero-Copy Transfers</h1>
+        </div>
+        
+        <div id="50233424" class="content prepend-top">
+            <p>
+    The term &quot;zero-copy&quot; refers to the concept of moving data between two different channels without having to copy the data to or from buffers.  NIO supports &quot;zero-copy&quot; I/O by way of two methods on the FileChannel class: transferTo and transferFrom. These methods accept either a readable or writable channel as an argument. Since XNIO extends the NIO channels for its stream types, you can pass XNIO stream channel types directly in to these methods.  However, most JDKs will, in reality, probe the given channel type and perform special optimizations for certain implementations. Because of this, passing in an XNIO channel type may yield poorer performance than the equivalent NIO channel would. To address this issue, you should use the transfer methods found on the XNIO stream channels rather than those found on file channels acquired from NIO (file channels opened via the XNIO API can execute transfers using either mechanism).            </p>
+                <p>
+    While these types of transfers are often called &quot;zero-copy&quot;, it is not always possible on all platforms and in all circumstances to perform the associated transfer without actual copies; in general, a best effort will be made to minimize copying.            </p>
+                <p>
+    XNIO stream channels support two different &quot;zero-copy&quot; operations.  The first type are the inverse of the transfer methods found on <tt class=" ">FileChannel</tt>, and are <tt class=" ">transferFrom(FileChannel,long,long)</tt> and <tt class=" ">transferTo(long,long,FileChannel)</tt>.  They function similarly to the their <tt class=" ">FileChannel</tt> equivalents.  If no data is available to transfer, the method simply returns zero (even if the cause is an EOF on the source channel).            </p>
+                <p>
+    The second type of transfer are used to transfer data between two XNIO channels, and are implemented by the overloaded methods <tt class=" ">transferFrom(StreamSourceChannel,long,ByteBuffer)</tt> and <tt class=" ">transferTo(long,ByteBuffer,StreamSinkChannel)</tt>.            </p>
+                <p>
+    These methods function slightly differently from the <tt class=" ">FileChannel</tt> variants in that there is data being transferred between two non-blocking channels.  Thus if the operation would block, at first it would appear to be difficult to determine whether the read side or the write side is the cause.            </p>
+                <p>
+    To solve this issue, these transfer methods accept a buffer.  Upon return, if the buffer contains data, then that data must be written to the destination channel before the transfer operation can proceed (in other words the transfer is blocked on write).  If the buffer is empty, then the source channel has no ready data (in other words the transfer is blocked on read).  It is recommended that a direct buffer be used for this intermediary purpose.            </p>
+                <p>
+    Furthermore, this type of transfer can differentiate between a blocking condition or an EOF condition on the stream source channel; the transfer returns -1 if an EOF is encountered on the source side.            </p>
+                <p>
+    Because there are a quantity of states that must be negotiated when performing transfers, there exist channel utility methods which simplify the initiation of a zero-copy transfer and coordinate all the states for you, invoking callbacks in the event of completion or error.  See <a href="50233450.html">Channel Utilities</a> for more information.            </p>
+                <p>
+    Finally there is a special zero-copy operation which applies to <tt class=" ">StreamSourceChannels</tt> called <tt class=" ">drain(StreamSourceChannel,long)</tt> which skips the given number of bytes on the given channel without actually copying any data from the source channel (in some implementations the data can be discarded directly from the channel's buffer), useful for skipping large chunks of data on an TCP input stream.            </p>
+            </div>
+    </div>
+</body>
+</html>

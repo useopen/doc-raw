@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Buffer Pooling</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Buffer Pooling</h1>
+        </div>
+        
+        <div id="50233415" class="content prepend-top">
+            <p>
+    Because buffer allocation (especially direct buffer allocation) has a specific, significant performance impact, buffer pooling is essential for maximizing performance in an I/O-intensive application.  For this reason, XNIO provides extensive support for pooling buffers.            </p>
+                <p>
+    In order to effectively pool a resource, the pool consumer must have a mechanism by which pooled resources can be returned to the pool.  Because of the nature of the JVM GC cycle, using automatic cleanup mechanisms such as finalization are not only ineffective, but actually detrimental to performance and functionality; for example, it is possible to artificially deplete the direct buffer pool because outstanding allocated direct buffer objects remain in existence due to GC delays.            </p>
+                <p>
+    The XNIO buffer pool API utilizes two classes for this purpose: <a href="http://docs.jboss.org/xnio/3.1/api/index.html?org/xnio/Pool.html">org.xnio.Pool</a> and <a href="http://docs.jboss.org/xnio/3.1/api/index.html?org/xnio/Pooled.html">org.xnio.Pooled</a>.  The former represents the pool itself, and the latter is a holder for a pooled resource type.            </p>
+                <p>
+    If an item is allocated from a pool which is empty, a <a href="http://docs.jboss.org/xnio/3.1/api/index.html?org/xnio/PoolDepletedException.html">org.xnio.PoolDepletedException</a> will result.  This is a runtime exception, but should be gracefully handled nevertheless (though in many cases the only acceptable behavior is the cancellation of whatever the current operation is).            </p>
+                <p>
+    Items allocated from pools must be <a href="http://docs.jboss.org/xnio/3.1/api/index.html?org/xnio/Pooled.html#free()">freed</a> or <a href="http://docs.jboss.org/xnio/3.1/api/index.html?org/xnio/Pooled.html#discard()">discarded</a>.  Normally freeing items is the correct action to take.  Items should only be discarded if it is impossible to determine whether the item is still in use.  If the <tt class=" ">discard()</tt> method is called, a phantom reference is created to track the item, and the item is lazily returned to the pool once all references to it have been cleared; this is a potentially expensive operation so it should be utilized only sparingly if at all.            </p>
+                <p>
+    The <tt class=" ">free()</tt> and <tt class=" ">discard()</tt> methods are idempotent.  Furthermore, if either method is called, subsequent calls to either method are ignored.            </p>
+        <div class="confbox admonition admonition-warning">
+            <div class="title">Warning</div>
+        
+            <p>
+    It is <strong class=" ">critical</strong> that buffers not be accessed after their corresponding <tt class=" ">Pooled</tt> object is freed or discarded. Doing so may cause difficult-to-debug data corruption.            </p>
+        </div>
+    
+            <p>
+    The pool API is only currently implemented for buffers, however the API used is generally applicable to many types of resources and may be used for other item types beyond buffers.  The type signatures for these interfaces are intended to be read fluently, e.g. <tt class=" ">Pool&lt;ByteBuffer&gt;</tt> is read as &quot;a pool of byte buffers&quot; and <tt class=" ">Pooled&lt;ByteBuffer&gt;</tt> is read as &quot;a pooled byte buffer&quot;.            </p>
+            </div>
+    </div>
+</body>
+</html>

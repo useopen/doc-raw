@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Stream Channels</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Stream Channels</h1>
+        </div>
+        
+        <div id="50233423" class="content prepend-top">
+            <p>
+    A <i class=" "><a href="http://docs.jboss.org/xnio/3.1/api/index.html?org/xnio/channels/StreamChannel.html">stream channel</a></i> is a type of channel which corresponds to a reliable byte stream.  Stream channels extend the standard NIO readable and writable channel interfaces, meaning that many NIO classes and operations can act on them directly (and vice-versa).  A stream channel which can only be read is referred to as a <i class=" "><a href="http://docs.jboss.org/xnio/3.1/api/index.html?org/xnio/channels/StreamSourceChannel.html">stream source channel</a></i>.  A stream channel which can only be written is referred to as a <i class=" "><a href="http://docs.jboss.org/xnio/3.1/api/index.html?org/xnio/channels/StreamSinkChannel.html">stream sink channel</a></i>.  A stream channel which can be both read and written is simply referred to as a &quot;stream channel&quot; and can behave as both a stream source and stream sink.            </p>
+                <p>
+    Stream channels can be differentiated from <i class=" ">message channels</i> by the fact that there are no message boundaries; for example, separate writes of 30 and 20 bytes to a stream may correspond to reads of 10, 15, and 25 bytes on the remote side of the stream.  For this reason, accessing a stream source channel to read from two threads concurrently may cause undefined behavior or even cause an exception to be thrown; likewise for writes on stream sink channels.  Full-duplex stream channels may always be read and written from different threads at the same time.            </p>
+                <p>
+    In addition to supporting the standard simple and scatter/gather <tt class=" ">read()</tt> and <tt class=" ">write()</tt> methods, stream channels support efficient zero- or low-copy transfer methods which allow transferring data from and to other stream source and sink channels, as well as transferring data from and to file channels.  On some platforms, using these methods can greatly improve throughput by moving pages directly from one device driver to the other without actually copying any data into user space.  On platforms which do not support such optimizations, these methods merely provide optimal implementations of these common tasks.  For more information on zero-copy transfers, see <a href="50233424.html">Zero-Copy Transfers</a> and <a href="50233450.html">Channel Utilities</a>.            </p>
+            </div>
+    </div>
+</body>
+</html>

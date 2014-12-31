@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Buffer Types</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Buffer Types</h1>
+        </div>
+        
+        <div id="50233473" class="content prepend-top">
+            <p>
+    The NIO API specifies two types of buffers: <i class=" ">heap</i> buffers and <i class=" ">direct</i> buffers.  Heap buffers are buffers which wrap arrays.  Generally, the &quot;backing array&quot; for such buffers is accessible indirectly via the <tt class=" ">ByteBuffer</tt> API.  Heap buffers are characterized by fast access; however, they often cannot be used directly with channels (NIO generally copies the data of such buffers to and from direct buffers before performing I/O operations on them).            </p>
+                <p>
+    Direct buffers are buffers which are backed by memory allocated outside of the system heap - most often, as is the case when the <tt class=" ">ByteBuffer.allocateDirect()</tt> method is used, it is simply system heap memory.  They have no &quot;backing array&quot; and are characterized by slower access because each access has to utilize special APIs (often involving a JNI bridge or an <tt class=" ">Unsafe</tt> method call) to transfer data to and from the memory region.  Despite this, using direct buffers are much faster in certain cases because NIO can utilize them &quot;directly&quot; for I/O operations without introducing additional copies.            </p>
+                <p>
+    There is another variation on direct buffers: <i class=" ">mapped</i> buffers.  These buffers have a special type (<tt class=" ">java.nio.MappedByteBuffer</tt>) and typically represent a mapping of a portion of a file into memory.  Using such buffers as the source or target of read/write operations can, under some circumstances, perform much better than copying to and them from an intermediate buffer (of any type).            </p>
+            </div>
+    </div>
+</body>
+</html>

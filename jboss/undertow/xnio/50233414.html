@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Accessing Buffers</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Accessing Buffers</h1>
+        </div>
+        
+        <div id="50233414" class="content prepend-top">
+            <p>
+    Data can be read from or written to buffers in two ways: using <i class=" ">absolute</i> operations or <i class=" ">relative</i> operations. The absolute operations accept a parameter which represents the absolute position of the data to be read or written, which will happen without advancing the buffer position regardless of the offset; the relative operations read or write at the current position, advancing the position by the size of the item being read or written.            </p>
+                <p>
+    When writing data to an empty buffer, either via the <tt class=" ">putXXX()</tt> operations or by reading from a channel into a buffer, the limit is generally set to be equal to the capacity, with the position advancing as the buffer is filled. For the sake of discussion, this state will be called the &quot;filling&quot; state.            </p>
+                <p>
+    Once the buffer is satisfactorily populated from the desired source, it may be flipped by invoking the <tt class=" ">flip()</tt> method on the buffer. This sets the limit to the position, and resets the position back to the start of the buffer, effectively allowing the data to be read out of the buffer again. This state will be referred to as the &quot;emptying&quot; state.            </p>
+                <p>
+    If a flipped buffer's data is not able to be fully consumed, the buffer may be restored to the filling state without losing any of its remaining data by way of the <tt class=" ">compact()</tt> method. This method effectively moves the remaining data to the beginning of the buffer, sets the position to be just after the end of this data, and resets the limit to be equal to the capacity.            </p>
+                <p>
+    A buffer may be cleared at any time by way of the <tt class=" ">clear()</tt> method. This method resets the position to zero, and sets the limit to be equal to the capacity. Thus the buffer is effectively emptied and restored to the &quot;filling&quot; state.            </p>
+                <p>
+    The <tt class=" ">rewind()</tt> method restarts the position back at zero. This allows a buffer in the &quot;emptying&quot; state which was read partially or completely to be reread in whole. A buffer in the &quot;filling&quot; state is effectively cleared by this method.            </p>
+                <p>
+    Often, in XNIO documentation and comments, the phrases &quot;flipped for emptying/writing&quot; and &quot;compacted/emptied for filling/reading&quot; will appear.  The former refers to the &quot;emptying&quot; state, while the latter refers to the &quot;filling&quot; state.            </p>
+                <p>
+    When keeping a buffer for long periods of time and/or sharing it between tasks or threads, it is advisable to keep it in one state or the other in order to ensure consistent behavior.  If your task requires the buffer to be in the opposite state for an operation, this should be done using a standard <tt class=" ">try/finally</tt> mechanism, like this:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ByteBuffer buffer = this.buffer; // starts in filling state
+buffer.flip(); // switch to emptying state
+try {
+   perform emptying tasks;
+} finally {
+   buffer.compact(); // restore to filling state
+}</code></pre>
+        </div>
+    </div>
+            <p>
+    Or:            </p>
+        <div class="confbox programlisting">
+                <div class="content">
+        <pre><code>ByteBuffer buffer = this.buffer; // starts in emptying state
+buffer.compact(); // switch to filling state
+try {
+   perform filling tasks;
+} finally {
+   buffer.flip(); // restore to emptying state
+}</code></pre>
+        </div>
+    </div>
+        </div>
+    </div>
+</body>
+</html>

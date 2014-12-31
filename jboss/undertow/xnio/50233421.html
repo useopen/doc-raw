@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Channel Listeners</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Channel Listeners</h1>
+        </div>
+        
+        <div id="50233421" class="content prepend-top">
+            <p>
+    The application program is notified of events on a channel by way of the <tt class=" ">ChannelListener</tt> interface. A class which implements this interface is known as a <i class=" ">channel</i> <i class=" ">listener</i>. The interface's single method, <tt class=" ">handleEvent()</tt>, is invoked when a specific event occurs on a channel.            </p>
+                <p>
+    By default, XNIO uses only a small number of dedicated threads to handle events. This means that in general, channel listeners are expected to run only for a brief period of time (in other words, the listener should be non-blocking). If a channel listener runs for an extended period of time, other pending listeners will be starved while the XNIO provider waits for the listener to complete, causing major performance degradation and possibly even deadlocks. If your design calls for long-running listeners, then such a listener should be implemented asynchronously using the XNIO worker thread pool (see <a href="50233438.html">Workers</a>).  Such a configuration can simplify your design, at the cost of a slight increase in latency.            </p>
+                <p>
+    Registering a channel listener involves accessing the setter for the corresponding listener type. The setter can accept a listener, which will be stored internally, replacing any previous value, to be invoked when the listener's condition is met. The new listener value will take effect immediately. Setting a listener to <tt class=" ">null</tt> will cause the corresponding event to be ignored. By default, unless explicitly specified otherwise, all listeners for a channel will default to <tt class=" ">null</tt> and have to be set in order to receive the corresponding notification.            </p>
+                <p>
+    The <tt class=" ">ChannelListener</tt> interface has a type parameter which specifies what channel type the listener expects to receive. Every channel listener setter will accept a channel listener for the channel type with which it is associated; however, they will additionally accept a channel listener for any supertype of that channel type as well. This allows general-purpose listeners to be applied to multiple channel types, while also allowing special-purpose listeners which take advantage of the features of a more specific channel type.            </p>
+                <p>
+    There are several types of events for which a channel listener may be registered. Though the circumstances for each type may differ, the same interface is used for all of them. The types are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Readiness Events - called when a channel is ready for some type of access.  Listeners should clear such events fully before returning (e.g. read the channel until no more data is available or suspend the read channel); the provider <strong class=" ">may</strong> or <strong class=" ">may</strong> <strong class=" ">not</strong> requeue a ready channel if the causing event is not cleared.  In addition, readiness events may be <i class=" ">spuriously</i> triggered - meaning that despite the listener being called, there is actually no corresponding ready state and executing the corresponding operation will return 0 (typically) and clear the causing event; this can happen due to the inability to determine whether a channel is ready, among other reasons.  The types of readiness events are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Channel Readable - called when readable notifications are enabled and a call to the channel's read or receive method is expected to yield useful information. This notification type is enabled by invoking the <tt class=" ">resumeReads</tt> method on a readable channel, and remains enabled until explicitly disabled by invoking the <tt class=" ">suspendReads</tt> method. To clear this event, read from the channel until the <tt class=" ">read()</tt> method returns 0 or -1, or use the <tt class=" ">suspendReads()</tt> method.            </p>
+    </li><li class=" ">            <p>
+    Channel Writable - called when writable notifications are enabled and a call to the channel's write or send method is expected to accept at least some data; a call to the channel's flush or shutdownWrites is expected to make progress or complete. This notification type is enabled by invoking the resumeWrites method on a writable channel, and is implicitly disabled once the corresponding channel listener, if any, is invoked. It can also be explicitly disabled by invoking the suspendWrites method. To clear this event, write to the channel until the <tt class=" ">write()</tt> method returns 0, or use the <tt class=" ">suspendWrites()</tt> method.            </p>
+    </li><li class=" ">            <p>
+    Channel Acceptable - called when a new connection can be accepted from a server channel.  Such channels will typically extend the <tt class=" ">AcceptingChannel</tt> interface.            </p>
+    </li></ul></li><li class=" ">            <p>
+    Status Events - called when a one-time status change occurs on a channel.  Such events are only ever triggered in response to some specific external event.  The types of status events are:            </p>
+    <ul class=" "><li class=" ">            <p>
+    Channel Opened - called when a channel was newly created and connected to, or accepted from, a remote peer. The new channel is passed in as the argument to the listener. Such channels will typically extend the <tt class=" ">ConnectedChannel</tt> interface.            </p>
+    </li><li class=" ">            <p>
+    Channel Bound - called when a channel was newly created and bound to a local address. The new channel is passed in as the argument to the listener. Such channels will typically extend the <tt class=" ">BoundChannel</tt> interface.            </p>
+    </li><li class=" ">            <p>
+    Channel Closed - called when the channel is closed via the close method or via complete shutdown.            </p>
+    </li></ul></li></ul>            <p>
+    Not all event types are relevant for all channels, however most channel types will support notification for channel close events, and most channel types will have a way to register a listener for channel binding or opening, though the mechanism may vary depending on whether the channel in question is a client or server, TCP or UDP, etc.            </p>
+            </div>
+    </div>
+</body>
+</html>

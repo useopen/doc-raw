@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+    <head>
+        <meta name="dtb:uid" content="ww"/>
+                <meta name="dtb:depth" content="3"/>
+        <meta name="dtb:totalPageCount" content="0"/>
+        <meta name="dtb:maxPageNumber" content="0"/>
+    </head>
+    <docTitle>
+        <text>Extending w8</text>
+    </docTitle>
+    <navMap>
+
+        
+                <navPoint id="_819678" playOrder="1">
+            <navLabel>
+                <text>Developer's Guide</text>
+            </navLabel>
+            <content src="819678.html"/>
+                                                        <navPoint id="_50233411" playOrder="2">
+                    <navLabel>
+                        <text>About XNIO</text>
+                    </navLabel>
+                    <content src="50233411.html"/>
+                                                                        <navPoint id="_50233410" playOrder="3">
+                    <navLabel>
+                        <text>XNIO Providers</text>
+                    </navLabel>
+                    <content src="50233410.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_50233413" playOrder="4">
+                    <navLabel>
+                        <text>Buffers</text>
+                    </navLabel>
+                    <content src="50233413.html"/>
+                                                                        <navPoint id="_50233412" playOrder="5">
+                    <navLabel>
+                        <text>Buffers Overview</text>
+                    </navLabel>
+                    <content src="50233412.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233473" playOrder="6">
+                    <navLabel>
+                        <text>Buffer Types</text>
+                    </navLabel>
+                    <content src="50233473.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233414" playOrder="7">
+                    <navLabel>
+                        <text>Accessing Buffers</text>
+                    </navLabel>
+                    <content src="50233414.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233415" playOrder="8">
+                    <navLabel>
+                        <text>Buffer Pooling</text>
+                    </navLabel>
+                    <content src="50233415.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_50233417" playOrder="9">
+                    <navLabel>
+                        <text>Configuration</text>
+                    </navLabel>
+                    <content src="50233417.html"/>
+                                                                        <navPoint id="_50233416" playOrder="10">
+                    <navLabel>
+                        <text>Options and Option Maps</text>
+                    </navLabel>
+                    <content src="50233416.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_50233438" playOrder="11">
+                    <navLabel>
+                        <text>Workers</text>
+                    </navLabel>
+                    <content src="50233438.html"/>
+                                                                        <navPoint id="_50233437" playOrder="12">
+                    <navLabel>
+                        <text>Read and Write Threads</text>
+                    </navLabel>
+                    <content src="50233437.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233439" playOrder="13">
+                    <navLabel>
+                        <text>Worker Pool Management</text>
+                    </navLabel>
+                    <content src="50233439.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233440" playOrder="14">
+                    <navLabel>
+                        <text>Channel Migration</text>
+                    </navLabel>
+                    <content src="50233440.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_50233422" playOrder="15">
+                    <navLabel>
+                        <text>XNIO Channels</text>
+                    </navLabel>
+                    <content src="50233422.html"/>
+                                                                        <navPoint id="_50233421" playOrder="16">
+                    <navLabel>
+                        <text>Channel Listeners</text>
+                    </navLabel>
+                    <content src="50233421.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233478" playOrder="17">
+                    <navLabel>
+                        <text>Channel Blocking Modes</text>
+                    </navLabel>
+                    <content src="50233478.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233423" playOrder="18">
+                    <navLabel>
+                        <text>Stream Channels</text>
+                    </navLabel>
+                    <content src="50233423.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233424" playOrder="19">
+                    <navLabel>
+                        <text>Zero-Copy Transfers</text>
+                    </navLabel>
+                    <content src="50233424.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233425" playOrder="20">
+                    <navLabel>
+                        <text>Message Channels</text>
+                    </navLabel>
+                    <content src="50233425.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233426" playOrder="21">
+                    <navLabel>
+                        <text>Channel Timeouts</text>
+                    </navLabel>
+                    <content src="50233426.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233427" playOrder="22">
+                    <navLabel>
+                        <text>Accepting Channels</text>
+                    </navLabel>
+                    <content src="50233427.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233428" playOrder="23">
+                    <navLabel>
+                        <text>Pipe Channels</text>
+                    </navLabel>
+                    <content src="50233428.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233429" playOrder="24">
+                    <navLabel>
+                        <text>Socket Addresses</text>
+                    </navLabel>
+                    <content src="50233429.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233430" playOrder="25">
+                    <navLabel>
+                        <text>Socket Channels</text>
+                    </navLabel>
+                    <content src="50233430.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233431" playOrder="26">
+                    <navLabel>
+                        <text>Servers</text>
+                    </navLabel>
+                    <content src="50233431.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233432" playOrder="27">
+                    <navLabel>
+                        <text>File Channels</text>
+                    </navLabel>
+                    <content src="50233432.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233433" playOrder="28">
+                    <navLabel>
+                        <text>Assembled Channels</text>
+                    </navLabel>
+                    <content src="50233433.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233434" playOrder="29">
+                    <navLabel>
+                        <text>Channel Utility Types</text>
+                    </navLabel>
+                    <content src="50233434.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_50233436" playOrder="30">
+                    <navLabel>
+                        <text>IO Futures</text>
+                    </navLabel>
+                    <content src="50233436.html"/>
+                                                                        <navPoint id="_50233435" playOrder="31">
+                    <navLabel>
+                        <text>Implementing IO Futures</text>
+                    </navLabel>
+                    <content src="50233435.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_50233442" playOrder="32">
+                    <navLabel>
+                        <text>Streams</text>
+                    </navLabel>
+                    <content src="50233442.html"/>
+                                                                        <navPoint id="_50233441" playOrder="33">
+                    <navLabel>
+                        <text>Streams Wrapping Channels</text>
+                    </navLabel>
+                    <content src="50233441.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233443" playOrder="34">
+                    <navLabel>
+                        <text>Streams Fed By Buffers</text>
+                    </navLabel>
+                    <content src="50233443.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233444" playOrder="35">
+                    <navLabel>
+                        <text>Stream Pipes</text>
+                    </navLabel>
+                    <content src="50233444.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233445" playOrder="36">
+                    <navLabel>
+                        <text>Stream Utility Types</text>
+                    </navLabel>
+                    <content src="50233445.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                                                            <navPoint id="_50233446" playOrder="37">
+                    <navLabel>
+                        <text>SSL</text>
+                    </navLabel>
+                    <content src="50233446.html"/>
+                </navPoint>
+                                                                            <navPoint id="_50233448" playOrder="38">
+                    <navLabel>
+                        <text>Utility Classes</text>
+                    </navLabel>
+                    <content src="50233448.html"/>
+                                                                        <navPoint id="_50233447" playOrder="39">
+                    <navLabel>
+                        <text>Bit Utilities</text>
+                    </navLabel>
+                    <content src="50233447.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233449" playOrder="40">
+                    <navLabel>
+                        <text>IO Utilities</text>
+                    </navLabel>
+                    <content src="50233449.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233450" playOrder="41">
+                    <navLabel>
+                        <text>Channel Utilities</text>
+                    </navLabel>
+                    <content src="50233450.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233451" playOrder="42">
+                    <navLabel>
+                        <text>Channel Listener Utilities</text>
+                    </navLabel>
+                    <content src="50233451.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233452" playOrder="43">
+                    <navLabel>
+                        <text>Byte Strings</text>
+                    </navLabel>
+                    <content src="50233452.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233453" playOrder="44">
+                    <navLabel>
+                        <text>Buffer Utilities</text>
+                    </navLabel>
+                    <content src="50233453.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233454" playOrder="45">
+                    <navLabel>
+                        <text>Stream Utilities</text>
+                    </navLabel>
+                    <content src="50233454.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233455" playOrder="46">
+                    <navLabel>
+                        <text>SASL Utilities</text>
+                    </navLabel>
+                    <content src="50233455.html"/>
+                </navPoint>
+                                                                                            <navPoint id="_50233456" playOrder="47">
+                    <navLabel>
+                        <text>SSL Utilities</text>
+                    </navLabel>
+                    <content src="50233456.html"/>
+                </navPoint>
+                                                        </navPoint>
+                                        </navPoint>
+    </navMap>
+</ncx>

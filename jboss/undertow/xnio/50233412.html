@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Buffers Overview</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Buffers Overview</h1>
+        </div>
+        
+        <div id="50233412" class="content prepend-top">
+            <p>
+    XNIO, like NIO, is based on the usage of buffers as implemented by the NIO buffer classes in the <tt class=" ">java.nio</tt> package. The NIO documentation defines a <tt class=" ">java.nio.Buffer</tt> as &quot;a linear, finite sequence of elements of a specific primitive type&quot;. There are buffer types corresponding to every primitive type; however, as a practical matter, networking software will rarely use a buffer type other than <tt class=" ">java.nio.ByteBuffer</tt>.            </p>
+                <p>
+    Buffers are <i class=" ">mutable</i>, meaning that the data in the buffer is subject to alteration, as are the buffer's properties. Buffers are also <i class=" ">unsafe</i> for use in multiple threads without some type of external synchronization.            </p>
+                <p>
+    There are three primary attributes in a <tt class=" ">java.nio.Buffer</tt>:            </p>
+    <ul class=" "><li class=" ">            <p>
+    the <i class=" ">position</i>, a zero-based mutable integer value representing the point in the buffer from which the next item will be read or written            </p>
+    </li><li class=" ">            <p>
+    the <i class=" ">limit</i>, a zero-based mutable integer value which is used to mark the end of the buffer's data when reading or the point at which no more data may be added when writing (this value is always greater than or equal to the position)            </p>
+    </li><li class=" ">            <p>
+    the <i class=" ">capacity</i>, a zero-based fixed integer value which represents the total size of the buffer (this value is always greater than or equal to the limit)            </p>
+    </li></ul>            <p>
+    In addition, there is one &quot;virtual&quot; attribute which may be derived from these: the <i class=" ">remaining</i> <i class=" ">size</i>, which is equal to the difference between the position and the limit.            </p>
+                <p>
+    These properties are used to provide boundaries for data within a buffer; typically a buffer will have a larger capacity than limit (meaning that there is more space in the buffer than there is actual useful data). The position and limit properties allow the application to deal with data that is of a possibly smaller size than the buffer's total capacity.            </p>
+                <p>
+    Buffers can be <i class=" ">duplicated</i> using the unsurprisingly-named <tt class=" ">ByteBuffer.duplicate()</tt> method.  This causes a new buffer object to be created with the same backing storage as the original buffer, but with independent position and limit values.            </p>
+                <p>
+    Similarly, a buffer can be <i class=" ">sliced</i>, meaning a subsection of a buffer's backing storage can be exposed as a new buffer.  This can be done using the <tt class=" ">ByteBuffer.slice()</tt> method, which creates a new buffer whose content begins at the current buffer's position, and whose capacity is equal to the remaining space in the original buffer.  See <a href="50233453.html">the Buffer Utilities section</a> for more useful ways to slice buffers.            </p>
+                <p>
+    In both cases, you must be aware of the fact that the backing content is shared, especially if multiple threads or asynchronous tasks may handle the buffer simultaneously.            </p>
+            </div>
+    </div>
+</body>
+</html>

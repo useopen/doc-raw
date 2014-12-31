@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Channel Blocking Modes</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Channel Blocking Modes</h1>
+        </div>
+        
+        <div id="50233478" class="content prepend-top">
+            <p>
+    When using NIO, a channel may operate in a <i class=" ">blocking</i> or <i class=" ">non-blocking</i> fashion. Non-blocking I/O is achieved in NIO by way of <i class=" ">selectors</i>, which are essentially coordination points between multiple channels. However, this API is combersome and difficult to use; as such, XNIO does not use this facility, preferring instead the callback-based <a href="50233421.html">listener system</a>.            </p>
+                <p>
+    An XNIO channel is always non-blocking; however, blocking I/O may be simulated by way of the <tt class=" ">awaitReadable()</tt> and <tt class=" ">awaitWritable()</tt> methods, which will block until the channel is expected to be readable or writable without blocking, or until the current thread is interrupted. The <tt class=" ">ChannelInputStream</tt> and <tt class=" ">ChannelOutputStream</tt> classes use this facility by way of a wrapper around the stream channel types with a blocking <tt class=" ">InputStream</tt> or <tt class=" ">OutputStream</tt> for compatibility with APIs which rely on these types.            </p>
+                <p>
+    Because of this mechanism, blocking and non-blocking operations can be intermixed freely and easily. One common pattern, for example, revolves around using blocking operations for write and non-blocking operations for read. Another pattern is to use blocking I/O in both directions, but only for the duration of a request.  See also <a href="50233450.html">the Channel Utilities section</a> for additional methods which can help with intermixing blocking and non-blocking operations.            </p>
+            </div>
+    </div>
+</body>
+</html>

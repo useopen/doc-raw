@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Workers</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="Scroll Wiki Publisher" name="generator"/>
+    <link rel="stylesheet" href="css/content-style.css" type="text/css"/>
+</head>
+<body>
+    <div class="container">
+        <div id="title" class="prepend-top">
+              <h1>Workers</h1>
+        </div>
+        
+        <div id="50233438" class="content prepend-top">
+            <p>
+    <a href="http://docs.jboss.org/xnio/3.1/api/index.html?org/xnio/XnioWorker.html">XNIO workers</a> are the central point of coordination for a network application.  A worker includes two different thread pool types:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <i class=" ">I/O threads</i>, which come in two types:            </p>
+    <ul class=" "><li class=" ">            <p>
+    <i class=" ">Read threads</i> which handle callbacks for read events, and            </p>
+    </li><li class=" ">            <p>
+    <i class=" ">Write threads</i> which handle callbacks for write events; and            </p>
+    </li></ul></li><li class=" ">            <p>
+    <i class=" ">Worker threads</i>, which come from a fully configurable standard <tt class=" ">Executor</tt>-based thread pool.            </p>
+    </li></ul>            <p>
+    I/O threads are used by XNIO for the purpose of notification but also may be used by the user to execute tasks or perform cancellable actions after an elapsed timeout; these are represented by the <tt class=" ">XnioExecutor</tt> interface.  The worker thread pool exists for the user's use.  Threads created by the worker are tagged with the worker name, to make them easier to identify in thread dumps and log files.            </p>
+                <p>
+    In addition to managing the thread pools and event callbacks, the worker is also the object from which most channels can be created; these include pipes and sockets of various types.            </p>
+                <p>
+    When a worker is no longer needed, it should be shut down using the <tt class=" ">shutdown</tt> method.  When the worker's shutdown process is complete, the shutdown complete task (if any) which was registered upon creation of the worker is executed (typically from the last thread in the worker pool, before it is terminated).            </p>
+            </div>
+    </div>
+</body>
+</html>
